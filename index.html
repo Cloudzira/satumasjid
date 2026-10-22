@@ -39,8 +39,13 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet (peta OpenStreetMap, gratis tanpa API key) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
+        #map-terdekat { isolation: isolate; }
+        .leaflet-container img { max-width: none !important; }
         .bg-islamic-pattern {
             background-color: #0d5c3a;
             background-image: radial-gradient(#d4af37 0.75px, transparent 0.75px), radial-gradient(#d4af37 0.75px, #0d5c3a 0.75px);
@@ -164,6 +169,10 @@
                     <button onclick="switchTab('sarpras-jamaah')" id="tabnav-sarpras-jamaah" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
                         <i data-lucide="package-check" class="w-4 h-4"></i>
                         <span>Pinjam Sarpras</span>
+                    </button>
+                    <button onclick="switchTab('terdekat')" id="tabnav-terdekat" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        <span>Masjid Terdekat</span>
                     </button>
                     <button onclick="switchTab('konsultasi')" id="tabnav-konsultasi" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
                         <i data-lucide="message-square" class="w-4 h-4"></i>
@@ -546,6 +555,26 @@
         <!-- ========================================== -->
         <!-- TAB 7: DIREKTORI FASILITAS MASJID -->
         <!-- ========================================== -->
+        <section id="view-terdekat" class="view-content space-y-4 hidden">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Masjid Terdekat</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Temukan masjid di sekitar Anda, lihat jaraknya di peta, dan buka rute perjalanan.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <select id="radius-terdekat" onchange="cariSekitar()" class="px-3 py-2 border border-slate-300 rounded-xl text-xs">
+                        <option value="1000">Radius 1 km</option><option value="3000" selected>Radius 3 km</option><option value="5000">Radius 5 km</option><option value="10000">Radius 10 km</option>
+                    </select>
+                    <button onclick="cariLokasi()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-2">
+                        <i data-lucide="locate-fixed" class="w-4 h-4 text-gold-400"></i><span>Gunakan Lokasi Saya</span>
+                    </button>
+                </div>
+            </div>
+            <div id="map-terdekat" class="h-80 md:h-[28rem] rounded-2xl border border-slate-200 shadow-sm"></div>
+            <p id="terdekat-status" class="text-xs text-slate-500"></p>
+            <div id="terdekat-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </section>
+
         <section id="view-fasilitas" class="view-content space-y-6 hidden">
             <div>
                 <h3 class="text-xl font-bold text-slate-900">Direktori Fasilitas & Layanan Masjid</h3>
@@ -814,7 +843,7 @@
 
     <!-- MOBILE BOTTOM NAVIGATION BAR -->
     <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-950 text-white border-t border-emerald-800 z-40 px-2 py-2">
-        <div id="mobile-nav-jamaah" class="grid grid-cols-5 text-center text-[10px]">
+        <div id="mobile-nav-jamaah" class="grid grid-cols-6 text-center text-[10px]">
             <button onclick="switchTab('home')" class="flex flex-col items-center py-1 text-gold-400 font-bold" id="mobnav-home">
                 <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
                 <span>Beranda</span>
@@ -830,6 +859,10 @@
             <button onclick="switchTab('sarpras-jamaah')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-sarpras-jamaah">
                 <i data-lucide="truck" class="w-5 h-5 mb-0.5"></i>
                 <span>Pinjam</span>
+            </button>
+            <button onclick="switchTab('terdekat')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-terdekat">
+                <i data-lucide="map-pin" class="w-5 h-5 mb-0.5"></i>
+                <span>Terdekat</span>
             </button>
             <button onclick="switchTab('konsultasi')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-konsultasi">
                 <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
@@ -912,7 +945,7 @@
         const COLS = ['keuangan','kajian','hajat','sarpras','mustahik','qaPublic'];
         COLS.forEach(k => D[k].forEach(x => x.masjidId = 1));
         D.ver = 2; D.permohonan = []; D.userBookmarks = [];
-        D.masjidList.forEach((m,i) => Object.assign(m, { bank: 'BSI', rekening: ['7123-4567-89','8800-1122-33','5566-7788-90'][i], pin: '1234' }));
+        D.masjidList.forEach((m,i) => Object.assign(m, { bank: 'BSI', rekening: ['7123-4567-89','8800-1122-33','5566-7788-90'][i], pin: '1234', lat: [-6.9932, -7.0051, -6.9667][i], lng: [110.4203, 110.4381, 110.4167][i] }));
         D.kajian.push({id:101,masjidId:2,tema:'Kajian Kitab Riyadhus Shalihin',ustaz:'Ust. Fauzan, Lc',waktu:"Jumat, Ba'da Maghrib",lokasi:'Teras Masjid',poster:P,live:false},{id:102,masjidId:3,tema:"Tahsin Al-Qur'an Dewasa",ustaz:'Ust. Hasan, S.Pd.I',waktu:"Selasa, Ba'da Isya",lokasi:'Aula Masjid',poster:P,live:false});
         D.hajat.push({id:101,masjidId:2,judul:'Pembangunan Tempat Wudhu Baru',target:20000000,terkumpul:4500000,batasWaktu:'31 Des 2026',ket:'Perluasan area wudhu jamaah.'});
         D.keuangan.push({id:101,masjidId:2,tanggal:'2026-10-20',tipe:'pemasukan',kategori:'Infaq Jumat',keterangan:'Kotak amal Jumat',nominal:3200000});
@@ -929,6 +962,7 @@
             } catch (e) { return fresh(); }
         }
         let appState = loadState();
+        appState.masjidList.forEach(m => { const d = D.masjidList.find(x => x.id === m.id); if (d && m.lat == null) { m.lat = d.lat; m.lng = d.lng; } });
         let modalCtx = '';
         const curM = () => appState.masjidList.find(m => m.id === appState.activeMasjidId) || appState.masjidList[0];
         const byM = arr => arr.filter(x => x.masjidId === appState.activeMasjidId);
@@ -973,6 +1007,74 @@
                 </div>`).join('') : '<p class="text-xs text-slate-400">Belum ada permohonan.</p>';
         }
 
+        // MASJID TERDEKAT (Leaflet + OpenStreetMap/Overpass)
+        let map = null, mapLayer = null, userPos = null, osmCache = [];
+        const hav = (a, b, c, d) => { const K = Math.PI / 180, x = (c - a) * K, y = (d - b) * K, q = Math.sin(x / 2) ** 2 + Math.cos(a * K) * Math.cos(c * K) * Math.sin(y / 2) ** 2; return 12742 * Math.asin(Math.sqrt(q)); };
+        const origin = () => userPos || { lat: curM().lat ?? -6.9932, lng: curM().lng ?? 110.4203 };
+        const setStatus = t => { const el = document.getElementById('terdekat-status'); if (el) el.innerText = t; };
+        function initTerdekat() {
+            if (!window.L) return showToast('Peta gagal dimuat', 'Periksa koneksi internet Anda.');
+            if (!map) {
+                const o = origin();
+                map = L.map('map-terdekat').setView([o.lat, o.lng], 14);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+                mapLayer = L.layerGroup().addTo(map);
+                cariSekitar();
+            }
+            setTimeout(() => map.invalidateSize(), 100);
+            renderTerdekat();
+        }
+        function cariLokasi() {
+            if (!navigator.geolocation) return showToast('Tidak didukung', 'Peramban tidak mendukung lokasi.');
+            setStatus('Mencari lokasi Anda…');
+            navigator.geolocation.getCurrentPosition(p => {
+                userPos = { lat: p.coords.latitude, lng: p.coords.longitude };
+                map.setView([userPos.lat, userPos.lng], 14);
+                cariSekitar();
+            }, () => { setStatus('Izin lokasi ditolak. Jarak dihitung dari masjid yang sedang dipilih.'); showToast('Lokasi tidak aktif', 'Izinkan akses lokasi di peramban.'); }, { enableHighAccuracy: true, timeout: 10000 });
+        }
+        async function cariSekitar() {
+            const o = origin(), r = document.getElementById('radius-terdekat').value;
+            setStatus('Mencari masjid di sekitar…');
+            try {
+                const f = `["amenity"="place_of_worship"]["religion"="muslim"](around:${r},${o.lat},${o.lng})`;
+                const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(`[out:json][timeout:20];(node${f};way${f};);out center 60;`) });
+                const j = await res.json();
+                osmCache = j.elements.map(e => ({ id: 'osm' + e.id, name: e.tags?.name || 'Masjid/Musholla (tanpa nama)', lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon })).filter(x => x.lat != null);
+                setStatus(`${osmCache.length} tempat ibadah muslim ditemukan dalam radius ${r / 1000} km (data OpenStreetMap).`);
+            } catch (e) { osmCache = []; setStatus('Gagal memuat data sekitar (offline?). Masjid terdaftar SatuMasjid tetap ditampilkan.'); }
+            renderTerdekat();
+        }
+        function pilihMasjid(id) { changeMasjid(id); switchTab('home'); }
+        function renderTerdekat() {
+            if (!map) return;
+            const o = origin();
+            mapLayer.clearLayers();
+            const all = [
+                ...appState.masjidList.filter(m => m.lat != null).map(m => ({ id: m.id, name: m.name, sub: m.address, lat: m.lat, lng: m.lng, reg: true })),
+                ...osmCache.map(x => ({ ...x, sub: 'Data OpenStreetMap', reg: false }))
+            ].map(x => ({ ...x, d: hav(o.lat, o.lng, x.lat, x.lng) })).sort((a, b) => a.d - b.d);
+            if (userPos) L.circleMarker([o.lat, o.lng], { radius: 8, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: .9 }).addTo(mapLayer).bindPopup('Lokasi Anda');
+            all.forEach(x => {
+                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${x.d.toFixed(1)} km${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
+                (x.reg ? L.marker([x.lat, x.lng]) : L.circleMarker([x.lat, x.lng], { radius: 6, color: '#0d5c3a', fillColor: '#34d399', fillOpacity: .9 })).addTo(mapLayer).bindPopup(pop);
+            });
+            document.getElementById('terdekat-list').innerHTML = all.slice(0, 20).map(x => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${x.reg ? 'bg-gold-300 text-emerald-950' : 'bg-slate-100 text-slate-600'}">${x.reg ? 'Terdaftar SatuMasjid' : 'OpenStreetMap'}</span>
+                        <h4 class="font-bold text-slate-900 text-sm mt-1 truncate">${esc(x.name)}</h4>
+                        <p class="text-[11px] text-slate-500 truncate">${esc(x.sub)}</p>
+                        <p class="text-xs font-bold text-emerald-900 mt-1">${x.d.toFixed(1)} km</p>
+                    </div>
+                    <div class="flex flex-col gap-1.5 flex-shrink-0 text-[11px] font-bold">
+                        <button onclick="map.flyTo([${x.lat},${x.lng}],17)" class="px-2.5 py-1 bg-emerald-100 text-emerald-900 rounded-lg">Lihat Peta</button>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}" target="_blank" rel="noopener" class="px-2.5 py-1 bg-emerald-900 text-white rounded-lg text-center">Rute</a>
+                        ${x.reg ? `<button onclick="pilihMasjid(${x.id})" class="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg">Portal</button>` : ''}
+                    </div>
+                </div>`).join('');
+        }
+
         // PROFIL MASJID (takmir)
         function openModalProfil() {
             const m = curM();
@@ -980,7 +1082,7 @@
                 <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Profil & Rekening Masjid</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
                 <div class="space-y-3 text-xs">
-                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening],['pf-pin','PIN Takmir',m.pin]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
+                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening],['pf-lat','Latitude (untuk peta)',m.lat],['pf-lng','Longitude (untuk peta)',m.lng],['pf-pin','PIN Takmir',m.pin]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
                 </div>
                 <button onclick="simpanProfil()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Simpan Profil</button>`;
             document.getElementById('modal-backdrop').classList.remove('hidden');
@@ -989,6 +1091,8 @@
         function simpanProfil() {
             const m = curM(), g = id => document.getElementById(id).value.trim();
             m.name = g('pf-name') || m.name; m.address = g('pf-addr') || m.address; m.bank = g('pf-bank') || m.bank; m.rekening = g('pf-rek') || m.rekening; m.pin = g('pf-pin') || m.pin;
+            const la = parseFloat(g('pf-lat')), ln = parseFloat(g('pf-lng'));
+            if (!isNaN(la) && !isNaN(ln)) { m.lat = la; m.lng = ln; }
             saveState(); closeModal(); showToast('Profil disimpan', 'Data masjid diperbarui.');
         }
 
@@ -1045,6 +1149,7 @@
                 activeMobBtn.classList.remove('text-emerald-300');
             }
 
+            if (tabKey === 'terdekat') setTimeout(initTerdekat, 50);
             if (tabKey === 'takmir-dashboard' || tabKey === 'takmir-keuangan') {
                 setTimeout(renderKasChart, 100);
             }
@@ -1165,6 +1270,7 @@
             renderTakmirMustahikTable();
             renderQAPublic();
             renderPermohonan();
+            renderTerdekat();
 
             lucide.createIcons();
         }
