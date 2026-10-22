@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MasjidKu - Sistem Manajemen & Operasional Masjid Terpadu</title>
+    <title>SatuMasjid - Ekosistem Masjid Digital Terpadu</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -13,13 +13,13 @@
                     colors: {
                         emerald: {
                             850: '#0a492e',
-                            900: '#0d5c3a', // Emerald Utama
+                            900: '#0d5c3a', // Primary Emerald
                             950: '#06311f',
                         },
                         gold: {
                             300: '#f3e5ab',
                             400: '#e6ca65',
-                            500: '#d4af37', // Emas Elegan
+                            500: '#d4af37', // Accent Gold
                             600: '#aa8822',
                         }
                     },
@@ -31,10 +31,10 @@
             }
         }
     </script>
-    <!-- Google Fonts (Inter & Amiri for Arabic typography) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
@@ -44,20 +44,18 @@
         .bg-islamic-pattern {
             background-color: #0d5c3a;
             background-image: radial-gradient(#d4af37 0.75px, transparent 0.75px), radial-gradient(#d4af37 0.75px, #0d5c3a 0.75px);
-            background-size: 30px 30px;
-            background-position: 0 0,15px 15px;
-            background-opacity: 0.1;
+            background-size: 28px 28px;
+            background-position: 0 0, 14px 14px;
         }
         .text-arabic {
             font-family: 'Amiri', serif;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #f1f5f9;
         }
         ::-webkit-scrollbar-thumb {
             background: #0d5c3a;
@@ -66,730 +64,1218 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #0a492e;
         }
+        .tab-btn.active {
+            color: #0d5c3a;
+            border-bottom: 2px solid #0d5c3a;
+            font-weight: 700;
+        }
     </style>
 </head>
-<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased selection:bg-gold-500 selection:text-white">
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased selection:bg-gold-500 selection:text-white pb-20 lg:pb-0">
 
-    <!-- Notification Toast Modal -->
+    <!-- Toast Modal -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-x-full opacity-0 max-w-md bg-white rounded-xl shadow-2xl border-l-4 border-emerald-900 p-4 flex items-center space-x-3">
         <div id="toast-icon" class="text-emerald-900 bg-emerald-50 p-2 rounded-lg">
-            <i data-lucide="info" class="w-6 h-6"></i>
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
         </div>
         <div>
-            <h4 id="toast-title" class="font-bold text-slate-900 text-sm">Notifikasi</h4>
+            <h4 id="toast-title" class="font-bold text-slate-900 text-sm">Notifikasi SatuMasjid</h4>
             <p id="toast-message" class="text-xs text-slate-600 mt-0.5">Pesan informasi berhasil dijalankan.</p>
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="min-h-screen flex flex-col lg:flex-row">
-
-        <!-- SIDEBAR NAVIGATION (Desktop) -->
-        <aside class="w-full lg:w-72 bg-emerald-900 text-white flex-shrink-0 flex flex-col justify-between shadow-xl relative z-20">
-            <!-- Header Brand -->
-            <div>
-                <div class="p-6 bg-emerald-950/60 border-b border-emerald-800/50 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-emerald-950 font-bold shadow-lg shadow-gold-500/20">
-                            <i data-lucide="landmark" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h1 class="font-bold text-lg leading-tight tracking-wide text-white">MasjidKu</h1>
-                            <p class="text-[11px] text-gold-400 font-medium tracking-wider uppercase">Sistem Manajemen Masjid</p>
-                        </div>
-                    </div>
+    <!-- MAIN APP HEADER -->
+    <header class="bg-emerald-900 text-white sticky top-0 z-30 shadow-md">
+        <!-- Top Bar: Logo, Search, Mode Switch, Location -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-emerald-950 font-extrabold shadow-lg shadow-gold-500/20">
+                    <i data-lucide="landmark" class="w-6 h-6"></i>
                 </div>
-
-                <!-- Navigation Links -->
-                <nav class="p-4 space-y-1">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-emerald-800/80 text-white shadow-sm">
-                        <i data-lucide="layout-dashboard" class="w-5 h-5 text-gold-400"></i>
-                        <span>Dashboard Utama</span>
-                    </button>
-
-                    <button onclick="switchTab('keuangan')" id="nav-keuangan" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="wallet" class="w-5 h-5 text-emerald-300"></i>
-                        <span>Manajemen Keuangan</span>
-                    </button>
-
-                    <button onclick="switchTab('kajian')" id="nav-kajian" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="book-open" class="w-5 h-5 text-emerald-300"></i>
-                        <span>Program & Kajian</span>
-                    </button>
-
-                    <button onclick="switchTab('sarpras')" id="nav-sarpras" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="package" class="w-5 h-5 text-emerald-300"></i>
-                        <span>Sarana & Prasarana</span>
-                    </button>
-
-                    <button onclick="switchTab('hajat')" id="nav-hajat" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="heart-handshake" class="w-5 h-5 text-emerald-300"></i>
-                        <span>Daftar Kebutuhan</span>
-                    </button>
-
-                    <button onclick="switchTab('administrasi')" id="nav-administrasi" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="users" class="w-5 h-5 text-emerald-300"></i>
-                        <span>Takmir & Jamaah</span>
-                    </button>
-
-                    <button onclick="switchTab('rekomendasi')" id="nav-rekomendasi" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-emerald-100 hover:bg-emerald-800/50 hover:text-white">
-                        <i data-lucide="sparkles" class="w-5 h-5 text-gold-400"></i>
-                        <span>Modul Masa Depan</span>
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Footer Sidebar & Status -->
-            <div class="p-4 bg-emerald-950/40 border-t border-emerald-800/40 space-y-3">
-                <div class="bg-emerald-800/40 p-3 rounded-xl flex items-center justify-between border border-emerald-700/30">
-                    <div class="flex items-center space-x-2">
-                        <span id="storage-badge" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                        <span id="storage-status" class="text-xs text-emerald-200">LocalStorage Ready</span>
-                    </div>
-                    <button onclick="openDeployGuideModal()" class="text-[11px] text-gold-400 hover:text-gold-300 underline font-medium">Panduan Deploy</button>
-                </div>
-                <div class="text-center text-[11px] text-emerald-300/60">
-                    MasjidKu v2.4 &bull; 100% Free Stack Stack
+                <div>
+                    <h1 class="font-black text-xl tracking-tight text-white leading-none">SatuMasjid</h1>
+                    <p class="text-[10px] text-gold-300 font-medium tracking-wider uppercase mt-0.5">Dekat Bersama Masjid</p>
                 </div>
             </div>
-        </aside>
 
-        <!-- CONTENT AREA -->
-        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+            <!-- Global Masjid Selector -->
+            <div class="flex-1 max-w-md mx-2 hidden md:block">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-emerald-300"></i>
+                    <select id="masjid-selector" onchange="changeMasjid(this.value)" class="w-full pl-9 pr-8 py-2 bg-emerald-950/60 text-emerald-100 border border-emerald-700/50 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-gold-400 appearance-none">
+                        <option value="1">Masjid Raya Al-Ikhlas (Pusat Kota)</option>
+                        <option value="2">Masjid An-Nur (Kampung Damai)</option>
+                        <option value="3">Masjid Al-Jihad (Kompleks Permata)</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-2.5 text-emerald-300 pointer-events-none"></i>
+                </div>
+            </div>
 
-            <!-- HEADER BAR -->
-            <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-10 shadow-sm">
-                <!-- Masjid Selector & Location -->
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-emerald-50 text-emerald-900 rounded-xl">
-                        <i data-lucide="map-pin" class="w-5 h-5"></i>
+            <!-- Mode Switcher (Jamaah / Takmir Admin) & Prayer Clock Widget -->
+            <div class="flex items-center space-x-3">
+                
+                <!-- Quick Prayer Clock -->
+                <div class="bg-emerald-950/70 border border-emerald-800/60 px-3 py-1.5 rounded-xl text-right hidden sm:block">
+                    <div class="flex items-center space-x-1.5 text-xs text-gold-300 font-bold font-mono">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                        <span id="header-clock">12:15:00</span>
                     </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h2 class="font-bold text-slate-800 text-lg" id="nama-masjid-display">Masjid Agung Al-Ikhlas</h2>
-                            <button onclick="editNamaMasjid()" class="text-xs text-slate-400 hover:text-emerald-900"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                        <p class="text-xs text-slate-500" id="lokasi-masjid-display">Jakarta Selatan &bull; DKI Jakarta</p>
-                    </div>
+                    <p id="header-prayer-next" class="text-[10px] text-emerald-200">Dzuhur 12:05 WIB</p>
                 </div>
 
-                <!-- Calendar Hijri & Clock Widget -->
-                <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-                    <div class="text-right">
-                        <p class="text-xs font-semibold text-emerald-900" id="hijri-date-display">12 Rabiul Awal 1448 H</p>
-                        <p class="text-[11px] text-slate-500" id="masehi-date-display">Kamis, 22 Oktober 2026</p>
-                    </div>
-                    <div class="h-8 w-px bg-slate-200"></div>
-                    <div class="flex items-center space-x-2 text-slate-700">
-                        <i data-lucide="clock" class="w-4 h-4 text-gold-500"></i>
-                        <span class="text-sm font-mono font-bold" id="clock-display">12:20:00</span>
-                    </div>
+                <!-- Dual Mode Toggle Button -->
+                <div class="bg-emerald-950 p-1 rounded-xl flex items-center border border-emerald-800/80 shadow-inner">
+                    <button id="btn-mode-jamaah" onclick="switchUserMode('jamaah')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gold-500 text-emerald-950 shadow-sm flex items-center space-x-1">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                        <span>Jamaah</span>
+                    </button>
+                    <button id="btn-mode-takmir" onclick="switchUserMode('takmir')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-emerald-200 hover:text-white flex items-center space-x-1">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Takmir Admin</span>
+                    </button>
                 </div>
-            </header>
+            </div>
+        </div>
 
-            <!-- TABS CONTENT CONTAINER -->
-            <div class="p-6 space-y-6 flex-1">
+        <!-- Desktop Navigation Menu Bar -->
+        <nav class="bg-emerald-950/80 border-t border-emerald-800/40 hidden lg:block">
+            <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+                
+                <!-- JAMAAH NAV MENU -->
+                <div id="nav-menu-jamaah" class="flex space-x-1">
+                    <button onclick="switchTab('home')" id="tabnav-home" class="px-4 py-2.5 text-xs font-semibold text-white border-b-2 border-gold-400 flex items-center space-x-2">
+                        <i data-lucide="home" class="w-4 h-4 text-gold-400"></i>
+                        <span>Beranda & Sholat</span>
+                    </button>
+                    <button onclick="switchTab('kajian')" id="tabnav-kajian" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        <span>Kajian & Majelis</span>
+                    </button>
+                    <button onclick="switchTab('infaq')" id="tabnav-infaq" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                        <span>Infaq Digital</span>
+                    </button>
+                    <button onclick="switchTab('kegiatan')" id="tabnav-kegiatan" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="hand-heart" class="w-4 h-4"></i>
+                        <span>Volunter & Sosial</span>
+                    </button>
+                    <button onclick="switchTab('sarpras-jamaah')" id="tabnav-sarpras-jamaah" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="package-check" class="w-4 h-4"></i>
+                        <span>Pinjam Sarpras</span>
+                    </button>
+                    <button onclick="switchTab('konsultasi')" id="tabnav-konsultasi" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                        <span>Tanya Ustadz & Saran</span>
+                    </button>
+                    <button onclick="switchTab('fasilitas')" id="tabnav-fasilitas" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                        <span>Fasilitas Masjid</span>
+                    </button>
+                </div>
 
-                <!-- TAB 1: DASHBOARD UTAMA -->
-                <section id="tab-dashboard" class="tab-content space-y-6">
-                    <!-- Arabic Greeting Banner -->
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-950 p-6 text-white shadow-xl">
-                        <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-islamic-pattern"></div>
-                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <p class="text-arabic text-2xl text-gold-300 font-bold mb-1">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
-                                <h3 class="text-xl font-bold">Selamat Datang di Portal Pengurus Masjid</h3>
-                                <p class="text-emerald-200 text-sm mt-1 max-w-xl">Kelola kegiatan, kas keuangan, inventaris, dan informasi kajian masjid secara akuntabel, transparan, dan profesional.</p>
-                            </div>
-                            <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-xl border border-white/10 text-center min-w-[180px]">
-                                <span class="text-xs text-emerald-200 uppercase tracking-wider font-semibold">Shalat Berikutnya</span>
-                                <h4 class="text-lg font-bold text-gold-300 mt-0.5" id="next-prayer-name">Dzuhur</h4>
-                                <p class="text-2xl font-extrabold tracking-tight font-mono text-white mt-0.5" id="next-prayer-time">12:05</p>
-                                <p class="text-[10px] text-emerald-200/80 mt-1" id="next-prayer-countdown">dalam -15 menit</p>
-                            </div>
-                        </div>
-                    </div>
+                <!-- TAKMIR ADMIN NAV MENU -->
+                <div id="nav-menu-takmir" class="flex space-x-1 hidden">
+                    <button onclick="switchTab('takmir-dashboard')" id="tabnav-takmir-dashboard" class="px-4 py-2.5 text-xs font-semibold text-white border-b-2 border-gold-400 flex items-center space-x-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-gold-400"></i>
+                        <span>Dashboard Takmir</span>
+                    </button>
+                    <button onclick="switchTab('takmir-keuangan')" id="tabnav-takmir-keuangan" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="wallet" class="w-4 h-4"></i>
+                        <span>Kas & Laporan Keuangan</span>
+                    </button>
+                    <button onclick="switchTab('takmir-agenda')" id="tabnav-takmir-agenda" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>Kelola Agenda & Kajian</span>
+                    </button>
+                    <button onclick="switchTab('takmir-inventaris')" id="tabnav-takmir-inventaris" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="boxes" class="w-4 h-4"></i>
+                        <span>Aset Sarpras</span>
+                    </button>
+                    <button onclick="switchTab('takmir-wishlist')" id="tabnav-takmir-wishlist" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="target" class="w-4 h-4"></i>
+                        <span>Daftar Kebutuhan Masjid</span>
+                    </button>
+                    <button onclick="switchTab('takmir-zis')" id="tabnav-takmir-zis" class="px-4 py-2.5 text-xs font-semibold text-emerald-200 hover:text-white border-b-2 border-transparent flex items-center space-x-2">
+                        <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+                        <span>Pengelolaan ZIS & Mustahik</span>
+                    </button>
+                </div>
 
-                    <!-- Jadwal Shalat Widget Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                        <div class="prayer-card bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm hover:border-emerald-500 transition-all">
-                            <span class="text-xs text-slate-500 font-medium">Subuh</span>
-                            <p class="text-base font-bold text-slate-800 font-mono mt-1" id="time-subuh">04:28</p>
-                        </div>
-                        <div class="prayer-card bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm hover:border-emerald-500 transition-all">
-                            <span class="text-xs text-slate-500 font-medium">Syuruq</span>
-                            <p class="text-base font-bold text-slate-800 font-mono mt-1" id="time-syuruq">05:42</p>
-                        </div>
-                        <div class="prayer-card bg-emerald-50 border-2 border-emerald-600 p-3 rounded-xl text-center shadow-sm">
-                            <span class="text-xs text-emerald-900 font-semibold flex items-center justify-center space-x-1">
-                                <span>Dzuhur</span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                            </span>
-                            <p class="text-base font-bold text-emerald-900 font-mono mt-1" id="time-dzuhur">12:05</p>
-                        </div>
-                        <div class="prayer-card bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm hover:border-emerald-500 transition-all">
-                            <span class="text-xs text-slate-500 font-medium">Ashar</span>
-                            <p class="text-base font-bold text-slate-800 font-mono mt-1" id="time-ashar">15:15</p>
-                        </div>
-                        <div class="prayer-card bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm hover:border-emerald-500 transition-all">
-                            <span class="text-xs text-slate-500 font-medium">Maghrib</span>
-                            <p class="text-base font-bold text-slate-800 font-mono mt-1" id="time-maghrib">18:10</p>
-                        </div>
-                        <div class="prayer-card bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm hover:border-emerald-500 transition-all">
-                            <span class="text-xs text-slate-500 font-medium">Isya</span>
-                            <p class="text-base font-bold text-slate-800 font-mono mt-1" id="time-isya">19:20</p>
-                        </div>
-                    </div>
+                <div class="text-[11px] text-gold-300 font-semibold bg-emerald-900/80 px-3 py-1 rounded-lg border border-emerald-700/50">
+                    <span id="active-masjid-tag">Masjid Raya Al-Ikhlas</span>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-                    <!-- Financial Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo Kas Utama</p>
-                                <h3 class="text-2xl font-black text-slate-900 mt-1" id="dashboard-saldo">Rp 48.750.000</h3>
-                                <p class="text-xs text-emerald-600 font-medium mt-1 flex items-center space-x-1">
-                                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                                    <span>Kondisi Keuangan Aman</span>
-                                </p>
-                            </div>
-                            <div class="p-3 bg-emerald-100 text-emerald-900 rounded-2xl">
-                                <i data-lucide="piggy-bank" class="w-8 h-8"></i>
-                            </div>
-                        </div>
+    <!-- MAIN BODY CONTENT AREA -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
 
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pemasukan Bulan Ini</p>
-                                <h3 class="text-2xl font-black text-emerald-700 mt-1" id="dashboard-pemasukan">Rp 12.400.000</h3>
-                                <p class="text-xs text-slate-500 mt-1">Infaq Jumat, Hajat & Donasi</p>
-                            </div>
-                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                                <i data-lucide="arrow-down-right" class="w-8 h-8"></i>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengeluaran Bulan Ini</p>
-                                <h3 class="text-2xl font-black text-rose-600 mt-1" id="dashboard-pengeluaran">Rp 3.650.000</h3>
-                                <p class="text-xs text-slate-500 mt-1">Listrik, Kebersihan, Honor Ustaz</p>
-                            </div>
-                            <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl">
-                                <i data-lucide="arrow-up-right" class="w-8 h-8"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Two Column Section (Agenda Terdekat & Progress Donasi) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Agenda Kajian Terdekat -->
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-slate-800 text-base flex items-center space-x-2">
-                                    <i data-lucide="calendar" class="w-5 h-5 text-emerald-900"></i>
-                                    <span>Jadwal Kajian Terdekat</span>
-                                </h4>
-                                <button onclick="switchTab('kajian')" class="text-xs font-semibold text-emerald-900 hover:underline">Lihat Semua</button>
-                            </div>
-
-                            <div class="space-y-3" id="dashboard-kajian-list">
-                                <!-- Dynamic List -->
-                            </div>
-                        </div>
-
-                        <!-- Highlight Kebutuhan / Donasi Hajat -->
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-slate-800 text-base flex items-center space-x-2">
-                                    <i data-lucide="target" class="w-5 h-5 text-gold-500"></i>
-                                    <span>Program Pengadaan Utamakan</span>
-                                </h4>
-                                <button onclick="switchTab('hajat')" class="text-xs font-semibold text-emerald-900 hover:underline">Semua Hajat</button>
-                            </div>
-
-                            <div class="space-y-4" id="dashboard-hajat-highlight">
-                                <!-- Dynamic Highlight -->
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 2: MANAJEMEN KEUANGAN -->
-                <section id="tab-keuangan" class="tab-content space-y-6 hidden">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Manajemen & Laporan Keuangan</h3>
-                            <p class="text-xs text-slate-500 mt-1">Pencatatan Pemasukan, Pengeluaran, Infaq Jumat, serta Rekapitulasi Kas.</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="openModalTrans('in')" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                                <span>Tambah Pemasukan</span>
-                            </button>
-                            <button onclick="openModalTrans('out')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                                <i data-lucide="minus-circle" class="w-4 h-4"></i>
-                                <span>Tambah Pengeluaran</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Visual Grafik Keuangan & Ringkasan Kategori -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <h4 class="font-bold text-slate-800 text-sm mb-4">Grafik Transaksi Kas (Visualisasi Sederhana)</h4>
-                            <div class="h-64 relative flex items-center justify-center">
-                                <canvas id="chartKeuangan"></canvas>
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-sm mb-3">Ringkasan Kategori</h4>
-                                <div class="space-y-3" id="kategori-summary-list">
-                                    <!-- Dynamic Category Summary -->
-                                </div>
-                            </div>
-                            <div class="pt-4 border-t border-slate-100">
-                                <button onclick="exportKeuanganCSV()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2">
-                                    <i data-lucide="download" class="w-4 h-4"></i>
-                                    <span>Export Rekap CSV</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabel Transaksi Keuangan -->
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3 bg-slate-50">
-                            <h4 class="font-bold text-slate-800 text-sm">Riwayat Transaksi Keuangan</h4>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                                <input type="text" id="search-keuangan" onkeyup="renderKeuanganTable()" placeholder="Cari ket. / kategori..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 w-full sm:w-64">
-                                <select id="filter-type-keuangan" onchange="renderKeuanganTable()" class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
-                                    <option value="all">Semua Tipe</option>
-                                    <option value="pemasukan">Pemasukan (+)</option>
-                                    <option value="pengeluaran">Pengeluaran (-)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
-                                        <th class="p-3">Tanggal</th>
-                                        <th class="p-3">Tipe</th>
-                                        <th class="p-3">Kategori</th>
-                                        <th class="p-3">Keterangan</th>
-                                        <th class="p-3 text-right">Nominal (Rp)</th>
-                                        <th class="p-3 text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-keuangan-body" class="divide-y divide-slate-100">
-                                    <!-- Dynamic Table Content -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 3: PROGRAM & KAJIAN -->
-                <section id="tab-kajian" class="tab-content space-y-6 hidden">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Jadwal Program & Kajian</h3>
-                            <p class="text-xs text-slate-500 mt-1">Agenda Ustaz, Tabligh Akbar, dan Kajian Rutin Masjid.</p>
-                        </div>
-                        <button onclick="openModalKajian()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Tambah Jadwal Kajian</span>
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="kajian-cards-container">
-                        <!-- Dynamic Kajian Cards -->
-                    </div>
-                </section>
-
-                <!-- TAB 4: SARANA & PRASARANA -->
-                <section id="tab-sarpras" class="tab-content space-y-6 hidden">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Sarana & Prasarana (Inventaris)</h3>
-                            <p class="text-xs text-slate-500 mt-1">Pencatatan Aset Masjid, Jumlah, Lokasi Penyimpanan, dan Kondisi Barang.</p>
-                        </div>
-                        <button onclick="openModalSarpras()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Tambah Barang Inventaris</span>
-                        </button>
-                    </div>
-
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                            <h4 class="font-bold text-slate-800 text-sm">Daftar Inventaris Masjid</h4>
-                            <input type="text" id="search-sarpras" onkeyup="renderSarprasTable()" placeholder="Cari nama barang..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 w-64">
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
-                                        <th class="p-3">Nama Barang</th>
-                                        <th class="p-3">Kategori</th>
-                                        <th class="p-3">Jumlah</th>
-                                        <th class="p-3">Lokasi</th>
-                                        <th class="p-3">Kondisi</th>
-                                        <th class="p-3 text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-sarpras-body" class="divide-y divide-slate-100">
-                                    <!-- Dynamic Table Content -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TAB 5: DAFTAR KEBUTUHAN (PAPAN HAJAT) -->
-                <section id="tab-hajat" class="tab-content space-y-6 hidden">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Daftar Kebutuhan & Donasi Hajat</h3>
-                            <p class="text-xs text-slate-500 mt-1">Papan pengadaan barang/pembangunan masjid yang membutuhkan donasi jamaah.</p>
-                        </div>
-                        <button onclick="openModalHajat()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Buat Program Hajat</span>
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="hajat-cards-container">
-                        <!-- Dynamic Hajat Cards -->
-                    </div>
-                </section>
-
-                <!-- TAB 6: TAKMIR & JAMAAH -->
-                <section id="tab-administrasi" class="tab-content space-y-6 hidden">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Kepengurusan Takmir & Jamaah</h3>
-                            <p class="text-xs text-slate-500 mt-1">Struktur Takmir, Daftar Jamaah Tetap, dan Kontak Penting.</p>
-                        </div>
-                        <button onclick="openModalTakmir()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 shadow-md">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i>
-                            <span>Tambah Pengurus</span>
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5" id="takmir-cards-container">
-                        <!-- Dynamic Takmir Cards -->
-                    </div>
-                </section>
-
-                <!-- TAB 7: REKOMENDASI MODUL MASA DEPAN -->
-                <section id="tab-rekomendasi" class="tab-content space-y-6 hidden">
-                    <div class="bg-gradient-to-r from-emerald-900 to-slate-900 text-white p-6 rounded-2xl shadow-xl">
-                        <div class="flex items-center space-x-3 mb-2">
-                            <i data-lucide="sparkles" class="w-6 h-6 text-gold-400"></i>
-                            <h3 class="text-xl font-bold">Rekomendasi Arsitektur & Pengembangan Fitur Lanjutan</h3>
-                        </div>
-                        <p class="text-xs text-emerald-100 leading-relaxed max-w-3xl">
-                            Aplikasi <strong>MasjidKu</strong> dirancang siap dikembangkan lebih jauh tanpa biaya bulanan (100% Free Stack: GitHub, Vercel & Firebase Free Tier). Berikut adalah modul-modul yang sangat direkomendasikan untuk pengembangan sistem masjid tingkat lanjut:
+        <!-- ========================================== -->
+        <!-- TAB 1: BERANDA JAMAAH & JADWAL SHOLAT -->
+        <!-- ========================================== -->
+        <section id="view-home" class="view-content space-y-6">
+            
+            <!-- Hero Islamic Greeting Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-950 text-white p-6 sm:p-8 shadow-xl border border-emerald-700/30">
+                <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-15 bg-islamic-pattern pointer-events-none"></div>
+                <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    <div class="md:col-span-2 space-y-2">
+                        <p class="text-arabic text-2xl sm:text-3xl text-gold-300 font-bold">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+                        <h2 class="text-xl sm:text-2xl font-black">Selamat Datang di Portal <span id="display-masjid-title">Masjid Raya Al-Ikhlas</span></h2>
+                        <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed max-w-xl">
+                            Mari makmurkan masjid bersama. Dapatkan informasi jadwal sholat, agenda kajian, wakaf digital, serta program sosial kemasyarakatan dalam satu platform.
                         </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="p-3 bg-emerald-50 text-emerald-900 w-fit rounded-xl">
-                                <i data-lucide="calculator" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-base">1. Modul Zakat & Mustahik</h4>
-                            <p class="text-xs text-slate-600 leading-relaxed">Pencatatan penerimaan Zakat Fitrah/Mal, perhitungan beras & uang, pendataan 8 asnaf mustahik di lingkungan masjid, serta cetak bukti kwitansi zakat.</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="p-3 bg-amber-50 text-amber-800 w-fit rounded-xl">
-                                <i data-lucide="tv" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-base">2. Mode TV Display Masjid (Digital Signage)</h4>
-                            <p class="text-xs text-slate-600 leading-relaxed">Tampilan layar TV masjid khusus berisi Jam Shalat Realtime, Countdown Iqomah, Running Text Pengumuman, dan Slide Poster Kajian secara otomatis.</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="p-3 bg-rose-50 text-rose-800 w-fit rounded-xl">
-                                <i data-lucide="truck" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-base">3. Modul Layanan Ambulans & Rukun Kematian</h4>
-                            <p class="text-xs text-slate-600 leading-relaxed">Pengelolaan iuran rukun kematian warga, jadwal piket pengemudi ambulans masjid, dan inventaris perlengkapan jenazah.</p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="p-3 bg-blue-50 text-blue-800 w-fit rounded-xl">
-                                <i data-lucide="qr-code" class="w-6 h-6"></i>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-base">4. Integration QRIS Dinamis & WhatsApp Gateway</h4>
-                            <p class="text-xs text-slate-600 leading-relaxed">Generasi QRIS otomatis untuk donasi hajat tertentu dan pengiriman pengumuman jadwal kajian langsung ke grup WhatsApp jamaah.</p>
+                        <div class="pt-2 flex flex-wrap gap-2 text-xs">
+                            <span class="bg-emerald-800/80 text-emerald-100 px-3 py-1 rounded-full border border-emerald-700/50 flex items-center space-x-1">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-400"></i>
+                                <span id="display-masjid-address">Jl. H. Rangkayo Sutan No. 12, Pusat Kota</span>
+                            </span>
+                            <span class="bg-emerald-800/80 text-gold-300 px-3 py-1 rounded-full border border-emerald-700/50 flex items-center space-x-1 font-semibold">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                                <span id="display-hijri-date">12 Rabiul Awal 1448 H</span>
+                            </span>
                         </div>
                     </div>
-                </section>
 
+                    <!-- Sholat Countdown Card -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 text-center shadow-lg space-y-2">
+                        <span class="text-xs text-emerald-200 uppercase font-bold tracking-wider">Menuju Sholat Berikutnya</span>
+                        <h3 class="text-2xl font-black text-gold-300" id="countdown-prayer-name">Dzuhur</h3>
+                        <div class="text-3xl font-extrabold font-mono tracking-wider text-white" id="countdown-timer">00:24:15</div>
+                        <p class="text-[11px] text-emerald-200" id="iqamah-notice">Estimasi Iqamah: 10 Menit Ba'da Azan</p>
+                        <button onclick="openModalKiblat()" class="mt-2 w-full py-2 bg-gold-500 hover:bg-gold-400 text-emerald-950 text-xs font-bold rounded-xl flex items-center justify-center space-x-2 transition shadow">
+                            <i data-lucide="compass" class="w-4 h-4"></i>
+                            <span>Cek Arah Kiblat Digital</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </main>
-    </div>
 
-    <!-- MODAL POPUPS FOR DATA ENTRY -->
-
-    <!-- Generic Backdrop Modal -->
-    <div id="modal-container" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto" id="modal-content">
-            <!-- Modal Content Dynamically Injected -->
-        </div>
-    </div>
-
-    <!-- PANDUAN DEPLOYMENT MODAL -->
-    <div id="deploy-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
-                <h3 class="font-bold text-slate-900 text-lg flex items-center space-x-2">
-                    <i data-lucide="cloud-lightning" class="w-5 h-5 text-emerald-900"></i>
-                    <span>Panduan Deploy 100% Gratis (GitHub + Vercel + Firebase)</span>
-                </h3>
-                <button onclick="closeDeployGuideModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <!-- Jadwal Sholat Real-Time Grid -->
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-base font-extrabold text-slate-800 flex items-center space-x-2">
+                        <i data-lucide="clock" class="w-5 h-5 text-emerald-900"></i>
+                        <span>Jadwal Sholat Hari Ini</span>
+                    </h3>
+                    <span class="text-xs text-slate-500" id="display-masehi-date">Kamis, 22 Oktober 2026</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="prayer-cards-grid">
+                    <!-- Dynamic Prayer Cards -->
+                </div>
             </div>
-            <div class="space-y-4 text-xs text-slate-700 leading-relaxed">
-                <div class="p-3 bg-emerald-50 text-emerald-900 rounded-xl border border-emerald-200">
-                    <strong>Status Saat Ini:</strong> Aplikasi menggunakan <code>LocalStorage</code> secara otomatis sehingga langsung fungsional tanpa backend!
+
+            <!-- Quick Action Grid Jamaah -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <button onclick="switchTab('infaq')" class="p-4 bg-white hover:bg-emerald-50/50 rounded-2xl border border-slate-200 shadow-sm transition flex flex-col items-center text-center space-y-2 group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center group-hover:scale-110 transition">
+                        <i data-lucide="qr-code" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xs text-slate-800">Infaq QRIS Cepat</span>
+                    <span class="text-[10px] text-slate-500">Scan & Transfer Infaq</span>
+                </button>
+
+                <button onclick="switchTab('kajian')" class="p-4 bg-white hover:bg-emerald-50/50 rounded-2xl border border-slate-200 shadow-sm transition flex flex-col items-center text-center space-y-2 group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center group-hover:scale-110 transition">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xs text-slate-800">Jadwal Kajian</span>
+                    <span class="text-[10px] text-slate-500">Simpan Pengingat Kajian</span>
+                </button>
+
+                <button onclick="switchTab('sarpras-jamaah')" class="p-4 bg-white hover:bg-emerald-50/50 rounded-2xl border border-slate-200 shadow-sm transition flex flex-col items-center text-center space-y-2 group">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center group-hover:scale-110 transition">
+                        <i data-lucide="truck" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xs text-slate-800">Pinjam Ambulans/Sarpras</span>
+                    <span class="text-[10px] text-slate-500">Layanan Gratis Ummat</span>
+                </button>
+
+                <button onclick="switchTab('konsultasi')" class="p-4 bg-white hover:bg-emerald-50/50 rounded-2xl border border-slate-200 shadow-sm transition flex flex-col items-center text-center space-y-2 group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-900 flex items-center justify-center group-hover:scale-110 transition">
+                        <i data-lucide="message-square" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xs text-slate-800">Tanya Ustadz</span>
+                    <span class="text-[10px] text-slate-500">Konsultasi Agama</span>
+                </button>
+            </div>
+
+            <!-- Two Columns Layout: Highlight Kajian & Highlight Target Wakaf -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Kajian Terdekat -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-emerald-900"></i>
+                            <span>Kajian Terdekat Pekan Ini</span>
+                        </h4>
+                        <button onclick="switchTab('kajian')" class="text-xs font-bold text-emerald-900 hover:underline">Lihat Semua</button>
+                    </div>
+
+                    <div class="space-y-3" id="home-kajian-list">
+                        <!-- Dynamic Kajian Items -->
+                    </div>
                 </div>
 
-                <h4 class="font-bold text-slate-900 text-sm">Langkah 1: Hosting di GitHub & Vercel (Gratis)</h4>
-                <ol class="list-decimal pl-5 space-y-1">
-                    <li>Buat Repository baru di <strong>GitHub.com</strong> (misal: <code>masjidku-app</code>).</li>
-                    <li>Upload file HTML ini (simpan dengan nama <code>index.html</code>).</li>
-                    <li>Buka <strong>Vercel.com</strong>, login dengan GitHub, lalu pilih <i>Import Repository</i>.</li>
-                    <li>Klik <strong>Deploy</strong>. Aplikasi MasjidKu Anda langsung live dengan HTTPS gratis!</li>
-                </ol>
+                <!-- Program Wakaf & Hajat Utama -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                            <i data-lucide="target" class="w-4 h-4 text-gold-500"></i>
+                            <span>Program Donasi & Kebutuhan Masjid</span>
+                        </h4>
+                        <button onclick="switchTab('infaq')" class="text-xs font-bold text-emerald-900 hover:underline">Semua Program</button>
+                    </div>
 
-                <h4 class="font-bold text-slate-900 text-sm">Langkah 2: Hubungkan Firebase Firestore (Opsional untuk Multi-User)</h4>
-                <ol class="list-decimal pl-5 space-y-1">
-                    <li>Buka <strong>console.firebase.google.com</strong> dan buat project gratis baru.</li>
-                    <li>Aktifkan <strong>Firestore Database</strong> (mode Test).</li>
-                    <li>Copy `firebaseConfig` Anda dan masukkan ke skrip aplikasi ini.</li>
-                </ol>
+                    <div class="space-y-4" id="home-hajat-list">
+                        <!-- Dynamic Hajat Items -->
+                    </div>
+                </div>
             </div>
-            <div class="pt-2 text-right">
-                <button onclick="closeDeployGuideModal()" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold">Tutup Panduan</button>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 2: KAJIAN & MAJELIS ILMU -->
+        <!-- ========================================== -->
+        <section id="view-kajian" class="view-content space-y-6 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Agenda Kajian & Majelis Ilmu</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Ikuti jadwal pengajian rutin, tabligh akbar, serta rekaman materi kajian masjid.</p>
+                </div>
+                <!-- Search Kajian -->
+                <div class="w-full md:w-72 relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                    <input type="text" id="search-kajian-input" onkeyup="renderKajianList()" placeholder="Cari ustadz / tema kajian..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                </div>
             </div>
+
+            <!-- Kajian Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="kajian-cards-container">
+                <!-- Dynamic Content -->
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 3: INFAQ & WAKAF DIGITAL -->
+        <!-- ========================================== -->
+        <section id="view-infaq" class="view-content space-y-6 hidden">
+            <div class="bg-gradient-to-r from-emerald-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="space-y-2">
+                    <span class="text-xs uppercase tracking-wider text-gold-300 font-bold bg-gold-500/20 px-3 py-1 rounded-full border border-gold-500/30">Transparan & Akuntabel</span>
+                    <h3 class="text-2xl font-black">Infaq & Sedekah Digital SatuMasjid</h3>
+                    <p class="text-xs text-emerald-100 max-w-xl leading-relaxed">
+                        Salurkan donasi terbaik Anda langsung ke rekening resmi masjid atau scan QRIS dinamis. Seluruh penggunaan dana dilaporkan secara terbuka di platform ini.
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-lg text-center text-slate-900 min-w-[200px]">
+                    <span class="text-[11px] font-bold uppercase text-slate-400">Total Kas Terkumpul</span>
+                    <h4 class="text-2xl font-black text-emerald-900 mt-0.5" id="infaq-total-kas">Rp 68.450.000</h4>
+                    <p class="text-[10px] text-emerald-600 font-semibold mt-1">Update Otomatis Real-Time</p>
+                </div>
+            </div>
+
+            <!-- Program Infaq Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="infaq-program-grid">
+                <!-- Dynamic Infaq Cards -->
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 4: VOLUNTEER & PROGRAM SOSIAL UMMAT -->
+        <!-- ========================================== -->
+        <section id="view-kegiatan" class="view-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Program Volunter & Layanan Sosial</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Bergabung menjadi relawan kemakmuran masjid atau ajukan bantuan sosial bagi warga.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Program Relawan List (Left 2 Cols) -->
+                <div class="lg:col-span-2 space-y-4" id="volunteer-program-container">
+                    <!-- Dynamic Volunteer Cards -->
+                </div>
+
+                <!-- Form Pengajuan Bantuan Sosial (Right 1 Col) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h4 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                            <i data-lucide="heart-handshake" class="w-5 h-5 text-emerald-900"></i>
+                            <span>Pengajuan Bantuan Ummat</span>
+                        </h4>
+                        <p class="text-xs text-slate-500 mt-1">Bagi jamaah/warga yang membutuhkan bantuan pangan, kesehatan, atau pendidikan.</p>
+                    </div>
+
+                    <form onsubmit="submitBantuanSocial(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-700">Nama Lengkap Pemohon</label>
+                            <input type="text" id="bantuan-nama" required class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="Sesuai KTP">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-700">No. WhatsApp / HP</label>
+                            <input type="text" id="bantuan-hp" required class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="0812-xxxx-xxxx">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-700">Jenis Bantuan Dituju</label>
+                            <select id="bantuan-jenis" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                <option value="Sembako / Pangan">Sembako & Pangan</option>
+                                <option value="Bantuan Pengobatan">Bantuan Pengobatan / Kesehatan</option>
+                                <option value="Beasiswa Pendidikan Anak Yatim">Beasiswa Anak Yatim / Mualaf</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-700">Alasan & Detail Situasi</label>
+                            <textarea id="bantuan-alasan" rows="3" required class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="Jelaskan kondisi dan kebutuhan Anda..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-emerald-900 hover:bg-emerald-800 text-white font-bold rounded-xl shadow transition">
+                            Kirim Pengajuan Bantuan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 5: PINJAM SARPRAS JAMAAH -->
+        <!-- ========================================== -->
+        <section id="view-sarpras-jamaah" class="view-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Layanan Peminjaman Sarpras Masjid</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Fasilitas umum masjid yang dapat dipinjam oleh jamaah secara gratis (Ambulans, Kain Kafan, Tenda, Kitab Perpustakaan).</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="public-sarpras-grid">
+                <!-- Dynamic Public Sarpras Cards -->
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 6: TANYA USTADZ & KOTAK SARAN -->
+        <!-- ========================================== -->
+        <section id="view-konsultasi" class="view-content space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Layanan Tanya Ustadz -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 text-lg flex items-center space-x-2">
+                            <i data-lucide="message-square" class="w-5 h-5 text-emerald-900"></i>
+                            <span>Tanya Ustadz & Konsultasi Syariah</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Kirimkan pertanyaan seputar ibadah, Fiqih, atau muamalah langsung ke Asatidz Masjid.</p>
+                    </div>
+
+                    <form onsubmit="submitPertanyaanUstadz(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-700">Pilih Ustadz Tujuan</label>
+                            <select id="tanya-ustadz-select" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                <option value="Ust. Dr. Hilman Fauzi">Ust. Dr. Hilman Fauzi (Fiqih & Ibadah)</option>
+                                <option value="Ust. Ammi Nur Baits">Ust. Ammi Nur Baits (Muamalah & Bisnis Syariah)</option>
+                                <option value="Ust. Ahmad Ridwan, Lc">Ust. Ahmad Ridwan, Lc (Keluarga & Tazkiyatun Nafs)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-700">Pertanyaan Anda</label>
+                            <textarea id="tanya-pertanyaan" rows="4" required class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="Tuliskan pertanyaan secara rinci..."></textarea>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="tanya-anonim" class="rounded text-emerald-900">
+                            <label for="tanya-anonim" class="text-slate-600">Sembunyikan nama saya (Hamba Allah)</label>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-emerald-900 hover:bg-emerald-800 text-white font-bold rounded-xl shadow transition">
+                            Kirim Pertanyaan
+                        </button>
+                    </form>
+
+                    <!-- Q&A History List -->
+                    <div class="pt-4 border-t border-slate-100 space-y-3">
+                        <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Tanya Jawab Terbaru yang Terjawab</h4>
+                        <div class="space-y-2" id="qa-public-list">
+                            <!-- Dynamic QA -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kotak Saran & Fasilitas Masjid -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 text-lg flex items-center space-x-2">
+                            <i data-lucide="send" class="w-5 h-5 text-gold-500"></i>
+                            <span>Kotak Saran & Perbaikan Kebersihan/Fasilitas</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Bantu pengurus takmir menjaga kebersihan dan fasilitas masjid dengan mengirimkan masukan Anda.</p>
+                    </div>
+
+                    <form onsubmit="submitKotakSaran(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-700">Kategori Masukan</label>
+                            <select id="saran-kategori" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                <option value="Kebersihan Area Wudhu / Toilet">Kebersihan Area Wudhu / Toilet</option>
+                                <option value="Audio / Sound System">Audio / Sound System Khutbah/Sholat</option>
+                                <option value="Pendingin / AC / Kipas">Pendingin / AC / Kipas Ruang Sholat</option>
+                                <option value="Fasilitas Parkir / Keamanan">Fasilitas Parkir & Keamanan</option>
+                                <option value="Usulan Program / Kajian">Usulan Program / Kajian Baru</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-700">Isi Masukan / Saran</label>
+                            <textarea id="saran-isi" rows="4" required class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="Berikan deskripsi lokasi dan permasalahan fasilitas..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow transition">
+                            Kirim Ke Pengurus Takmir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- TAB 7: DIREKTORI FASILITAS MASJID -->
+        <!-- ========================================== -->
+        <section id="view-fasilitas" class="view-content space-y-6 hidden">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900">Direktori Fasilitas & Layanan Masjid</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Sarana prasarana pendukung kenyamanan beribadah jamaah di Masjid Raya Al-Ikhlas.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="fasilitas-cards-grid">
+                <!-- Dynamic Facilities Cards -->
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 8 - DASHBOARD EKEKUTIF TAKMIR -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-dashboard" class="view-content space-y-6 hidden">
+            <div class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-emerald-800">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-gold-400 font-bold">Portal Khusus Pengurus Takmir</span>
+                    <h3 class="text-2xl font-black mt-1">Dashboard Operasional Masjid</h3>
+                    <p class="text-xs text-emerald-200 mt-0.5">Kelola kas keuangan, inventaris, jadwal kajian, dan permohonan jamaah dalam satu dashboard.</p>
+                </div>
+                <button onclick="openModalTambahTrans('pemasukan')" class="px-4 py-2 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold rounded-xl text-xs flex items-center space-x-2 shadow">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Catat Transaksi Baru</span>
+                </button>
+            </div>
+
+            <!-- Financial Summary Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Saldo Kas Utama</p>
+                        <h4 class="text-2xl font-black text-slate-900 mt-1" id="dash-saldo-kas">Rp 68.450.000</h4>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-1">Status Keuangan Sehat</p>
+                    </div>
+                    <div class="p-3 bg-emerald-100 text-emerald-900 rounded-2xl">
+                        <i data-lucide="wallet" class="w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Pemasukan Bulan Ini</p>
+                        <h4 class="text-2xl font-black text-emerald-700 mt-1" id="dash-pemasukan-bulan">Rp 18.250.000</h4>
+                        <p class="text-[11px] text-slate-500 mt-1">Infaq Jumat & QRIS</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                        <i data-lucide="arrow-down-right" class="w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">Pengeluaran Bulan Ini</p>
+                        <h4 class="text-2xl font-black text-rose-600 mt-1" id="dash-pengeluaran-bulan">Rp 5.400.000</h4>
+                        <p class="text-[11px] text-slate-500 mt-1">Listrik, Air, Honor Marbot</p>
+                    </div>
+                    <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+                        <i data-lucide="arrow-up-right" class="w-8 h-8"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart & Notifications Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Financial Visual Chart (Left 2 Cols) -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm">Visualisasi Arus Kas Keuangan</h4>
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="chartKasMasjid"></canvas>
+                    </div>
+                </div>
+
+                <!-- Permohonan Jamaah Terbaru (Right 1 Col) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm">Permohonan Pinjam Sarpras / Bantuan</h4>
+                    <div class="space-y-3 overflow-y-auto max-h-64" id="dash-permohonan-list">
+                        <!-- Dynamic List -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 9 - KAS & LAPORAN KEUANGAN MASJID -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-keuangan" class="view-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Manajemen Kas & Buku Keuangan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Pencatatan Pemasukan, Pengeluaran, serta Laporan Transparan Kas Masjid.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openModalTambahTrans('pemasukan')" class="px-3.5 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>+ Pemasukan</span>
+                    </button>
+                    <button onclick="openModalTambahTrans('pengeluaran')" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow">
+                        <i data-lucide="minus-circle" class="w-4 h-4"></i>
+                        <span>- Pengeluaran</span>
+                    </button>
+                    <button onclick="exportKeuanganCSV()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-slate-300">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Financial Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <h4 class="font-bold text-slate-800 text-sm">Buku Kas Masjid</h4>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <input type="text" id="filter-keuangan-search" onkeyup="renderKeuanganTable()" placeholder="Cari keterangan..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 w-full sm:w-64">
+                        <select id="filter-keuangan-type" onchange="renderKeuanganTable()" class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                            <option value="all">Semua Tipe</option>
+                            <option value="pemasukan">Pemasukan (+)</option>
+                            <option value="pengeluaran">Pengeluaran (-)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                                <th class="p-3">Tanggal</th>
+                                <th class="p-3">Tipe</th>
+                                <th class="p-3">Kategori</th>
+                                <th class="p-3">Keterangan</th>
+                                <th class="p-3 text-right">Nominal (Rp)</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-keuangan-body" class="divide-y divide-slate-100">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 10 - KELOLA AGENDA & KAJIAN -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-agenda" class="view-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Kelola Agenda Kajian & Kegiatan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Tambah dan jadwalkan pengajian ustadz untuk dipublikasikan ke jamaah.</p>
+                </div>
+                <button onclick="openModalTambahKajian()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Tambah Agenda Kajian</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="takmir-kajian-grid">
+                <!-- Dynamic Kajian Manage Cards -->
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 11 - ASET SARPRAS MASJID -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-inventaris" class="view-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Inventaris & Aset Masjid</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Pendataan barang, lokasi penyimpanan, dan status kondisi alat perlengkapan masjid.</p>
+                </div>
+                <button onclick="openModalTambahSarpras()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Tambah Inventaris</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                                <th class="p-3">Nama Barang</th>
+                                <th class="p-3">Kategori</th>
+                                <th class="p-3">Jumlah</th>
+                                <th class="p-3">Lokasi Penyimpanan</th>
+                                <th class="p-3">Kondisi</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-sarpras-body" class="divide-y divide-slate-100">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 12 - DAFTAR KEBUTUHAN MASJID (WISHLIST) -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-wishlist" class="view-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Daftar Kebutuhan Wakaf / Hajat Masjid</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Program pengadaan barang atau renovasi yang membutuhkan partisipasi wakaf jamaah.</p>
+                </div>
+                <button onclick="openModalTambahHajat()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Buat Program Kebutuhan</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="takmir-hajat-grid">
+                <!-- Dynamic Hajat Cards -->
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- MODE TAKMIR ADMIN: TAB 13 - PENGELOLAAN ZIS & MUSTAHIK -->
+        <!-- ================================================================= -->
+        <section id="view-takmir-zis" class="view-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Pengelolaan Zakat, Infaq, Sedekah (ZIS) & Mustahik</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Pendataan penerima manfaat (8 Asnaf Mustahik) di lingkungan sekitar masjid.</p>
+                </div>
+                <button onclick="openModalTambahMustahik()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Tambah Data Mustahik</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200">
+                    <h4 class="font-bold text-slate-800 text-sm">Daftar Mustahik Terdata</h4>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                                <th class="p-3">Nama Lengkap</th>
+                                <th class="p-3">Kategori Asnaf</th>
+                                <th class="p-3">Alamat / Wilayah RT</th>
+                                <th class="p-3">Status Bantuan</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-mustahik-body" class="divide-y divide-slate-100">
+                            <!-- Dynamic Mustahik Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-950 text-white border-t border-emerald-800 z-40 px-2 py-2">
+        <div id="mobile-nav-jamaah" class="grid grid-cols-5 text-center text-[10px]">
+            <button onclick="switchTab('home')" class="flex flex-col items-center py-1 text-gold-400 font-bold" id="mobnav-home">
+                <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+                <span>Beranda</span>
+            </button>
+            <button onclick="switchTab('kajian')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-kajian">
+                <i data-lucide="book-open" class="w-5 h-5 mb-0.5"></i>
+                <span>Kajian</span>
+            </button>
+            <button onclick="switchTab('infaq')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-infaq">
+                <i data-lucide="heart" class="w-5 h-5 mb-0.5"></i>
+                <span>Infaq</span>
+            </button>
+            <button onclick="switchTab('sarpras-jamaah')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-sarpras-jamaah">
+                <i data-lucide="truck" class="w-5 h-5 mb-0.5"></i>
+                <span>Pinjam</span>
+            </button>
+            <button onclick="switchTab('konsultasi')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-konsultasi">
+                <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
+                <span>Tanya</span>
+            </button>
+        </div>
+
+        <div id="mobile-nav-takmir" class="grid grid-cols-4 text-center text-[10px] hidden">
+            <button onclick="switchTab('takmir-dashboard')" class="flex flex-col items-center py-1 text-gold-400 font-bold" id="mobnav-takmir-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('takmir-keuangan')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-keuangan">
+                <i data-lucide="wallet" class="w-5 h-5 mb-0.5"></i>
+                <span>Kas</span>
+            </button>
+            <button onclick="switchTab('takmir-agenda')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-agenda">
+                <i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i>
+                <span>Agenda</span>
+            </button>
+            <button onclick="switchTab('takmir-inventaris')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-inventaris">
+                <i data-lucide="boxes" class="w-5 h-5 mb-0.5"></i>
+                <span>Inventaris</span>
+            </button>
         </div>
     </div>
 
 
-    <!-- APPLICATION LOGIC & JAVASCRIPT -->
+    <!-- GENERIC CONTAINER MODAL -->
+    <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div id="modal-box" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <!-- Dynamic Modal Content -->
+        </div>
+    </div>
+
+
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
     <script>
-        // INITIAL DATA & STATE MANAGEMENT
-        const DEFAULT_DATA = {
-            masjidName: "Masjid Agung Al-Ikhlas",
-            masjidLocation: "Jakarta Selatan • DKI Jakarta",
+        // MOCK INITIAL DATA persistence
+        const DEFAULT_MASJID_DATA = {
+            masjidList: [
+                { id: 1, name: "Masjid Raya Al-Ikhlas", address: "Jl. H. Rangkayo Sutan No. 12, Pusat Kota" },
+                { id: 2, name: "Masjid An-Nur", address: "Jl. Damai Sejahtera No. 45, Kampung Damai" },
+                { id: 3, name: "Masjid Al-Jihad", address: "Kompleks Permata Indah Blok B" }
+            ],
+            activeMasjidId: 1,
+            userBookmarks: [],
             keuangan: [
-                { id: 1, tanggal: "2026-10-18", tipe: "pemasukan", kategori: "Infaq Jumat", keterangan: "Kotak Infaq Shalat Jumat", nominal: 4250000 },
-                { id: 2, tanggal: "2026-10-19", tipe: "pengeluaran", kategori: "Operasional", keterangan: "Tagihan Listrik & Water Masjid", nominal: 1850000 },
-                { id: 3, tanggal: "2026-10-20", tipe: "pemasukan", kategori: "Donasi Hajat", keterangan: "Hajat Sound System dari Bpk H. Ahmad", nominal: 5000000 },
-                { id: 4, tanggal: "2026-10-21", tipe: "pengeluaran", kategori: "Kajian", keterangan: "Honorium Ustadz Kajian Rutin", nominal: 800000 }
+                { id: 1, tanggal: "2026-10-18", tipe: "pemasukan", kategori: "Infaq Jumat", keterangan: "Kotak Amal Sholat Jumat Berjamaah", nominal: 6850000 },
+                { id: 2, tanggal: "2026-10-19", tipe: "pengeluaran", kategori: "Operasional", keterangan: "Tagihan Listrik AC & Air Masjid", nominal: 2400000 },
+                { id: 3, tanggal: "2026-10-20", tipe: "pemasukan", kategori: "Wakaf Hajat", keterangan: "Donasi Pengadaan Digital TV dari H. Budi", nominal: 8500000 },
+                { id: 4, tanggal: "2026-10-21", tipe: "pengeluaran", kategori: "Kajian", keterangan: "Honorarium & Akomodasi Ustadz Penceramah", nominal: 1200000 }
             ],
             kajian: [
-                { id: 1, tema: "Tafsir Surah Al-Kahfi", ustaz: "Ust. Dr. Hilman Fauzi", waktu: "Sabtu, Subuh Berjamaah", lokasi: "Ruang Utama Masjid", poster: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=400&q=80" },
-                { id: 2, tema: "Fiqih Muamalah & Bisnis Syariah", ustaz: "Ust. Ammi Nur Baits", waktu: "Ahad, Ba'da Maghrib", lokasi: "Ruang Utama Masjid", poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80" }
-            ],
-            sarpras: [
-                { id: 1, nama: "Sound System Mixer Yamaha 16 Ch", kategori: "Elektronik", jumlah: 1, lokasi: "Ruang Kontrol Audio", kondisi: "Baik" },
-                { id: 2, nama: "Karpet Sajadah Turki Grade A", kategori: "Perlengkapan", jumlah: 24, lokasi: "Ruang Shalat Utama", kondisi: "Baik" },
-                { id: 3, nama: "AC Standing 5 PK", kategori: "Pendingin", jumlah: 4, lokasi: "Ruang Utama", kondisi: "Perlu Servis" }
+                { id: 1, tema: "Tafsir Surah Al-Kahfi & Hikmah Akhir Zaman", ustaz: "Ust. Dr. Hilman Fauzi", waktu: "Sabtu, Ba'da Subuh", lokasi: "Ruang Utama Sholat", poster: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=400&q=80", live: true },
+                { id: 2, tema: "Fiqih Muamalah & Akad Syariah Modern", ustaz: "Ust. Ammi Nur Baits", waktu: "Ahad, Ba'da Maghrib", lokasi: "Ruang Utama Sholat", poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80", live: false },
+                { id: 3, tema: "Tazkiyatun Nafs: Menyucikan Hati", ustaz: "Ust. Ahmad Ridwan, Lc", waktu: "Rabu, Ba'da Isya", lokasi: "Aula Lt. 2 Masjid", poster: "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=400&q=80", live: false }
             ],
             hajat: [
-                { id: 1, judul: "Pengadaan Digital Display TV Jam Shalat 65 Inch", target: 12000000, terkumpul: 8500000, batasWaktu: "15 Nov 2026", ket: "Pengadaan layar informasi jam shalat otomatis dan display kajian." },
-                { id: 2, judul: "Renovasi Karpet Area Wudhu Wanita", target: 4500000, terkumpul: 4500000, batasWaktu: "01 Nov 2026", ket: "Penggantian karpet anti licin di area tempat wudhu." }
+                { id: 1, judul: "Pengadaan Digital Display Jam Shalat 65 Inch", target: 15000000, terkumpul: 11200000, batasWaktu: "15 Nov 2026", ket: "Pengadaan Layanan Digital Signage jadwal iqamah & slide materi kajian." },
+                { id: 2, judul: "Renovasi Karpet Area Wudhu & Toilet Wanita", target: 6500000, terkumpul: 6500000, batasWaktu: "01 Nov 2026", ket: "Penggantian karpet anti licin dan pembaruan kran wudhu." }
             ],
-            takmir: [
-                { id: 1, nama: "H. Bambang Sukoco", jabatan: "Ketua Takmir", hp: "0812-3456-7890", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" },
-                { id: 2, nama: "Ahmad Fauzan, S.Pd", jabatan: "Sekretaris", hp: "0813-9876-5432", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" },
-                { id: 3, nama: "H. Ridwan Mansyur", jabatan: "Bendahara", hp: "0811-2233-4455", foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" }
+            sarpras: [
+                { id: 1, nama: "Mobil Ambulans Masjid (Layanan 24 Jam)", kategori: "Kendaraan", jumlah: 1, lokasi: "Garansi Utama", kondisi: "Sangat Baik", publik: true },
+                { id: 2, nama: "Set Perlengkapan Jenazah & Kain Kafan", kategori: "Sosial", jumlah: 5, lokasi: "Gudang Khusus", kondisi: "Tersedia", publik: true },
+                { id: 3, nama: "Tenda Acara & 100 Kursi Lipat", kategori: "Peralatan", jumlah: 2, lokasi: "Gudang Belakang", kondisi: "Baik", publik: true },
+                { id: 4, nama: "Mixer Audio Sound System Yamaha 16 Ch", kategori: "Elektronik", jumlah: 1, lokasi: "Ruang Audio", kondisi: "Baik", publik: false }
+            ],
+            mustahik: [
+                { id: 1, nama: "Ibu Maryam (Janda Dhuafa)", kategori: "Fakir / Miskin", alamat: "RT 03 / RW 02 No. 14", status: "Rutin Menerima Bulanan" },
+                { id: 2, nama: "Bpk. Suwandi (Mualaf)", kategori: "Mualaf", alamat: "RT 01 / RW 04 No. 08", status: "Bantuan Pembinaan" }
+            ],
+            qaPublic: [
+                { id: 1, ustadz: "Ust. Dr. Hilman Fauzi", tanya: "Bagaimana hukumnya sholat tahajud jamaah di masjid?", jawab: "Sholat tahajud jamaah diperbolehkan sesekali untuk pengajaran dan syiar." }
             ]
         };
 
-        // Application State
-        let appData = JSON.parse(localStorage.getItem('masjidku_db')) || DEFAULT_DATA;
+        // State Store
+        let appState = JSON.parse(localStorage.getItem('satumasjid_db')) || DEFAULT_MASJID_DATA;
+        let currentUserMode = 'jamaah'; // 'jamaah' or 'takmir'
 
-        function saveData() {
-            localStorage.setItem('masjidku_db', JSON.stringify(appData));
-            updateUI();
+        function saveState() {
+            localStorage.setItem('satumasjid_db', JSON.stringify(appState));
+            renderUI();
         }
 
-        // TAB SWITCHING SYSTEM
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('bg-emerald-800/80', 'text-white', 'shadow-sm');
-                item.classList.add('text-emerald-100');
+        // NAVIGATION & TAB SWITCHER SYSTEM
+        function switchTab(tabKey) {
+            document.querySelectorAll('.view-content').forEach(el => el.classList.add('hidden'));
+            
+            const targetView = document.getElementById(`view-${tabKey}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // Update Desktop Nav Highlight
+            document.querySelectorAll('#nav-menu-jamaah button, #nav-menu-takmir button').forEach(btn => {
+                btn.classList.remove('text-white', 'border-gold-400');
+                btn.classList.add('text-emerald-200', 'border-transparent');
             });
-
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            const activeNav = document.getElementById(`nav-${tabId}`);
-
-            if (activeTab) activeTab.classList.remove('hidden');
-            if (activeNav) {
-                activeNav.classList.add('bg-emerald-800/80', 'text-white', 'shadow-sm');
-                activeNav.classList.remove('text-emerald-100');
+            const activeDesktopBtn = document.getElementById(`tabnav-${tabKey}`);
+            if (activeDesktopBtn) {
+                activeDesktopBtn.classList.add('text-white', 'border-gold-400');
+                activeDesktopBtn.classList.remove('text-emerald-200', 'border-transparent');
             }
 
-            if (tabId === 'keuangan') {
-                setTimeout(renderKeuanganChart, 100);
+            // Update Mobile Nav Highlight
+            document.querySelectorAll('.lg\\:hidden button').forEach(btn => {
+                btn.classList.remove('text-gold-400', 'font-bold');
+                btn.classList.add('text-emerald-300');
+            });
+            const activeMobBtn = document.getElementById(`mobnav-${tabKey}`);
+            if (activeMobBtn) {
+                activeMobBtn.classList.add('text-gold-400', 'font-bold');
+                activeMobBtn.classList.remove('text-emerald-300');
+            }
+
+            if (tabKey === 'takmir-dashboard' || tabKey === 'takmir-keuangan') {
+                setTimeout(renderKasChart, 100);
             }
         }
 
-        // NOTIFICATION TOAST
-        function showToast(title, message, isError = false) {
+        // SWITCH USER MODE (JAMAAH VS TAKMIR ADMIN)
+        function switchUserMode(mode) {
+            currentUserMode = mode;
+            const btnJamaah = document.getElementById('btn-mode-jamaah');
+            const btnTakmir = document.getElementById('btn-mode-takmir');
+            
+            const navJamaah = document.getElementById('nav-menu-jamaah');
+            const navTakmir = document.getElementById('nav-menu-takmir');
+
+            const mobJamaah = document.getElementById('mobile-nav-jamaah');
+            const mobTakmir = document.getElementById('mobile-nav-takmir');
+
+            if (mode === 'jamaah') {
+                btnJamaah.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gold-500 text-emerald-950 shadow-sm flex items-center space-x-1";
+                btnTakmir.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-emerald-200 hover:text-white flex items-center space-x-1";
+                
+                navJamaah.classList.remove('hidden');
+                navTakmir.classList.add('hidden');
+                mobJamaah.classList.remove('hidden');
+                mobTakmir.classList.add('hidden');
+
+                switchTab('home');
+                showToast("Mode Jamaah", "Anda berada di tampilan Jamaah Masjid.");
+            } else {
+                btnTakmir.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gold-500 text-emerald-950 shadow-sm flex items-center space-x-1";
+                btnJamaah.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-emerald-200 hover:text-white flex items-center space-x-1";
+                
+                navTakmir.classList.remove('hidden');
+                navJamaah.classList.add('hidden');
+                mobTakmir.classList.remove('hidden');
+                mobJamaah.classList.add('hidden');
+
+                switchTab('takmir-dashboard');
+                showToast("Mode Takmir Admin", "Selamat datang Pengurus Takmir!");
+            }
+        }
+
+        // CHANGE ACTIVE MASJID
+        function changeMasjid(masjidId) {
+            appState.activeMasjidId = parseInt(masjidId);
+            saveState();
+            showToast("Masjid Diperbarui", "Data disesuaikan dengan masjid pilihan Anda.");
+        }
+
+        // TOAST NOTIFICATION
+        function showToast(title, message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-message').innerText = message;
-            
+
             toast.classList.remove('translate-x-full', 'opacity-0');
             toast.classList.add('translate-x-0', 'opacity-100');
 
             setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 toast.classList.remove('translate-x-0', 'opacity-100');
-            }, 3500);
+            }, 3000);
         }
 
-        // REALTIME CLOCK & PRAYER TIMES
+        // REALTIME CLOCK & PRAYER SCHEDULER
         function updateClock() {
             const now = new Date();
             const timeStr = now.toTimeString().split(' ')[0];
-            document.getElementById('clock-display').innerText = timeStr;
+            document.getElementById('header-clock').innerText = timeStr;
         }
-
         setInterval(updateClock, 1000);
         updateClock();
 
-        // EDIT MASJID PROFILE
-        function editNamaMasjid() {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
+        // RENDER ALL UI DATA
+        function renderUI() {
+            const currentMasjid = appState.masjidList.find(m => m.id === appState.activeMasjidId) || appState.masjidList[0];
+            
+            document.getElementById('display-masjid-title').innerText = currentMasjid.name;
+            document.getElementById('display-masjid-address').innerText = currentMasjid.address;
+            document.getElementById('active-masjid-tag').innerText = currentMasjid.name;
 
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Edit Profil Masjid</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Nama Masjid</label>
-                        <input type="text" id="edit-nama-input" value="${appData.masjidName}" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Lokasi / Kota</label>
-                        <input type="text" id="edit-lokasi-input" value="${appData.masjidLocation}" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveMasjidProfile()" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Simpan Perubahan</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
+            // Compute Total Financial Balance
+            let totalIn = appState.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalOut = appState.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
+            let saldo = totalIn - totalOut;
+
+            document.getElementById('infaq-total-kas').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
+            document.getElementById('dash-saldo-kas').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
+            document.getElementById('dash-pemasukan-bulan').innerText = `Rp ${totalIn.toLocaleString('id-ID')}`;
+            document.getElementById('dash-pengeluaran-bulan').innerText = `Rp ${totalOut.toLocaleString('id-ID')}`;
+
+            renderPrayerCards();
+            renderHomeKajian();
+            renderHomeHajat();
+            renderKajianList();
+            renderInfaqPrograms();
+            renderVolunteerPrograms();
+            renderPublicSarpras();
+            renderFasilitas();
+            renderKeuanganTable();
+            renderTakmirKajianGrid();
+            renderTakmirSarprasTable();
+            renderTakmirHajatGrid();
+            renderTakmirMustahikTable();
+            renderQAPublic();
+
             lucide.createIcons();
         }
 
-        function saveMasjidProfile() {
-            appData.masjidName = document.getElementById('edit-nama-input').value;
-            appData.masjidLocation = document.getElementById('edit-lokasi-input').value;
-            saveData();
-            closeModal();
-            showToast("Berhasil", "Profil masjid diperbarui.");
+        // PRAYER CARDS RENDER
+        function renderPrayerCards() {
+            const prayers = [
+                { name: "Subuh", time: "04:28", active: false },
+                { name: "Syuruq", time: "05:42", active: false },
+                { name: "Dzuhur", time: "12:05", active: true },
+                { name: "Ashar", time: "15:15", active: false },
+                { name: "Maghrib", time: "18:10", active: false },
+                { name: "Isya", time: "19:20", active: false }
+            ];
+
+            const grid = document.getElementById('prayer-cards-grid');
+            grid.innerHTML = prayers.map(p => `
+                <div class="${p.active ? 'bg-emerald-900 text-white border-2 border-gold-400' : 'bg-white text-slate-800 border border-slate-200'} p-3.5 rounded-2xl text-center shadow-sm relative overflow-hidden">
+                    ${p.active ? '<span class="absolute top-1 right-2 text-[9px] bg-gold-500 text-emerald-950 font-extrabold px-1.5 py-0.5 rounded">Berikutnya</span>' : ''}
+                    <span class="text-xs font-semibold ${p.active ? 'text-emerald-200' : 'text-slate-500'}">${p.name}</span>
+                    <p class="text-lg font-black font-mono mt-1">${p.time}</p>
+                </div>
+            `).join('');
         }
 
-        // MODAL HELPERS
-        function closeModal() {
-            document.getElementById('modal-container').classList.add('hidden');
-        }
-
-        function openDeployGuideModal() {
-            document.getElementById('deploy-modal').classList.remove('hidden');
-        }
-
-        function closeDeployGuideModal() {
-            document.getElementById('deploy-modal').classList.add('hidden');
-        }
-
-        // RENDER DASHBOARD & DATA
-        function updateUI() {
-            // Update Headers
-            document.getElementById('nama-masjid-display').innerText = appData.masjidName;
-            document.getElementById('lokasi-masjid-display').innerText = appData.masjidLocation;
-
-            // Calculate Keuangan
-            let totalIn = appData.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
-            let totalOut = appData.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
-            let saldo = totalIn - totalOut;
-
-            document.getElementById('dashboard-saldo').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
-            document.getElementById('dashboard-pemasukan').innerText = `Rp ${totalIn.toLocaleString('id-ID')}`;
-            document.getElementById('dashboard-pengeluaran').innerText = `Rp ${totalOut.toLocaleString('id-ID')}`;
-
-            // Render Dashboard Kajian List
-            const kajianDash = document.getElementById('dashboard-kajian-list');
-            kajianDash.innerHTML = appData.kajian.slice(0, 2).map(k => `
+        // HOME KAJIAN & HAJAT RENDER
+        function renderHomeKajian() {
+            const container = document.getElementById('home-kajian-list');
+            container.innerHTML = appState.kajian.slice(0, 2).map(k => `
                 <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <img src="${k.poster}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" alt="Kajian">
+                    <img src="${k.poster}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" alt="Poster">
                     <div class="flex-1 min-w-0">
-                        <h5 class="font-bold text-slate-800 text-xs truncate">${k.tema}</h5>
-                        <p class="text-[11px] text-emerald-800 font-medium">${k.ustaz}</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">${k.waktu}</p>
+                        <h5 class="font-bold text-slate-900 text-xs truncate">${k.tema}</h5>
+                        <p class="text-[11px] text-emerald-800 font-semibold mt-0.5">${k.ustaz}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">${k.waktu}</p>
                     </div>
                 </div>
             `).join('');
+        }
 
-            // Render Dashboard Hajat Highlight
-            const hajatDash = document.getElementById('dashboard-hajat-highlight');
-            hajatDash.innerHTML = appData.hajat.slice(0, 2).map(h => {
+        function renderHomeHajat() {
+            const container = document.getElementById('home-hajat-list');
+            container.innerHTML = appState.hajat.map(h => {
                 let pct = Math.min(100, Math.round((h.terkumpul / h.target) * 100));
                 return `
-                    <div class="space-y-1.5 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+                    <div class="space-y-1.5 p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-bold text-slate-800 truncate">${h.judul}</span>
-                            <span class="font-semibold text-emerald-900">${pct}%</span>
+                            <span class="font-bold text-emerald-900">${pct}%</span>
                         </div>
                         <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                             <div class="bg-gradient-to-r from-emerald-600 to-gold-500 h-full rounded-full" style="width: ${pct}%"></div>
                         </div>
-                        <div class="flex justify-between text-[11px] text-slate-500 pt-1">
+                        <div class="flex justify-between text-[10px] text-slate-500 pt-1">
                             <span>Terkumpul: <strong>Rp ${h.terkumpul.toLocaleString('id-ID')}</strong></span>
                             <span>Target: Rp ${h.target.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
 
-            // Render Sub-tables
-            renderKeuanganTable();
-            renderKajianCards();
-            renderSarprasTable();
-            renderHajatCards();
-            renderTakmirCards();
+        // KAJIAN TAB RENDER
+        function renderKajianList() {
+            const container = document.getElementById('kajian-cards-container');
+            const search = document.getElementById('search-kajian-input')?.value.toLowerCase() || '';
 
+            let filtered = appState.kajian.filter(k => k.tema.toLowerCase().includes(search) || k.ustaz.toLowerCase().includes(search));
+
+            container.innerHTML = filtered.map(k => `
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="relative">
+                            <img src="${k.poster}" class="w-full h-44 object-cover" alt="Kajian">
+                            ${k.live ? '<span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full flex items-center space-x-1 animate-pulse"><i data-lucide="video" class="w-3 h-3"></i><span>LIVE STREAMING</span></span>' : ''}
+                        </div>
+                        <div class="p-5 space-y-2">
+                            <h4 class="font-bold text-slate-900 text-base leading-snug">${k.tema}</h4>
+                            <p class="text-xs text-emerald-900 font-bold flex items-center space-x-1.5">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                <span>${k.ustaz}</span>
+                            </p>
+                            <p class="text-xs text-slate-500 flex items-center space-x-1.5">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                <span>${k.waktu}</span>
+                            </p>
+                            <p class="text-xs text-slate-500 flex items-center space-x-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                <span>${k.lokasi}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <button onclick="bookmarkKajian('${k.tema}')" class="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold rounded-xl text-xs flex items-center space-x-1">
+                            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+                            <span>Ingatkan Saya</span>
+                        </button>
+                        <button onclick="openModalQRIS('Infaq Kajian ${k.tema}')" class="text-xs font-bold text-emerald-900 hover:underline">Infaq Kajian</button>
+                    </div>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
-        // KEUANGAN LOGIC
+        function bookmarkKajian(tema) {
+            showToast("Tersimpan!", `Pengingat kajian "${tema}" ditambahkan ke kalender.`);
+        }
+
+        // INFAQ PROGRAM RENDER
+        function renderInfaqPrograms() {
+            const container = document.getElementById('infaq-program-grid');
+            container.innerHTML = appState.hajat.map(h => {
+                let pct = Math.min(100, Math.round((h.terkumpul / h.target) * 100));
+                return `
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-slate-900 text-base">${h.judul}</h4>
+                                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">Target: ${h.batasWaktu}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed">${h.ket}</p>
+
+                            <div class="space-y-1.5 pt-2">
+                                <div class="flex justify-between text-xs font-semibold">
+                                    <span class="text-slate-600">Capaian Wakaf</span>
+                                    <span class="text-emerald-900">${pct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-emerald-600 to-gold-500 h-full" style="width: ${pct}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-slate-500 pt-1">
+                                    <span>Terkumpul: <strong class="text-emerald-800">Rp ${h.terkumpul.toLocaleString('id-ID')}</strong></span>
+                                    <span>Target: Rp ${h.target.toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="openModalQRIS('${h.judul}')" class="w-full py-2.5 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow transition">
+                            <i data-lucide="qr-code" class="w-4 h-4 text-gold-400"></i>
+                            <span>Infaq / Transfer Wakaf</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // VOLUNTEER PROGRAM RENDER
+        function renderVolunteerPrograms() {
+            const container = document.getElementById('volunteer-program-container');
+            const programs = [
+                { id: 1, title: "Tim Kebersihan & Kesucian Karpet Masjid", schedule: "Setiap Jumat Ba'da Subuh", desk: "Relawan pembersihan area utama sholat dan penyucian sajadah jamaah." },
+                { id: 2, title: "Relawan Dapur Berkah Ramadhan & Jumat", schedule: "Setiap Jumat Sore", desk: "Membantu penyiapan Makanan Gratis Buka Puasa & Jumat Berkah." }
+            ];
+
+            container.innerHTML = programs.map(p => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full uppercase">Relawan Terbuka</span>
+                        <h4 class="font-bold text-slate-900 text-base">${p.title}</h4>
+                        <p class="text-xs text-slate-500">${p.desk}</p>
+                        <p class="text-xs text-emerald-900 font-semibold pt-1"><i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1"></i>${p.schedule}</p>
+                    </div>
+                    <button onclick="openModalRelawan('${p.title}')" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex-shrink-0 shadow">
+                        Daftar Relawan
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // PUBLIC SARPRAS BORROW RENDER
+        function renderPublicSarpras() {
+            const container = document.getElementById('public-sarpras-grid');
+            const publicItems = appState.sarpras.filter(s => s.publik);
+
+            container.innerHTML = publicItems.map(s => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <span class="text-[10px] font-bold bg-blue-100 text-blue-900 px-2.5 py-0.5 rounded-full uppercase">${s.kategori}</span>
+                        <h4 class="font-bold text-slate-900 text-base">${s.nama}</h4>
+                        <p class="text-xs text-slate-500">Lokasi: ${s.lokasi}</p>
+                        <p class="text-xs font-semibold text-emerald-900">Kondisi: ${s.kondisi}</p>
+                    </div>
+                    <button onclick="openModalPinjamSarpras('${s.nama}')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow transition">
+                        Pengajuan Pinjam
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // FASILITAS RENDER
+        function renderFasilitas() {
+            const container = document.getElementById('fasilitas-cards-grid');
+            const list = [
+                { name: "Area Wudhu Ramah Lansia & Disabilitas", desc: "Dilengkapi dudukan stainless dan pegangan tangan keamanan.", icon: "heart-handshake" },
+                { name: "Full AC & Karpet Empuk Turki", desc: "Kenyamanan beribadah khusyuk di ruang utama.", icon: "wind" },
+                { name: "Klinik & Pos Kesehatan Masjid", desc: "Pemeriksaan tensi & gula darah gratis ba'da Jumat.", icon: "activity" }
+            ];
+
+            container.innerHTML = list.map(f => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="p-3 bg-emerald-100 text-emerald-900 w-fit rounded-xl">
+                        <i data-lucide="${f.icon}" class="w-6 h-6"></i>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-base">${f.name}</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">${f.desc}</p>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // KEUANGAN TABLE TAKMIR RENDER
         function renderKeuanganTable() {
             const tbody = document.getElementById('table-keuangan-body');
-            const search = document.getElementById('search-keuangan')?.value.toLowerCase() || '';
-            const typeFilter = document.getElementById('filter-type-keuangan')?.value || 'all';
+            const search = document.getElementById('filter-keuangan-search')?.value.toLowerCase() || '';
+            const typeFilter = document.getElementById('filter-keuangan-type')?.value || 'all';
 
-            let filtered = appData.keuangan.filter(item => {
-                let matchSearch = item.keterangan.toLowerCase().includes(search) || item.kategori.toLowerCase().includes(search);
-                let matchType = typeFilter === 'all' ? true : item.tipe === typeFilter;
+            let filtered = appState.keuangan.filter(k => {
+                let matchSearch = k.keterangan.toLowerCase().includes(search) || k.kategori.toLowerCase().includes(search);
+                let matchType = typeFilter === 'all' ? true : k.tipe === typeFilter;
                 return matchSearch && matchType;
             });
 
             tbody.innerHTML = filtered.map(k => `
-                <tr class="hover:bg-slate-50 transition-colors">
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
                     <td class="p-3 font-mono text-slate-500">${k.tanggal}</td>
                     <td class="p-3">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${k.tipe === 'pemasukan' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
@@ -802,103 +1288,531 @@
                         ${k.tipe === 'pemasukan' ? '+' : '-'} Rp ${k.nominal.toLocaleString('id-ID')}
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="deleteKeuangan(${k.id})" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="hapusTrans(${k.id})" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>
             `).join('');
-
-            // Category Summary
-            const summaryContainer = document.getElementById('kategori-summary-list');
-            let catMap = {};
-            appData.keuangan.forEach(k => {
-                catMap[k.kategori] = (catMap[k.kategori] || 0) + (k.tipe === 'pemasukan' ? k.nominal : -k.nominal);
-            });
-
-            summaryContainer.innerHTML = Object.keys(catMap).map(cat => `
-                <div class="flex justify-between items-center text-xs">
-                    <span class="text-slate-600 font-medium">${cat}</span>
-                    <span class="font-bold font-mono ${catMap[cat] >= 0 ? 'text-emerald-800' : 'text-rose-600'}">Rp ${catMap[cat].toLocaleString('id-ID')}</span>
-                </div>
-            `).join('');
-
             lucide.createIcons();
         }
 
-        function openModalTrans(type) {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
+        // TAKMIR KAJIAN GRID
+        function renderTakmirKajianGrid() {
+            const container = document.getElementById('takmir-kajian-grid');
+            container.innerHTML = appState.kajian.map(k => `
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-900 text-base">${k.tema}</h4>
+                    <p class="text-xs text-emerald-900 font-bold">${k.ustaz}</p>
+                    <p class="text-xs text-slate-500">${k.waktu}</p>
+                    <button onclick="hapusKajian(${k.id})" class="text-xs text-rose-600 font-bold hover:underline">Hapus Agenda</button>
+                </div>
+            `).join('');
+        }
 
-            content.innerHTML = `
+        // TAKMIR INVENTARIS TABLE
+        function renderTakmirSarprasTable() {
+            const tbody = document.getElementById('table-sarpras-body');
+            tbody.innerHTML = appState.sarpras.map(s => `
+                <tr class="border-b border-slate-100">
+                    <td class="p-3 font-semibold text-slate-800">${s.nama}</td>
+                    <td class="p-3 text-slate-600">${s.kategori}</td>
+                    <td class="p-3 font-bold font-mono">${s.jumlah} Unit</td>
+                    <td class="p-3 text-slate-600">${s.lokasi}</td>
+                    <td class="p-3 font-bold text-emerald-800">${s.kondisi}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="hapusSarpras(${s.id})" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // TAKMIR HAJAT GRID
+        function renderTakmirHajatGrid() {
+            const container = document.getElementById('takmir-hajat-grid');
+            container.innerHTML = appState.hajat.map(h => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-900 text-base">${h.judul}</h4>
+                    <p class="text-xs text-slate-500">Target: Rp ${h.target.toLocaleString('id-ID')} | Terkumpul: Rp ${h.terkumpul.toLocaleString('id-ID')}</p>
+                    <button onclick="hapusHajat(${h.id})" class="text-xs text-rose-600 font-bold hover:underline">Hapus Program</button>
+                </div>
+            `).join('');
+        }
+
+        // TAKMIR MUSTAHIK TABLE
+        function renderTakmirMustahikTable() {
+            const tbody = document.getElementById('table-mustahik-body');
+            tbody.innerHTML = appState.mustahik.map(m => `
+                <tr class="border-b border-slate-100">
+                    <td class="p-3 font-semibold text-slate-800">${m.nama}</td>
+                    <td class="p-3 font-bold text-emerald-800">${m.kategori}</td>
+                    <td class="p-3 text-slate-600">${m.alamat}</td>
+                    <td class="p-3 text-slate-600">${m.status}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="hapusMustahik(${m.id})" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderQAPublic() {
+            const container = document.getElementById('qa-public-list');
+            container.innerHTML = appState.qaPublic.map(q => `
+                <div class="p-3 bg-slate-50 rounded-xl space-y-1 text-xs">
+                    <span class="font-bold text-emerald-900">${q.ustadz}</span>
+                    <p class="text-slate-700 font-semibold">T: ${q.tanya}</p>
+                    <p class="text-slate-500 italic">J: "${q.jawab}"</p>
+                </div>
+            `).join('');
+        }
+
+        // MODAL SIMULATION HANDLERS
+        function openModalQRIS(programName) {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
                 <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Catat Transaksi ${type === 'in' ? 'Pemasukan (+)' : 'Pengeluaran (-)'}</h3>
+                    <h3 class="font-bold text-slate-900 text-base">Infaq QRIS & Transfer Wakaf</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="text-center space-y-3 py-2">
+                    <p class="text-xs text-slate-600">Program: <strong class="text-emerald-900">${programName}</strong></p>
+                    <div class="w-48 h-48 bg-slate-100 border-2 border-dashed border-emerald-900 rounded-2xl mx-auto flex items-center justify-center p-2">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=SatuMasjidInfaq" alt="QRIS" class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-[11px] text-slate-500">Scan via GoPay, OVO, ShopeePay, BSI Mobile, DANA, BCA</p>
+                    <div class="bg-slate-50 p-3 rounded-xl text-xs text-left space-y-1 font-mono">
+                        <p class="text-slate-500">Rekening Bank BSI (Syariah):</p>
+                        <p class="font-bold text-slate-900">7123-4567-89 (a.n. Masjid Raya Al-Ikhlas)</p>
+                    </div>
+                </div>
+                <button onclick="confirmDonasiMasuk('${programName}')" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">
+                    Konfirmasi Saya Sudah Transfer
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function confirmDonasiMasuk(programName) {
+            appState.keuangan.unshift({
+                id: Date.now(),
+                tanggal: new Date().toISOString().split('T')[0],
+                tipe: 'pemasukan',
+                kategori: 'Infaq Jamaah',
+                keterangan: `Donasi Digital QRIS untuk ${programName}`,
+                nominal: 100000
+            });
+            saveState();
+            closeModal();
+            showToast("Jazakallahu Khairan!", "Infaq Anda sebesar Rp 100.000 telah dicatat secara real-time.");
+        }
+
+        function openModalKiblat() {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Kompas Kiblat Digital</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="text-center space-y-4 py-4">
+                    <div class="w-40 h-40 rounded-full border-4 border-emerald-900 mx-auto flex items-center justify-center relative shadow-inner bg-emerald-50">
+                        <i data-lucide="navigation" class="w-16 h-16 text-gold-500 transform -rotate-45 animate-pulse"></i>
+                    </div>
+                    <p class="text-xs text-slate-600">Arah Kiblat: <strong>295.2° Barat Laut (Ka'bah)</strong></p>
+                    <p class="text-[10px] text-slate-400">Pastikan GPS perangkat Anda terhubung dengan akurat.</p>
+                </div>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function openModalRelawan(title) {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Pendaftaran Relawan</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <p class="text-slate-600">Program: <strong>${title}</strong></p>
+                    <div>
+                        <label class="font-semibold text-slate-700">Nama Lengkap</label>
+                        <input type="text" id="relawan-nama" required class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">No. WhatsApp</label>
+                        <input type="text" id="relawan-hp" required class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+                <button onclick="simpanRelawan('${title}')" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Daftar Sekarang
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanRelawan(title) {
+            closeModal();
+            showToast("Alhamdulillah!", `Anda telah terdaftar sebagai relawan ${title}. Takmir akan menghubungi Anda via WhatsApp.`);
+        }
+
+        function openModalPinjamSarpras(namaBarang) {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Peminjaman Sarpras</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <p class="text-slate-600">Aset Dipinjam: <strong>${namaBarang}</strong></p>
+                    <div>
+                        <label class="font-semibold text-slate-700">Nama Penanggung Jawab</label>
+                        <input type="text" required class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Tanggal Diperlukan</label>
+                        <input type="date" required class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Tujuan Peminjaman</label>
+                        <input type="text" placeholder="misal: Acara Hajatan / Keperluan Duka" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+                <button onclick="simpanPinjamSarpras('${namaBarang}')" class="w-full py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Kirim Permohonan
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanPinjamSarpras(namaBarang) {
+            closeModal();
+            showToast("Permohonan Terkirim", `Permohonan peminjaman ${namaBarang} sedang diverifikasi oleh Pengurus Takmir.`);
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+        }
+
+        // SUBMIT HANDLERS FOR FORMS
+        function submitBantuanSocial(e) {
+            e.preventDefault();
+            showToast("Pengajuan Terkirim", "Pengajuan bantuan Anda telah masuk ke sistem Takmir Sosial.");
+            e.target.reset();
+        }
+
+        function submitPertanyaanUstadz(e) {
+            e.preventDefault();
+            const ustadz = document.getElementById('tanya-ustadz-select').value;
+            const tanya = document.getElementById('tanya-pertanyaan').value;
+            
+            appState.qaPublic.unshift({ id: Date.now(), ustadz, tanya, jawab: "Pertanyaan baru diterima, dalam antrean jawaban Ustadz." });
+            saveState();
+            showToast("Pertanyaan Terkirim", "Ustadz akan menjawab konsultasi Anda.");
+            e.target.reset();
+        }
+
+        function submitKotakSaran(e) {
+            e.preventDefault();
+            showToast("Masukan Diterima", "Jazakallahu khairan atas kepedulian Anda terhadap kebersihan/fasilitas masjid.");
+            e.target.reset();
+        }
+
+        // TAKMIR ADMIN ADD DATA MODALS
+        function openModalTambahTrans(tipe) {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Catat ${tipe === 'pemasukan' ? 'Pemasukan (+)' : 'Pengeluaran (-)'}</h3>
                     <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 <div class="space-y-3 text-xs">
                     <div>
                         <label class="font-semibold text-slate-700">Tanggal</label>
-                        <input type="date" id="trans-tanggal" value="${new Date().toISOString().split('T')[0]}" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
+                        <input type="date" id="trans-date" value="${new Date().toISOString().split('T')[0]}" class="w-full mt-1 p-2 border rounded-xl">
                     </div>
                     <div>
                         <label class="font-semibold text-slate-700">Kategori</label>
-                        <input type="text" id="trans-kategori" placeholder="misal: Infaq Jumat / Operasional" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
+                        <input type="text" id="trans-kat" placeholder="Infaq Jumat / Operasional / Kajian" class="w-full mt-1 p-2 border rounded-xl">
                     </div>
                     <div>
-                        <label class="font-semibold text-slate-700">Keterangan</label>
-                        <input type="text" id="trans-ket" placeholder="Rincian deskripsi transaksi" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
+                        <label class="font-semibold text-slate-700">Keterangan Deskripsi</label>
+                        <input type="text" id="trans-ket" placeholder="Deskripsi rinci transaksi" class="w-full mt-1 p-2 border rounded-xl">
                     </div>
                     <div>
                         <label class="font-semibold text-slate-700">Nominal (Rp)</label>
-                        <input type="number" id="trans-nominal" placeholder="0" class="w-full mt-1 p-2 border rounded-xl focus:ring-2 focus:ring-emerald-500">
+                        <input type="number" id="trans-nom" placeholder="0" class="w-full mt-1 p-2 border rounded-xl">
                     </div>
                 </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveTrans('${type === 'in' ? 'pemasukan' : 'pengeluaran'}')" class="px-4 py-1.5 ${type === 'in' ? 'bg-emerald-900' : 'bg-rose-600'} text-white rounded-xl text-xs font-semibold">Simpan Transaksi</button>
-                </div>
+                <button onclick="simpanTrans('${tipe}')" class="w-full py-2.5 ${tipe === 'pemasukan' ? 'bg-emerald-900' : 'bg-rose-600'} text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Simpan Transaksi
+                </button>
             `;
-            modal.classList.remove('hidden');
+            document.getElementById('modal-backdrop').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        function saveTrans(tipe) {
-            const tanggal = document.getElementById('trans-tanggal').value;
-            const kategori = document.getElementById('trans-kategori').value || 'Umum';
+        function simpanTrans(tipe) {
+            const tanggal = document.getElementById('trans-date').value;
+            const kategori = document.getElementById('trans-kat').value || 'Umum';
             const keterangan = document.getElementById('trans-ket').value || '-';
-            const nominal = parseFloat(document.getElementById('trans-nominal').value) || 0;
+            const nominal = parseFloat(document.getElementById('trans-nom').value) || 0;
 
-            if (nominal <= 0) {
-                alert('Nominal harus lebih dari 0');
-                return;
-            }
+            if (nominal <= 0) return;
 
-            appData.keuangan.unshift({ id: Date.now(), tanggal, tipe, kategori, keterangan, nominal });
-            saveData();
+            appState.keuangan.unshift({ id: Date.now(), tanggal, tipe, kategori, keterangan, nominal });
+            saveState();
             closeModal();
-            showToast("Transaksi Disimpan", `Berhasil menambah pencatatan ${tipe}.`);
+            showToast("Transaksi Disimpan", "Catatan kas keuangan diperbarui.");
         }
 
-        function deleteKeuangan(id) {
-            if (confirm("Hapus data transaksi ini?")) {
-                appData.keuangan = appData.keuangan.filter(k => k.id !== id);
-                saveData();
-                showToast("Dihapus", "Data transaksi berhasil dihapus.");
+        function hapusTrans(id) {
+            if (confirm("Hapus catatan transaksi kas ini?")) {
+                appState.keuangan = appState.keuangan.filter(k => k.id !== id);
+                saveState();
             }
         }
 
-        let chartInstance = null;
-        function renderKeuanganChart() {
-            const ctx = document.getElementById('chartKeuangan');
+        function exportKeuanganCSV() {
+            let csv = "ID,Tanggal,Tipe,Kategori,Keterangan,Nominal\n";
+            appState.keuangan.forEach(k => {
+                csv += `${k.id},${k.tanggal},${k.tipe},"${k.kategori}","${k.keterangan}",${k.nominal}\n`;
+            });
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Laporan_Kas_SatuMasjid.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function openModalTambahKajian() {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Tambah Agenda Kajian</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700">Tema Kajian</label>
+                        <input type="text" id="add-kajian-tema" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Penceramah / Ustadz</label>
+                        <input type="text" id="add-kajian-ustaz" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Waktu & Tanggal</label>
+                        <input type="text" id="add-kajian-waktu" placeholder="Sabtu, Ba'da Subuh" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+                <button onclick="simpanKajianBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Publikasikan Agenda
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanKajianBaru() {
+            const tema = document.getElementById('add-kajian-tema').value;
+            const ustaz = document.getElementById('add-kajian-ustaz').value;
+            const waktu = document.getElementById('add-kajian-waktu').value || "Jadwal Menyusul";
+
+            if (!tema) return;
+
+            appState.kajian.push({
+                id: Date.now(),
+                tema, ustaz, waktu,
+                lokasi: "Ruang Utama Sholat",
+                poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80",
+                live: false
+            });
+            saveState();
+            closeModal();
+            showToast("Sukses", "Agenda kajian baru telah terpublikasi ke Jamaah.");
+        }
+
+        function hapusKajian(id) {
+            appState.kajian = appState.kajian.filter(k => k.id !== id);
+            saveState();
+        }
+
+        function openModalTambahSarpras() {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Tambah Inventaris Barang</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700">Nama Barang</label>
+                        <input type="text" id="add-sarp-nama" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Kategori</label>
+                        <input type="text" id="add-sarp-kat" placeholder="Elektronik / Peralatan" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Jumlah Unit</label>
+                        <input type="number" id="add-sarp-jml" value="1" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Lokasi Penyimpanan</label>
+                        <input type="text" id="add-sarp-lok" placeholder="Gudang Utama" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+                <button onclick="simpanSarprasBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Simpan Inventaris
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanSarprasBaru() {
+            const nama = document.getElementById('add-sarp-nama').value;
+            const kategori = document.getElementById('add-sarp-kat').value || "Umum";
+            const jumlah = parseInt(document.getElementById('add-sarp-jml').value) || 1;
+            const lokasi = document.getElementById('add-sarp-lok').value || "Gudang";
+
+            if (!nama) return;
+
+            appState.sarpras.push({ id: Date.now(), nama, kategori, jumlah, lokasi, kondisi: "Baik", publik: false });
+            saveState();
+            closeModal();
+            showToast("Tersimpan", "Data inventaris masjid ditambahkan.");
+        }
+
+        function hapusSarpras(id) {
+            appState.sarpras = appState.sarpras.filter(s => s.id !== id);
+            saveState();
+        }
+
+        function openModalTambahHajat() {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Buat Program Kebutuhan Wakaf</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700">Judul Kebutuhan</label>
+                        <input type="text" id="add-hajat-judul" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Target Dana (Rp)</label>
+                        <input type="number" id="add-hajat-target" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Batas Waktu</label>
+                        <input type="text" id="add-hajat-batas" placeholder="30 Nov 2026" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Deskripsi Rinci</label>
+                        <textarea id="add-hajat-ket" rows="2" class="w-full mt-1 p-2 border rounded-xl"></textarea>
+                    </div>
+                </div>
+                <button onclick="simpanHajatBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Publikasikan Hajat
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanHajatBaru() {
+            const judul = document.getElementById('add-hajat-judul').value;
+            const target = parseFloat(document.getElementById('add-hajat-target').value) || 0;
+            const batasWaktu = document.getElementById('add-hajat-batas').value || "Segera";
+            const ket = document.getElementById('add-hajat-ket').value || "-";
+
+            if (!judul || target <= 0) return;
+
+            appState.hajat.push({ id: Date.now(), judul, target, terkumpul: 0, batasWaktu, ket });
+            saveState();
+            closeModal();
+            showToast("Dipublikasikan", "Program kebutuhan masjid telah dipublikasikan.");
+        }
+
+        function hapusHajat(id) {
+            appState.hajat = appState.hajat.filter(h => h.id !== id);
+            saveState();
+        }
+
+        function openModalTambahMustahik() {
+            const box = document.getElementById('modal-box');
+            box.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Pendataan Mustahik ZIS</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="font-semibold text-slate-700">Nama Lengkap</label>
+                        <input type="text" id="add-must-nama" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Golongan Asnaf</label>
+                        <select id="add-must-kat" class="w-full mt-1 p-2 border rounded-xl">
+                            <option value="Fakir / Miskin">Fakir / Miskin</option>
+                            <option value="Mualaf">Mualaf</option>
+                            <option value="Gharim (Hutang)">Gharim</option>
+                            <option value="Ibnu Sabil">Ibnu Sabil</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700">Alamat / RT RW</label>
+                        <input type="text" id="add-must-alamat" class="w-full mt-1 p-2 border rounded-xl">
+                    </div>
+                </div>
+                <button onclick="simpanMustahikBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">
+                    Simpan Data Mustahik
+                </button>
+            `;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function simpanMustahikBaru() {
+            const nama = document.getElementById('add-must-nama').value;
+            const kategori = document.getElementById('add-must-kat').value;
+            const alamat = document.getElementById('add-must-alamat').value || "-";
+
+            if (!nama) return;
+
+            appState.mustahik.push({ id: Date.now(), nama, kategori, alamat, status: "Terdaftar Penerima" });
+            saveState();
+            closeModal();
+            showToast("Pendataan Berhasil", "Data Mustahik berhasil ditambahkan ke database ZIS.");
+        }
+
+        function hapusMustahik(id) {
+            appState.mustahik = appState.mustahik.filter(m => m.id !== id);
+            saveState();
+        }
+
+        // CHART VISUALIZATION TAKMIR
+        let chartKasInstance = null;
+        function renderKasChart() {
+            const ctx = document.getElementById('chartKasMasjid');
             if (!ctx) return;
 
-            if (chartInstance) chartInstance.destroy();
+            if (chartKasInstance) chartKasInstance.destroy();
 
-            let totalIn = appData.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
-            let totalOut = appData.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalIn = appState.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalOut = appState.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
 
-            chartInstance = new Chart(ctx, {
+            chartKasInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Pemasukan', 'Pengeluaran'],
+                    labels: ['Pemasukan Kas', 'Pengeluaran Operasional'],
                     datasets: [{
                         data: [totalIn, totalOut],
                         backgroundColor: ['#0d5c3a', '#e11d48'],
@@ -915,442 +1829,9 @@
             });
         }
 
-        function exportKeuanganCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,ID,Tanggal,Tipe,Kategori,Keterangan,Nominal\n";
-            appData.keuangan.forEach(k => {
-                csvContent += `${k.id},${k.tanggal},${k.tipe},"${k.kategori}","${k.keterangan}",${k.nominal}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Laporan_Kas_MasjidKu.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // KAJIAN LOGIC
-        function renderKajianCards() {
-            const container = document.getElementById('kajian-cards-container');
-            container.innerHTML = appData.kajian.map(k => `
-                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
-                    <div>
-                        <img src="${k.poster}" class="w-full h-40 object-cover" alt="Poster">
-                        <div class="p-5 space-y-2">
-                            <span class="text-[10px] uppercase font-bold text-gold-600 tracking-wider bg-gold-300/20 px-2.5 py-1 rounded-md">Kajian Rutin</span>
-                            <h4 class="font-bold text-slate-800 text-base leading-snug">${k.tema}</h4>
-                            <p class="text-xs text-emerald-900 font-semibold flex items-center space-x-1">
-                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                                <span>${k.ustaz}</span>
-                            </p>
-                            <p class="text-xs text-slate-500 flex items-center space-x-1">
-                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                                <span>${k.waktu}</span>
-                            </p>
-                            <p class="text-xs text-slate-500 flex items-center space-x-1">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-                                <span>${k.lokasi}</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-slate-50 border-t border-slate-100 text-right">
-                        <button onclick="deleteKajian(${k.id})" class="text-xs text-rose-600 hover:underline font-semibold">Hapus Jadwal</button>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function openModalKajian() {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Tambah Jadwal Kajian</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Tema Kajian</label>
-                        <input type="text" id="kajian-tema" placeholder="misal: Tafsir Jalalain" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Nama Ustaz / Penceramah</label>
-                        <input type="text" id="kajian-ustaz" placeholder="misal: Ustaz Ahmad" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Waktu & Tanggal</label>
-                        <input type="text" id="kajian-waktu" placeholder="misal: Sabtu, Ba'da Maghrib" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Ruangan / Tempat</label>
-                        <input type="text" id="kajian-lokasi" value="Ruang Utama Masjid" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveKajian()" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Simpan Jadwal</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveKajian() {
-            const tema = document.getElementById('kajian-tema').value;
-            const ustaz = document.getElementById('kajian-ustaz').value;
-            const waktu = document.getElementById('kajian-waktu').value;
-            const lokasi = document.getElementById('kajian-lokasi').value;
-
-            if (!tema || !ustaz) {
-                alert('Mohon isi tema dan nama ustaz.');
-                return;
-            }
-
-            appData.kajian.push({
-                id: Date.now(),
-                tema, ustaz, waktu, lokasi,
-                poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80"
-            });
-            saveData();
-            closeModal();
-            showToast("Sukses", "Jadwal kajian baru berhasil ditambahkan.");
-        }
-
-        function deleteKajian(id) {
-            if (confirm("Hapus agenda kajian ini?")) {
-                appData.kajian = appData.kajian.filter(k => k.id !== id);
-                saveData();
-            }
-        }
-
-        // SARPRAS LOGIC
-        function renderSarprasTable() {
-            const tbody = document.getElementById('table-sarpras-body');
-            const search = document.getElementById('search-sarpras')?.value.toLowerCase() || '';
-
-            let filtered = appData.sarpras.filter(s => s.nama.toLowerCase().includes(search) || s.kategori.toLowerCase().includes(search));
-
-            tbody.innerHTML = filtered.map(s => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-3 font-semibold text-slate-800">${s.nama}</td>
-                    <td class="p-3 text-slate-600">${s.kategori}</td>
-                    <td class="p-3 font-bold font-mono">${s.jumlah} unit</td>
-                    <td class="p-3 text-slate-600">${s.lokasi}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${s.kondisi === 'Baik' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                            ${s.kondisi}
-                        </span>
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteSarpras(${s.id})" class="text-rose-500 hover:text-rose-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function openModalSarpras() {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Tambah Inventaris / Sarpras</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Nama Barang / Aset</label>
-                        <input type="text" id="sarpras-nama" placeholder="misal: Sound System / Karpet Sajadah" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Kategori</label>
-                        <input type="text" id="sarpras-kategori" placeholder="Elektronik / Perlengkapan" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold text-slate-700">Jumlah (Unit)</label>
-                            <input type="number" id="sarpras-jumlah" value="1" class="w-full mt-1 p-2 border rounded-xl">
-                        </div>
-                        <div>
-                            <label class="font-semibold text-slate-700">Kondisi</label>
-                            <select id="sarpras-kondisi" class="w-full mt-1 p-2 border rounded-xl">
-                                <option value="Baik">Baik</option>
-                                <option value="Perlu Servis">Perlu Servis</option>
-                                <option value="Rusak">Rusak</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Lokasi Penyimpanan</label>
-                        <input type="text" id="sarpras-lokasi" placeholder="Gudang / Ruang Utama" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveSarpras()" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Simpan Barang</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveSarpras() {
-            const nama = document.getElementById('sarpras-nama').value;
-            const kategori = document.getElementById('sarpras-kategori').value || 'Aset';
-            const jumlah = parseInt(document.getElementById('sarpras-jumlah').value) || 1;
-            const kondisi = document.getElementById('sarpras-kondisi').value;
-            const lokasi = document.getElementById('sarpras-lokasi').value || 'Gudang';
-
-            if (!nama) {
-                alert('Nama barang wajib diisi');
-                return;
-            }
-
-            appData.sarpras.push({ id: Date.now(), nama, kategori, jumlah, kondisi, lokasi });
-            saveData();
-            closeModal();
-            showToast("Tersimpan", "Barang inventaris ditambahkan.");
-        }
-
-        function deleteSarpras(id) {
-            if (confirm("Hapus data barang ini?")) {
-                appData.sarpras = appData.sarpras.filter(s => s.id !== id);
-                saveData();
-            }
-        }
-
-        // HAJAT / DONASI LOGIC
-        function renderHajatCards() {
-            const container = document.getElementById('hajat-cards-container');
-            container.innerHTML = appData.hajat.map(h => {
-                let pct = Math.min(100, Math.round((h.terkumpul / h.target) * 100));
-                return `
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-bold text-slate-800 text-base">${h.judul}</h4>
-                                <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Target: ${h.batasWaktu}</span>
-                            </div>
-                            <p class="text-xs text-slate-500 leading-relaxed">${h.ket}</p>
-                            
-                            <div class="space-y-1.5 pt-2">
-                                <div class="flex justify-between text-xs font-semibold">
-                                    <span class="text-slate-600">Progres Pengumpulan</span>
-                                    <span class="text-emerald-900">${pct}%</span>
-                                </div>
-                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                    <div class="bg-gradient-to-r from-emerald-700 to-gold-500 h-full" style="width: ${pct}%"></div>
-                                </div>
-                                <div class="flex justify-between text-xs pt-1">
-                                    <span class="text-slate-500">Terkumpul: <strong class="text-emerald-800">Rp ${h.terkumpul.toLocaleString('id-ID')}</strong></span>
-                                    <span class="text-slate-500">Target: Rp ${h.target.toLocaleString('id-ID')}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                            <button onclick="openModalTambahDonasi(${h.id})" class="px-3 py-1.5 bg-emerald-900 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-1">
-                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-                                <span>Input Donasi Masuk</span>
-                            </button>
-                            <button onclick="deleteHajat(${h.id})" class="text-xs text-rose-500 hover:underline">Hapus Program</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function openModalHajat() {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Buat Program Pengadaan / Hajat</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Judul Pengadaan / Hajat</label>
-                        <input type="text" id="hajat-judul" placeholder="misal: Renovasi Tempat Wudhu" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Target Dana (Rp)</label>
-                        <input type="number" id="hajat-target" placeholder="0" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Batas Waktu Pengadaan</label>
-                        <input type="text" id="hajat-batas" placeholder="misal: 31 Des 2026" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Deskripsi Singkat</label>
-                        <textarea id="hajat-ket" rows="2" placeholder="Rincian kebutuhan barang..." class="w-full mt-1 p-2 border rounded-xl"></textarea>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveHajat()" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Publikasikan Hajat</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveHajat() {
-            const judul = document.getElementById('hajat-judul').value;
-            const target = parseFloat(document.getElementById('hajat-target').value) || 0;
-            const batasWaktu = document.getElementById('hajat-batas').value || 'Segera';
-            const ket = document.getElementById('hajat-ket').value || '-';
-
-            if (!judul || target <= 0) {
-                alert('Judul dan target biaya wajib diisi');
-                return;
-            }
-
-            appData.hajat.push({ id: Date.now(), judul, target, terkumpul: 0, batasWaktu, ket });
-            saveData();
-            closeModal();
-            showToast("Dipublikasikan", "Program hajat baru berhasil dibuka.");
-        }
-
-        function openModalTambahDonasi(id) {
-            const item = appData.hajat.find(h => h.id === id);
-            if (!item) return;
-
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Tambah Donasi Hajat: ${item.judul}</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Nominal Donasi Terkumpul Tambahan (Rp)</label>
-                        <input type="number" id="donasi-nominal" placeholder="0" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveDonasiMasuk(${id})" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Update Terkumpul</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveDonasiMasuk(id) {
-            const add = parseFloat(document.getElementById('donasi-nominal').value) || 0;
-            const item = appData.hajat.find(h => h.id === id);
-            if (item && add > 0) {
-                item.terkumpul += add;
-                // Catat juga ke transaksi pemasukan
-                appData.keuangan.unshift({
-                    id: Date.now(),
-                    tanggal: new Date().toISOString().split('T')[0],
-                    tipe: 'pemasukan',
-                    kategori: 'Donasi Hajat',
-                    keterangan: `Donasi untuk ${item.judul}`,
-                    nominal: add
-                });
-                saveData();
-                closeModal();
-                showToast("Berhasil", "Nominal donasi hajat berhasil diperbarui.");
-            }
-        }
-
-        function deleteHajat(id) {
-            if (confirm("Hapus program hajat ini?")) {
-                appData.hajat = appData.hajat.filter(h => h.id !== id);
-                saveData();
-            }
-        }
-
-        // TAKMIR LOGIC
-        function renderTakmirCards() {
-            const container = document.getElementById('takmir-cards-container');
-            container.innerHTML = appData.takmir.map(t => `
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center space-y-3 relative">
-                    <img src="${t.foto}" class="w-20 h-20 rounded-full object-cover mx-auto ring-4 ring-emerald-50" alt="${t.nama}">
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-sm">${t.nama}</h4>
-                        <p class="text-xs text-emerald-900 font-semibold mt-0.5">${t.jabatan}</p>
-                        <p class="text-[11px] text-slate-500 mt-1 font-mono">${t.hp}</p>
-                    </div>
-                    <button onclick="deleteTakmir(${t.id})" class="text-xs text-rose-500 hover:underline pt-2">Hapus</button>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function openModalTakmir() {
-            const modal = document.getElementById('modal-container');
-            const content = document.getElementById('modal-content');
-
-            content.innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-base">Tambah Pengurus Takmir</h3>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div>
-                        <label class="font-semibold text-slate-700">Nama Lengkap</label>
-                        <input type="text" id="takmir-nama" placeholder="misal: H. Abdullah" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">Jabatan / Posisi</label>
-                        <input type="text" id="takmir-jabatan" placeholder="Ketua / Sekretaris / Sie Perlengkapan" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                    <div>
-                        <label class="font-semibold text-slate-700">No. WhatsApp / HP</label>
-                        <input type="text" id="takmir-hp" placeholder="0812-xxxx-xxxx" class="w-full mt-1 p-2 border rounded-xl">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-3">
-                    <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 rounded-xl text-xs font-semibold">Batal</button>
-                    <button onclick="saveTakmir()" class="px-4 py-1.5 bg-emerald-900 text-white rounded-xl text-xs font-semibold">Simpan Pengurus</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function saveTakmir() {
-            const nama = document.getElementById('takmir-nama').value;
-            const jabatan = document.getElementById('takmir-jabatan').value || 'Anggota Takmir';
-            const hp = document.getElementById('takmir-hp').value || '-';
-
-            if (!nama) {
-                alert('Nama pengurus wajib diisi.');
-                return;
-            }
-
-            appData.takmir.push({
-                id: Date.now(),
-                nama, jabatan, hp,
-                foto: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80"
-            });
-            saveData();
-            closeModal();
-            showToast("Tersimpan", "Pengurus takmir baru berhasil didaftarkan.");
-        }
-
-        function deleteTakmir(id) {
-            if (confirm("Hapus pengurus ini dari daftar?")) {
-                appData.takmir = appData.takmir.filter(t => t.id !== id);
-                saveData();
-            }
-        }
-
-        // INITIALIZE ON LOAD
+        // INITIALIZE APP
         window.onload = function() {
-            updateUI();
-            lucide.createIcons();
+            renderUI();
         };
     </script>
 </body>
