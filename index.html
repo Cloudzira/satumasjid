@@ -727,6 +727,7 @@
         <!-- MODE TAKMIR ADMIN: TAB 8 - DASHBOARD EKEKUTIF TAKMIR -->
         <!-- ================================================================= -->
         <section id="view-takmir-dashboard" class="view-content space-y-6 hidden">
+            <div id="verif-banner" class="hidden p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2"></div>
             <div class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-emerald-800">
                 <div>
                     <span class="text-xs uppercase tracking-wider text-gold-400 font-bold">Portal Khusus Pengurus Takmir</span>
@@ -737,7 +738,8 @@
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>Catat Transaksi Baru</span>
                 </button>
-                <button onclick="openModalProfil()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs flex items-center space-x-2 border border-white/20"><i data-lucide="settings" class="w-4 h-4"></i><span>Profil & Rekening</span></button></div>
+                <button onclick="openModalProfil()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs flex items-center space-x-2 border border-white/20"><i data-lucide="settings" class="w-4 h-4"></i><span>Profil Masjid</span></button>
+                <button onclick="openModalPembayaran()" class="px-4 py-2 bg-gold-500 hover:bg-gold-600 text-emerald-950 font-bold rounded-xl text-xs flex items-center space-x-2"><i data-lucide="qr-code" class="w-4 h-4"></i><span>Rekening & QRIS</span></button></div>
             </div>
 
             <!-- Financial Summary Metric Cards -->
@@ -1065,45 +1067,19 @@
         }
 
         // PERMOHONAN JAMAAH (donasi, pinjam, relawan, bantuan, saran) -> diproses Takmir
-        function addPermohonan(jenis, judul, detail, nominal = 0) {
-            appState.permohonan.unshift({ id: Date.now(), masjidId: appState.activeMasjidId, jenis, judul, detail, nominal, status: 'menunggu', tgl: new Date().toISOString().slice(0,10) });
-            saveState();
-        }
-        function prosesPermohonan(id, ok) {
-            const p = appState.permohonan.find(x => x.id === id);
-            if (!p) return;
-            p.status = ok ? 'disetujui' : 'ditolak';
-            if (ok && p.jenis === 'donasi' && p.nominal > 0) {
-                appState.keuangan.unshift({ id: Date.now(), masjidId: p.masjidId, tanggal: new Date().toISOString().slice(0,10), tipe: 'pemasukan', kategori: 'Infaq Jamaah', keterangan: 'Donasi digital: ' + p.judul, nominal: p.nominal });
-                const h = appState.hajat.find(x => x.masjidId === p.masjidId && x.judul === p.judul);
-                if (h) h.terkumpul += p.nominal;
-            }
-            saveState();
-            showToast('Permohonan ' + p.status, p.judul);
-        }
-        function renderPermohonan() {
-            const el = document.getElementById('dash-permohonan-list');
-            if (!el) return;
-            const l = byM(appState.permohonan);
-            const col = { menunggu: 'text-amber-600', disetujui: 'text-emerald-700', ditolak: 'text-rose-600' };
-            el.innerHTML = l.length ? l.map(p => `
-                <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1">
-                    <div class="flex justify-between"><span class="font-bold text-emerald-900 uppercase text-[10px]">${esc(p.jenis)}${p.nominal ? ' · Rp ' + p.nominal.toLocaleString('id-ID') : ''}</span><span class="text-[10px] font-bold ${col[p.status]}">${p.status}</span></div>
-                    <p class="font-semibold text-slate-800">${esc(p.judul)}</p><p class="text-slate-500">${esc(p.detail)}</p>
-                    ${p.status === 'menunggu' ? `<div class="flex gap-2 pt-1"><button onclick="prosesPermohonan(${p.id},true)" class="px-2.5 py-1 bg-emerald-900 text-white rounded-lg font-bold">Setujui</button><button onclick="prosesPermohonan(${p.id},false)" class="px-2.5 py-1 bg-slate-200 rounded-lg font-bold">Tolak</button></div>` : ''}
-                </div>`).join('') : '<p class="text-xs text-slate-400">Belum ada permohonan.</p>';
-        }
 
         // MASJID TERDEKAT (Leaflet + OpenStreetMap/Overpass)
         let map = null, mapLayer = null, userPos = null, osmCache = [];
         const hav = (a, b, c, d) => { const K = Math.PI / 180, x = (c - a) * K, y = (d - b) * K, q = Math.sin(x / 2) ** 2 + Math.cos(a * K) * Math.cos(c * K) * Math.sin(y / 2) ** 2; return 12742 * Math.asin(Math.sqrt(q)); };
-        const origin = () => userPos || { lat: curM().lat ?? -6.9932, lng: curM().lng ?? 110.4203 };
+        const hasOrigin = () => !!userPos || curM().lat != null;
+        const origin = () => userPos || (curM().lat != null ? { lat: curM().lat, lng: curM().lng } : { lat: -2.5, lng: 118 });
+        const fmtKm = d => isNaN(d) ? '' : d.toFixed(1) + ' km';
         const setStatus = t => { const el = document.getElementById('terdekat-status'); if (el) el.innerText = t; };
         function initTerdekat() {
             if (!window.L) return showToast('Peta gagal dimuat', 'Periksa koneksi internet Anda.');
             if (!map) {
                 const o = origin();
-                map = L.map('map-terdekat').setView([o.lat, o.lng], 14);
+                map = L.map('map-terdekat').setView([o.lat, o.lng], hasOrigin() ? 14 : 5);
                 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
                 mapLayer = L.layerGroup().addTo(map);
                 cariSekitar();
@@ -1117,11 +1093,13 @@
             navigator.geolocation.getCurrentPosition(p => {
                 userPos = { lat: p.coords.latitude, lng: p.coords.longitude };
                 map.setView([userPos.lat, userPos.lng], 14);
+                loadPrayerTimes();
                 cariSekitar();
             }, () => { setStatus('Izin lokasi ditolak. Jarak dihitung dari masjid yang sedang dipilih.'); showToast('Lokasi tidak aktif', 'Izinkan akses lokasi di peramban.'); }, { enableHighAccuracy: true, timeout: 10000 });
         }
         async function cariSekitar() {
             const o = origin(), r = document.getElementById('radius-terdekat').value;
+            if (!hasOrigin()) { osmCache = []; setStatus('Tekan "Gunakan Lokasi Saya" untuk mencari masjid di sekitar Anda.'); renderTerdekat(); return; }
             setStatus('Mencari masjid di sekitar…');
             try {
                 const f = `["amenity"="place_of_worship"]["religion"="muslim"](around:${r},${o.lat},${o.lng})`;
@@ -1140,10 +1118,10 @@
             const all = [
                 ...appState.masjidList.filter(m => m.lat != null).map(m => ({ id: m.id, name: m.name, sub: m.address, lat: m.lat, lng: m.lng, maps: m.maps, reg: true })),
                 ...osmCache.map(x => ({ ...x, sub: 'Data OpenStreetMap', reg: false }))
-            ].map(x => ({ ...x, d: hav(o.lat, o.lng, x.lat, x.lng) })).sort((a, b) => a.d - b.d);
+            ].map(x => ({ ...x, d: hasOrigin() ? hav(o.lat, o.lng, x.lat, x.lng) : NaN })).sort((a, b) => hasOrigin() ? a.d - b.d : a.name.localeCompare(b.name));
             if (userPos) L.circleMarker([o.lat, o.lng], { radius: 8, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: .9 }).addTo(mapLayer).bindPopup('Lokasi Anda');
             all.forEach(x => {
-                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${x.d.toFixed(1)} km${x.maps && /^https?:\/\//.test(x.maps) ? `<br><a href="${esc(x.maps)}" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>` : ''}${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
+                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${fmtKm(x.d)}${x.maps && /^https?:\/\//.test(x.maps) ? `<br><a href="${esc(x.maps)}" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>` : ''}${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
                 (x.reg ? L.marker([x.lat, x.lng]) : L.circleMarker([x.lat, x.lng], { radius: 6, color: '#0d5c3a', fillColor: '#34d399', fillOpacity: .9 })).addTo(mapLayer).bindPopup(pop);
             });
             document.getElementById('terdekat-list').innerHTML = all.slice(0, 20).map(x => `
@@ -1152,7 +1130,7 @@
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${x.reg ? 'bg-gold-300 text-emerald-950' : 'bg-slate-100 text-slate-600'}">${x.reg ? 'Terdaftar SatuMasjid' : 'OpenStreetMap'}</span>
                         <h4 class="font-bold text-slate-900 text-sm mt-1 truncate">${esc(x.name)}</h4>
                         <p class="text-[11px] text-slate-500 truncate">${esc(x.sub)}</p>
-                        <p class="text-xs font-bold text-emerald-900 mt-1">${x.d.toFixed(1)} km</p>
+                        <p class="text-xs font-bold text-emerald-900 mt-1">${fmtKm(x.d)}</p>
                     </div>
                     <div class="flex flex-col gap-1.5 flex-shrink-0 text-[11px] font-bold">
                         <button onclick="map.flyTo([${x.lat},${x.lng}],17)" class="px-2.5 py-1 bg-emerald-100 text-emerald-900 rounded-lg">Lihat Peta</button>
@@ -1177,111 +1155,13 @@
             'auth/invalid-credential': 'Email atau kata sandi salah.', 'auth/wrong-password': 'Email atau kata sandi salah.', 'auth/user-not-found': 'Akun tidak ditemukan.',
             'auth/email-already-in-use': 'Email sudah terdaftar, silakan Masuk.', 'auth/weak-password': 'Kata sandi minimal 6 karakter.', 'auth/invalid-email': 'Format email tidak valid.',
             'auth/operation-not-allowed': 'Aktifkan metode login di Firebase Console.', 'auth/unauthorized-domain': 'Domain belum diizinkan di Firebase Auth.',
-            'auth/popup-closed-by-user': 'Jendela login ditutup.', 'permission-denied': 'Tidak punya izin (cek Firestore Rules).'
+            'auth/popup-closed-by-user': 'Jendela login ditutup.', 'permission-denied': 'Tidak punya izin untuk tindakan ini.', 'auth/admin-restricted-operation': 'Aktifkan metode Anonymous di Firebase Console.', 'unavailable': 'Tidak dapat terhubung ke server.'
         }[e.code] || e.code || e.message);
-        async function syncMasjid() {
-            if (!db) return;
-            try {
-                const snap = await db.collection('masjid').get();
-                snap.forEach(d => {
-                    const dat = d.data(), lid = dat.id ?? Number(d.id);
-                    if (['1', '2', '3'].includes(d.id) && dat.id === undefined) return; // sisa data contoh lama
-                    if (!Number.isFinite(lid)) return;
-                    const m = appState.masjidList.find(x => x.id === lid);
-                    if (m) Object.assign(m, dat, { id: m.id, docId: d.id });
-                    else appState.masjidList.push({ ...dat, id: lid, docId: d.id });
-                });
-                saveState();
-            } catch (e) { console.warn('Sync gagal', e); }
-        }
         function openModalLogin() { showAuth(); }
-        async function doLogin(reg) {
-            const email = document.getElementById('lg-email').value.trim(), pass = document.getElementById('lg-pass').value;
-            if (!email || !pass) return showToast('Data belum lengkap', 'Isi email dan kata sandi.');
-            try { await (reg ? auth.createUserWithEmailAndPassword(email, pass) : auth.signInWithEmailAndPassword(email, pass)); }
-            catch (e) { return showToast('Gagal masuk', fbErr(e)); }
-            afterLogin();
-        }
         async function doGoogle() {
             try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
             catch (e) { return showToast('Gagal masuk', fbErr(e)); }
             afterLogin();
-        }
-        async function afterLogin() {
-            closeModal(); hideAuth();
-            await syncMasjid();
-            const m = appState.masjidList.find(x => x.ownerUid === auth.currentUser.uid);
-            if (m) { appState.activeMasjidId = m.id; saveState(); switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
-            else openModalMasjidBaru();
-        }
-        function openModalMasjidBaru() {
-            document.getElementById('modal-box').innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Daftarkan Masjid Anda</h3></div>
-                <p class="text-xs text-slate-500">Isi data dasar masjid. Rekening dan QRIS dapat dilengkapi nanti di menu Profil & Rekening.</p>
-                <div class="space-y-3 text-xs">
-                    <div><label class="font-semibold text-slate-700">Nama Masjid</label><input id="nb-name" placeholder="Masjid Al-Ikhlas" class="w-full mt-1 p-2 border rounded-xl"></div>
-                    <div><label class="font-semibold text-slate-700">Alamat</label><input id="nb-addr" placeholder="Jl. Contoh No. 1, Kelurahan, Kota" class="w-full mt-1 p-2 border rounded-xl"></div>
-                    ${MAPS_FIELD('nb-maps', 'nb-maps-info', '')}
-                </div>
-                <button onclick="simpanMasjidBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">Simpan & Masuk Dashboard</button>
-                <button onclick="logoutTakmir()" class="w-full py-2 text-slate-500 font-bold text-xs">Batal & keluar</button>`;
-            document.getElementById('modal-backdrop').classList.remove('hidden');
-            lucide.createIcons();
-        }
-        async function simpanMasjidBaru() {
-            const g = id => document.getElementById(id).value.trim(), name = g('nb-name'), addr = g('nb-addr'), maps = g('nb-maps');
-            if (!name || !addr) return showToast('Data belum lengkap', 'Isi nama dan alamat masjid.');
-            const u = auth.currentUser, c = parseMapsLink(maps);
-            try {
-                const ref = db.collection('masjid').doc(u.uid), ex = await ref.get();
-                let m;
-                if (ex.exists) m = { ...ex.data(), docId: u.uid };
-                else {
-                    m = { id: Date.now(), name, address: addr, bank: '', rekening: '', lat: c ? c.lat : null, lng: c ? c.lng : null, maps, qris: '', ownerUid: u.uid };
-                    await ref.set(m);
-                    m.docId = u.uid;
-                }
-                const i = appState.masjidList.findIndex(x => x.id === m.id);
-                if (i >= 0) Object.assign(appState.masjidList[i], m); else appState.masjidList.push(m);
-                appState.activeMasjidId = m.id;
-                saveState(); closeModal(); switchUserMode('takmir');
-                showToast('Masjid terdaftar', m.name + ' siap dikelola.');
-            } catch (e) { showToast('Gagal menyimpan', fbErr(e)); }
-        }
-        function logoutTakmir() { if (auth) auth.signOut(); closeModal(); switchUserMode('jamaah'); showToast('Keluar', 'Anda telah keluar dari akun Takmir.'); }
-        function pilihQRIS(inp) {
-            const f = inp.files[0];
-            if (!f) return;
-            if (f.size > 8e6) return showToast('File terlalu besar', 'Maksimal 8 MB.');
-            const img = new Image();
-            img.onload = () => {
-                const sc = Math.min(1, 640 / Math.max(img.width, img.height)), c = document.createElement('canvas');
-                c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
-                const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
-                qrisTmp = c.toDataURL('image/jpeg', 0.9);
-                const pv = document.getElementById('pf-qris-prev'); pv.src = qrisTmp; pv.classList.remove('hidden');
-                URL.revokeObjectURL(img.src);
-            };
-            img.onerror = () => showToast('Gambar tidak valid', 'Pilih file JPG atau PNG.');
-            img.src = URL.createObjectURL(f);
-        }
-        async function simpanProfilAsync() {
-            const m = curM(), g = id => document.getElementById(id).value.trim();
-            m.name = g('pf-name') || m.name; m.address = g('pf-addr') || m.address; m.bank = g('pf-bank') || m.bank; m.rekening = g('pf-rek') || m.rekening;
-            const mp = g('pf-maps');
-            if (mp !== (m.maps || '')) {
-                m.maps = mp;
-                const c = parseMapsLink(mp);
-                if (c) { m.lat = c.lat; m.lng = c.lng; } else if (mp) showToast('Koordinat belum terbaca', 'Link pendek tidak bisa dibaca. Gunakan link panjang atau tempel koordinat.');
-            }
-            if (qrisTmp) { m.qris = qrisTmp; qrisTmp = null; }
-            saveState(); closeModal();
-            if (db && hasAuth()) {
-                try {
-                    await db.collection('masjid').doc(m.docId || String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, maps: m.maps || '', qris: m.qris || '' }, { merge: true });
-                    showToast('Profil tersimpan', 'Tersinkron ke server, terlihat oleh semua jamaah.');
-                } catch (e) { showToast('Tersimpan di perangkat saja', 'Gagal sinkron: ' + fbErr(e)); }
-            } else showToast('Profil tersimpan', 'Hanya di perangkat ini.');
         }
 
         // SIDEBAR
@@ -1289,9 +1169,9 @@
         function renderSidebar() {
             sbActions = [];
             const groups = (currentUserMode === 'takmir'
-                ? [['Pengelolaan Takmir', [['target', 'Daftar Kebutuhan Masjid', () => switchTab('takmir-wishlist')], ['heart-handshake', 'ZIS & Mustahik', () => switchTab('takmir-zis')], ['settings', 'Profil & Rekening Masjid', () => openModalProfil()]]]]
+                ? [['Pengelolaan Takmir', [['target', 'Daftar Kebutuhan Masjid', () => switchTab('takmir-wishlist')], ['heart-handshake', 'ZIS & Mustahik', () => switchTab('takmir-zis')], ['settings', 'Profil Masjid', () => openModalProfil()], ['qr-code', 'Rekening & QRIS', () => openModalPembayaran()], ['badge-check', 'Data Verifikasi', () => openModalVerifikasi()]]]]
                 : [['Layanan Jamaah', [['hand-heart', 'Volunter & Sosial', () => switchTab('kegiatan')], ['package-check', 'Pinjam Sarpras', () => switchTab('sarpras-jamaah')], ['message-square', 'Tanya Ustadz & Saran', () => switchTab('konsultasi')]]]]
-            ).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]);
+            ).concat(isAdminUser ? [['Admin SatuMasjid', [['shield-check', 'Verifikasi & Laporan', () => openAdmin()]]]] : []).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]);
             document.getElementById('sidebar-nav').innerHTML = groups.map(g => `<div><p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold px-3 mb-1">${g[0]}</p>${g[1].map(it => { sbActions.push(it[2]); return `<button onclick="sbRun(${sbActions.length - 1})" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 text-left"><i data-lucide="${it[0]}" class="w-5 h-5 text-emerald-900 flex-shrink-0"></i><span>${it[1]}</span></button>`; }).join('')}</div>`).join('');
             document.getElementById('sb-masjid').innerText = curM().name;
         }
@@ -1308,7 +1188,7 @@
             document.body.style.overflow = '';
         }
         function sbRun(i) { closeSidebar(); sbActions[i](); }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSidebar(); closeModal(); closeInfo(); } });
         (() => { let x0 = null; const sb = document.getElementById('sidebar');
             sb.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
             sb.addEventListener('touchend', e => { if (x0 !== null && e.changedTouches[0].clientX - x0 < -60) closeSidebar(); x0 = null; }, { passive: true }); })();
@@ -1366,6 +1246,359 @@
             <input id="${id}" value="${esc(val || '')}" oninput="mapsHint('${id}','${info}')" placeholder="https://www.google.com/maps/..." class="w-full mt-1 p-2 border rounded-xl">
             <p id="${info}" class="text-[10px] text-slate-400 mt-1">Buka masjid di Google Maps, ketuk Bagikan, lalu salin link. Atau tempel koordinat, mis. -6.9932, 110.4203.</p></div>`;
 
+        // ===== ARSITEKTUR DATA & KEAMANAN (Firestore) =====
+        const COLS_PUB = ['keuangan', 'kajian', 'hajat', 'sarpras', 'qaPublic'];
+        let isAdminUser = false, payInfo = null, verifInfo = null, dokTmp = null, adminRows = [], adminLaporan = [];
+        const mref = m => db.collection('masjid').doc(m.docId || String(m.id));
+        const serverTs = () => firebase.firestore.FieldValue.serverTimestamp();
+        const pickPub = (d, id) => ({ id: d.id, name: d.name, address: d.address, lat: d.lat ?? null, lng: d.lng ?? null, maps: d.maps || '', ownerUid: d.ownerUid, verified: d.verified === true, docId: id });
+        const mHead = t => `<div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">${t}</h3><button onclick="closeModal()" class="text-slate-400 hover:text-slate-600" aria-label="Tutup"><i data-lucide="x" class="w-5 h-5"></i></button></div>`;
+        const showModal = html => { const mb = document.getElementById('modal-box'); mb.innerHTML = html; mb.style.maxHeight = '85vh'; mb.style.overflowY = 'auto'; document.getElementById('modal-backdrop').classList.remove('hidden'); lucide.createIcons(); };
+        const fld = (id, label, val, ph = '') => `<div><label class="font-semibold text-slate-700">${label}</label><input id="${id}" value="${esc(val || '')}" placeholder="${esc(ph)}" class="w-full mt-1 p-2 border rounded-xl"></div>`;
+        const chip = (ok, t) => `<span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${ok ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${t}</span>`;
+
+        function guardTakmir() {
+            if (hasAuth()) return true;
+            showToast('Akses ditolak', 'Hanya pengurus masjid ini yang dapat mengubah data.');
+            return false;
+        }
+        async function ensureUser() {
+            if (!auth) throw new Error('offline');
+            if (auth.currentUser) return auth.currentUser;
+            return (await auth.signInAnonymously()).user;
+        }
+        async function checkAdmin(u) {
+            isAdminUser = false;
+            if (db && u && !u.isAnonymous) { try { isAdminUser = (await db.collection('admins').doc(u.uid).get()).exists; } catch (e) {} }
+        }
+        async function persistCol(col) {
+            const m = curM();
+            if (!db || !hasAuth()) return;
+            const items = JSON.parse(JSON.stringify(byM(appState[col]).map(({ masjidId, ...r }) => r)));
+            try { await mref(m).collection('data').doc(col).set({ items, updatedAt: serverTs() }); }
+            catch (e) { showToast('Gagal sinkron ke server', fbErr(e)); }
+        }
+        async function loadPermohonan() {
+            const m = curM();
+            if (!db || !hasAuth(m.id)) return;
+            const snap = await mref(m).collection('permohonan').orderBy('createdAt', 'desc').limit(100).get();
+            appState.permohonan = snap.docs.map(d => { const x = d.data(); return { id: d.id, masjidId: m.id, jenis: x.jenis, judul: x.judul, detail: x.detail, nominal: x.nominal || 0, status: x.status, tgl: x.tgl }; });
+        }
+        async function refreshPermohonan() {
+            try { await loadPermohonan(); } catch (e) { showToast('Gagal memuat', fbErr(e)); }
+            renderUI();
+        }
+        async function loadOwnerExtras() {
+            const m = curM();
+            const [p, v] = await Promise.all([mref(m).collection('pembayaran').doc('info').get(), mref(m).collection('private').doc('verifikasi').get()]);
+            payInfo = p.exists ? p.data() : null; verifInfo = v.exists ? v.data() : null;
+        }
+        async function loadMasjidData() {
+            const m = curM();
+            if (!db || !m.id || !m.docId) return;
+            const own = hasAuth(m.id), cols = own ? COLS_PUB.concat('mustahik') : COLS_PUB;
+            try {
+                const docs = await Promise.all(cols.map(c => mref(m).collection('data').doc(c).get()));
+                docs.forEach((d, i) => { const c = cols[i]; appState[c] = appState[c].filter(x => x.masjidId !== m.id).concat((d.exists ? (d.data().items || []) : []).map(x => ({ ...x, masjidId: m.id }))); });
+                if (own) await Promise.all([loadPermohonan(), loadOwnerExtras()]);
+                saveState();
+            } catch (e) { console.warn('Muat data masjid gagal', e); }
+        }
+        async function syncMasjid() {
+            if (!db) return;
+            try {
+                const snap = await db.collection('masjid').where('verified', '==', true).get();
+                const list = [];
+                snap.forEach(d => { if (Number.isFinite(d.data().id)) list.push(pickPub(d.data(), d.id)); });
+                const u = auth && auth.currentUser;
+                if (u && !u.isAnonymous && !list.some(x => x.ownerUid === u.uid)) {
+                    const own = await db.collection('masjid').doc(u.uid).get();
+                    if (own.exists && Number.isFinite(own.data().id)) list.push(pickPub(own.data(), own.id));
+                }
+                appState.masjidList = list;
+                if (!list.some(x => x.id === appState.activeMasjidId)) appState.activeMasjidId = list.length ? list[0].id : 0;
+                saveState();
+                await loadMasjidData();
+                loadPrayerTimes();
+            } catch (e) { console.warn('Sync gagal', e); }
+        }
+
+        // PERMOHONAN & LAPORAN JAMAAH -> tersimpan di server, diproses takmir
+        async function addPermohonan(jenis, judul, detail, nominal = 0) {
+            const m = curM();
+            if (!m.id || !m.docId) { showToast('Belum ada masjid', 'Pilih masjid terdaftar terlebih dahulu.'); return false; }
+            try {
+                const u = await ensureUser();
+                await mref(m).collection('permohonan').add({ uid: u.uid, jenis, judul: String(judul).slice(0, 200), detail: String(detail).slice(0, 1200), nominal, status: 'menunggu', tgl: new Date().toISOString().slice(0, 10), createdAt: serverTs() });
+                return true;
+            } catch (e) { showToast('Gagal mengirim', fbErr(e)); return false; }
+        }
+        async function prosesPermohonan(id, ok) {
+            if (!guardTakmir()) return;
+            const p = appState.permohonan.find(x => x.id === id);
+            if (!p || p.status !== 'menunggu') return;
+            try { await mref(curM()).collection('permohonan').doc(id).update({ status: ok ? 'disetujui' : 'ditolak' }); }
+            catch (e) { return showToast('Gagal memproses', fbErr(e)); }
+            p.status = ok ? 'disetujui' : 'ditolak';
+            if (ok && p.jenis === 'donasi' && p.nominal > 0) {
+                appState.keuangan.unshift({ id: Date.now(), masjidId: p.masjidId, tanggal: new Date().toISOString().slice(0, 10), tipe: 'pemasukan', kategori: 'Infaq Jamaah', keterangan: 'Donasi digital: ' + p.judul, nominal: p.nominal });
+                const h = appState.hajat.find(x => x.masjidId === p.masjidId && x.judul === p.judul);
+                if (h) h.terkumpul += p.nominal;
+                saveState(); await persistCol('keuangan'); await persistCol('hajat');
+            } else saveState();
+            showToast('Permohonan ' + p.status, p.judul);
+        }
+        async function jawabTanya(id) {
+            if (!guardTakmir()) return;
+            const p = appState.permohonan.find(x => x.id === id), t = document.getElementById('jw-' + id), j = t && t.value.trim();
+            if (!p || !j) return showToast('Jawaban kosong', 'Tulis jawaban terlebih dahulu.');
+            appState.qaPublic.unshift({ id: Date.now(), masjidId: curM().id, ustadz: p.judul, tanya: p.detail, jawab: j });
+            await persistCol('qaPublic');
+            await prosesPermohonan(id, true);
+        }
+        async function laporkanMasjid() {
+            const m = curM(), alasan = (prompt('Jelaskan masalahnya (mis. rekening tidak sesuai nama masjid):') || '').trim();
+            if (alasan.length < 5) return;
+            try { const u = await ensureUser(); await db.collection('laporan').add({ masjidId: m.docId, alasan: alasan.slice(0, 500), uid: u.uid, createdAt: serverTs() }); showToast('Laporan terkirim', 'Terima kasih. Admin akan menindaklanjuti.'); }
+            catch (e) { showToast('Gagal mengirim laporan', fbErr(e)); }
+        }
+        function renderVerifBanner() {
+            const el = document.getElementById('verif-banner');
+            if (!el) return;
+            const m = curM();
+            if (!hasAuth(m.id)) { el.classList.add('hidden'); return; }
+            el.innerHTML = `<div class="flex flex-wrap gap-2 items-center text-xs"><b>Status masjid:</b>${chip(m.verified, m.verified ? 'Terverifikasi ✓' : 'Menunggu verifikasi')}<b class="ml-2">Rekening & QRIS:</b>${chip(payInfo && payInfo.approved, !payInfo ? 'Belum diisi' : payInfo.approved ? 'Aktif ✓' : 'Menunggu verifikasi')}</div>
+                ${!m.verified ? '<p class="text-[11px] text-slate-500">Masjid Anda belum tampil kepada jamaah. Pastikan data verifikasi lengkap (menu Data Verifikasi); admin akan menghubungi WhatsApp pengurus.</p>' : ''}
+                ${m.verified && !(payInfo && payInfo.approved) ? '<p class="text-[11px] text-slate-500">Rekening & QRIS belum aktif. Isi lewat tombol Rekening & QRIS dan tunggu persetujuan admin.</p>' : ''}`;
+            el.classList.remove('hidden');
+        }
+        function renderPermohonan() {
+            const el = document.getElementById('dash-permohonan-list');
+            if (!el) return;
+            const l = byM(appState.permohonan), col = { menunggu: 'text-amber-600', disetujui: 'text-emerald-700', ditolak: 'text-rose-600' };
+            el.innerHTML = `<button onclick="refreshPermohonan()" class="text-[11px] font-bold text-emerald-900 mb-2">↻ Muat ulang</button>` + (l.length ? l.map(p => `
+                <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1 mb-2">
+                    <div class="flex justify-between"><span class="font-bold text-emerald-900 uppercase text-[10px]">${esc(p.jenis)}${p.nominal ? ' · Rp ' + p.nominal.toLocaleString('id-ID') : ''}</span><span class="text-[10px] font-bold ${col[p.status] || ''}">${esc(p.status)}</span></div>
+                    <p class="font-semibold text-slate-800">${esc(p.judul)}</p><p class="text-slate-500 break-words">${esc(p.detail)}</p>
+                    ${p.status === 'menunggu' && p.jenis === 'tanya' ? `<textarea id="jw-${esc(p.id)}" rows="2" placeholder="Tulis jawaban…" class="w-full p-2 border rounded-lg"></textarea><div class="flex gap-2 pt-1"><button onclick="jawabTanya(this.dataset.i)" data-i="${esc(p.id)}" class="px-2.5 py-1 bg-emerald-900 text-white rounded-lg font-bold">Jawab & Terbitkan</button><button onclick="prosesPermohonan(this.dataset.i,false)" data-i="${esc(p.id)}" class="px-2.5 py-1 bg-slate-200 rounded-lg font-bold">Tolak</button></div>`
+                    : p.status === 'menunggu' ? `<div class="flex gap-2 pt-1"><button onclick="prosesPermohonan(this.dataset.i,true)" data-i="${esc(p.id)}" class="px-2.5 py-1 bg-emerald-900 text-white rounded-lg font-bold">Setujui</button><button onclick="prosesPermohonan(this.dataset.i,false)" data-i="${esc(p.id)}" class="px-2.5 py-1 bg-slate-200 rounded-lg font-bold">Tolak</button></div>` : ''}
+                </div>`).join('') : '<p class="text-xs text-slate-400">Belum ada permohonan.</p>');
+        }
+
+        // GAMBAR (QRIS & dokumen): dikompres di perangkat
+        function kompres(file, maxPx, maxLen) {
+            return new Promise((res, rej) => {
+                const img = new Image();
+                img.onload = () => {
+                    const sc = Math.min(1, maxPx / Math.max(img.width, img.height)), c = document.createElement('canvas');
+                    c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+                    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+                    let q = .9, out = c.toDataURL('image/jpeg', q);
+                    while (out.length > maxLen && q > .4) { q -= .1; out = c.toDataURL('image/jpeg', q); }
+                    URL.revokeObjectURL(img.src);
+                    out.length > maxLen ? rej(new Error('Gambar terlalu besar')) : res(out);
+                };
+                img.onerror = () => rej(new Error('File bukan gambar yang valid'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        async function pilihQRIS(inp) {
+            const f = inp.files[0]; if (!f) return;
+            try { qrisTmp = await kompres(f, 640, 600000); const pv = document.getElementById('pf-qris-prev'); pv.src = qrisTmp; pv.classList.remove('hidden'); }
+            catch (e) { showToast('Gambar gagal diproses', e.message); }
+        }
+        async function pilihDok(inp) {
+            const f = inp.files[0]; if (!f) return;
+            try { dokTmp = await kompres(f, 1280, 600000); const pv = document.getElementById('vf-doc-prev'); pv.src = dokTmp; pv.classList.remove('hidden'); }
+            catch (e) { showToast('Gambar gagal diproses', e.message); }
+        }
+
+        // DATA VERIFIKASI (rahasia: hanya pemilik & admin)
+        const verifForm = v => `<div class="space-y-3 text-xs">
+            ${fld('vf-nama', 'Nama pengurus (penanggung jawab)', v.kontakNama)}${fld('vf-jab', 'Jabatan', v.jabatan, 'Ketua Takmir / Sekretaris / Bendahara')}${fld('vf-wa', 'Nomor WhatsApp pengurus', v.kontakWA, '08xxxxxxxxxx')}
+            <div><label class="font-semibold text-slate-700">Foto surat tugas / SK pengurus (boleh tutup NIK)</label>
+            <img id="vf-doc-prev" src="${v.dokumen && v.dokumen.startsWith('data:image/') ? v.dokumen : ''}" class="${v.dokumen ? '' : 'hidden'} max-h-32 mt-1 rounded-lg border bg-white">
+            <input type="file" id="vf-doc" accept="image/*" onchange="pilihDok(this)" class="w-full mt-1 text-xs"></div>
+            <p class="text-[10px] text-slate-400">Data ini rahasia: hanya dapat dilihat Anda dan admin SatuMasjid untuk memastikan Anda benar-benar pengurus masjid.</p></div>`;
+        function collectVerif() {
+            const g = id => document.getElementById(id).value.trim();
+            const d = { kontakNama: g('vf-nama'), jabatan: g('vf-jab'), kontakWA: g('vf-wa').replace(/[^\d+]/g, ''), email: (auth.currentUser && auth.currentUser.email) || '', dokumen: dokTmp || (verifInfo && verifInfo.dokumen) || '' };
+            if (!d.kontakNama || !d.jabatan || d.kontakWA.length < 9 || !d.dokumen) { showToast('Data verifikasi belum lengkap', 'Isi nama, jabatan, WhatsApp, dan unggah foto dokumen.'); return null; }
+            return d;
+        }
+        function openModalVerifikasi() {
+            if (!guardTakmir()) return;
+            dokTmp = null;
+            showModal(mHead('Data Verifikasi') + `<div class="mt-3">${verifForm(verifInfo || {})}</div><button onclick="simpanVerifikasi()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Simpan</button>`);
+        }
+        async function simpanVerifikasi() {
+            if (!guardTakmir()) return;
+            const d = collectVerif(); if (!d) return;
+            try { await mref(curM()).collection('private').doc('verifikasi').set({ ...d, updatedAt: serverTs() }); verifInfo = d; dokTmp = null; closeModal(); saveState(); showToast('Tersimpan', 'Data verifikasi diperbarui. Admin akan meninjau.'); }
+            catch (e) { showToast('Gagal menyimpan', fbErr(e)); }
+        }
+
+        // REKENING & QRIS (tampil ke jamaah hanya setelah disetujui admin)
+        function openModalPembayaran() {
+            if (!guardTakmir()) return;
+            qrisTmp = null;
+            const p = payInfo || {};
+            showModal(mHead('Rekening & QRIS') + `<div class="space-y-3 text-xs mt-3">
+                <p>Status: ${chip(p.approved, !payInfo ? 'Belum diisi' : p.approved ? 'Aktif ✓' : 'Menunggu verifikasi admin')}</p>
+                ${fld('pay-an', 'Nama pemilik rekening / QRIS', p.atasNama, 'Sesuai nama masjid / yayasan')}${fld('pay-bank', 'Bank', p.bank, 'BSI / BCA / BRI ...')}${fld('pay-rek', 'Nomor rekening', p.rekening)}
+                <div><label class="font-semibold text-slate-700">Gambar QRIS Masjid</label>
+                <img id="pf-qris-prev" src="${p.qris && p.qris.startsWith('data:image/') ? p.qris : ''}" class="${p.qris ? '' : 'hidden'} w-32 h-32 object-contain border rounded-xl mt-1 bg-white">
+                <input type="file" id="pf-qris" accept="image/*" onchange="pilihQRIS(this)" class="w-full mt-1 text-xs"></div>
+                <p class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">Nama pemilik harus sesuai nama masjid/yayasan. Rekening pribadi akan ditolak. Setiap perubahan ditinjau ulang admin sebelum tampil ke jamaah.</p></div>
+                <button onclick="simpanPembayaran()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Kirim untuk Verifikasi</button>`);
+        }
+        async function simpanPembayaran() {
+            if (!guardTakmir()) return;
+            const g = id => document.getElementById(id).value.trim(), atasNama = g('pay-an'), bank = g('pay-bank'), rekening = g('pay-rek').replace(/\s+/g, '');
+            const qris = qrisTmp || (payInfo && payInfo.qris) || '';
+            if (!atasNama || (!rekening && !qris)) return showToast('Data belum lengkap', 'Isi nama pemilik dan minimal rekening atau QRIS.');
+            if (rekening && (!bank || !/^[0-9\-]{5,30}$/.test(rekening))) return showToast('Rekening tidak valid', 'Isi nama bank dan nomor rekening (angka).');
+            try { await mref(curM()).collection('pembayaran').doc('info').set({ bank, rekening, atasNama, qris, approved: false, updatedAt: serverTs() }); }
+            catch (e) { return showToast('Gagal menyimpan', fbErr(e)); }
+            payInfo = { bank, rekening, atasNama, qris, approved: false }; qrisTmp = null; closeModal(); saveState();
+            showToast('Dikirim untuk verifikasi', 'Rekening & QRIS tampil ke jamaah setelah disetujui admin.');
+        }
+
+        // INFAQ (jamaah): QRIS/rekening diambil dari server, hanya bila sudah disetujui admin
+
+        // PROFIL IDENTITAS MASJID
+        async function simpanProfilAsync() {
+            if (!guardTakmir()) return;
+            const m = curM(), g = id => document.getElementById(id).value.trim();
+            const name = g('pf-name') || m.name, address = g('pf-addr') || m.address, maps = g('pf-maps'), c = parseMapsLink(maps);
+            let lat = m.lat, lng = m.lng;
+            if (maps !== (m.maps || '')) { if (c) { lat = c.lat; lng = c.lng; } else if (maps) showToast('Koordinat belum terbaca', 'Link pendek tidak bisa dibaca. Gunakan link panjang atau tempel koordinat.'); }
+            const changed = name !== m.name || address !== m.address || maps !== (m.maps || '') || lat !== m.lat || lng !== m.lng;
+            if (changed && m.verified && !confirm('Mengubah identitas masjid akan mencabut status verifikasi sampai admin menyetujui ulang. Lanjutkan?')) return;
+            const payload = { name, address, lat: lat ?? null, lng: lng ?? null, maps };
+            if (changed && m.verified) payload.verified = false;
+            try { await mref(m).set(payload, { merge: true }); } catch (e) { return showToast('Gagal menyimpan', fbErr(e)); }
+            Object.assign(m, payload); closeModal(); saveState(); loadPrayerTimes();
+            showToast('Profil tersimpan', payload.verified === false ? 'Menunggu verifikasi ulang admin.' : 'Tersinkron ke server.');
+        }
+
+        // PENDAFTARAN MASJID BARU (+ data verifikasi)
+        function openModalMasjidBaru() {
+            dokTmp = null;
+            showModal(mHead('Daftarkan Masjid Anda') + `<p class="text-xs text-slate-500 mt-2">Masjid tampil ke jamaah setelah admin memverifikasi data berikut.</p>
+                <div class="space-y-3 text-xs mt-3">${fld('nb-name', 'Nama Masjid', '', 'Masjid Al-Ikhlas')}${fld('nb-addr', 'Alamat', '', 'Jl. Contoh No. 1, Kelurahan, Kota')}${MAPS_FIELD('nb-maps', 'nb-maps-info', '')}</div>
+                <p class="font-bold text-slate-900 text-xs mt-4 mb-2">Data Verifikasi Pengurus</p>${verifForm({})}
+                <button onclick="simpanMasjidBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Kirim Pendaftaran</button>
+                <button onclick="logoutTakmir()" class="w-full py-2 text-slate-500 font-bold text-xs">Batal & keluar</button>`);
+        }
+        async function simpanMasjidBaru() {
+            const g = id => document.getElementById(id).value.trim(), name = g('nb-name'), addr = g('nb-addr'), maps = g('nb-maps');
+            if (!name || !addr) return showToast('Data belum lengkap', 'Isi nama dan alamat masjid.');
+            const v = collectVerif(); if (!v) return;
+            const u = auth.currentUser, c = parseMapsLink(maps);
+            try {
+                const ref = db.collection('masjid').doc(u.uid), ex = await ref.get();
+                if (!ex.exists) {
+                    await ref.set({ id: Date.now(), name, address: addr, lat: c ? c.lat : null, lng: c ? c.lng : null, maps, ownerUid: u.uid, verified: false, createdAt: serverTs() });
+                    await ref.collection('private').doc('verifikasi').set({ ...v, updatedAt: serverTs() });
+                }
+                await syncMasjid();
+                const m = appState.masjidList.find(x => x.ownerUid === u.uid);
+                if (!m) throw new Error('Data masjid tidak ditemukan setelah disimpan');
+                appState.activeMasjidId = m.id; saveState(); await loadMasjidData();
+                closeModal(); switchUserMode('takmir');
+                showToast('Pendaftaran terkirim', 'Menunggu verifikasi admin. Kami akan menghubungi WhatsApp pengurus.');
+            } catch (e) { showToast('Gagal menyimpan', fbErr(e)); }
+        }
+
+        // LOGIN
+        async function doLogin(reg) {
+            const email = document.getElementById('lg-email').value.trim(), pass = document.getElementById('lg-pass').value;
+            if (!email || !pass) return showToast('Data belum lengkap', 'Isi email dan kata sandi.');
+            if (reg && pass.length < 8) return showToast('Kata sandi terlalu pendek', 'Gunakan minimal 8 karakter.');
+            try {
+                if (reg) { const c = await auth.createUserWithEmailAndPassword(email, pass); try { await c.user.sendEmailVerification(); } catch (e) {} }
+                else await auth.signInWithEmailAndPassword(email, pass);
+            } catch (e) { return showToast('Gagal masuk', fbErr(e)); }
+            afterLogin();
+        }
+        async function afterLogin() {
+            closeModal(); hideAuth();
+            const u = auth.currentUser;
+            if (u.providerData.some(p => p.providerId === 'password') && !u.emailVerified) return openModalVerifEmail();
+            await checkAdmin(u);
+            await syncMasjid();
+            const m = appState.masjidList.find(x => x.ownerUid === u.uid);
+            if (m) { appState.activeMasjidId = m.id; saveState(); await loadMasjidData(); switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
+            else if (isAdminUser) showToast('Admin', 'Buka menu samping > Verifikasi & Laporan.');
+            else openModalMasjidBaru();
+        }
+        function openModalVerifEmail() {
+            const u = auth.currentUser;
+            showModal(mHead('Verifikasi Email Anda') + `<div class="text-xs text-slate-600 space-y-2 py-3"><p>Kami mengirim tautan verifikasi ke <b>${esc(u.email)}</b>. Buka email (cek folder spam), klik tautannya, lalu tekan tombol di bawah.</p></div>
+                <button onclick="cekVerifEmail()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">Saya sudah verifikasi</button>
+                <button onclick="kirimUlangVerif()" class="w-full py-2 text-emerald-900 font-bold text-xs mt-1">Kirim ulang email</button>
+                <button onclick="logoutTakmir()" class="w-full py-2 text-slate-500 font-bold text-xs">Keluar</button>`);
+        }
+        async function cekVerifEmail() {
+            const u = auth.currentUser;
+            try { await u.reload(); await u.getIdToken(true); } catch (e) { return showToast('Gagal', fbErr(e)); }
+            if (u.emailVerified) { closeModal(); afterLogin(); } else showToast('Belum terverifikasi', 'Klik tautan di email Anda terlebih dahulu.');
+        }
+        async function kirimUlangVerif() {
+            try { await auth.currentUser.sendEmailVerification(); showToast('Terkirim', 'Periksa email Anda (cek folder spam).'); } catch (e) { showToast('Gagal', fbErr(e)); }
+        }
+        function logoutTakmir() {
+            if (auth) auth.signOut();
+            appState.permohonan = []; appState.mustahik = []; payInfo = null; verifInfo = null; isAdminUser = false;
+            closeModal(); switchUserMode('jamaah'); showToast('Keluar', 'Anda telah keluar dari akun.');
+        }
+
+        // PANEL ADMIN: verifikasi masjid, rekening/QRIS, laporan
+        function adminShell(html) { document.getElementById('info-body').innerHTML = html; const sh = document.getElementById('info-sheet'); sh.classList.remove('hidden'); sh.scrollTop = 0; lucide.createIcons(); }
+        async function openAdmin() {
+            if (!isAdminUser || !db) return;
+            adminShell('<p class="text-sm text-slate-500">Memuat data…</p>');
+            try {
+                const snap = await db.collection('masjid').get();
+                adminRows = await Promise.all(snap.docs.map(async d => {
+                    const [v, p] = await Promise.all([d.ref.collection('private').doc('verifikasi').get(), d.ref.collection('pembayaran').doc('info').get()]);
+                    return { docId: d.id, m: d.data(), v: v.exists ? v.data() : null, p: p.exists ? p.data() : null };
+                }));
+                adminRows.sort((a, b) => (a.m.verified === true) - (b.m.verified === true));
+                const lap = await db.collection('laporan').orderBy('createdAt', 'desc').limit(30).get();
+                adminLaporan = lap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAdmin();
+            } catch (e) { adminShell('<p class="text-sm text-rose-600">Gagal memuat: ' + esc(fbErr(e)) + '</p>'); }
+        }
+        function renderAdmin() {
+            const img = (u, c) => u && u.startsWith('data:image/') ? `<img src="${esc(u)}" class="${c} rounded-lg border bg-white" alt="">` : '<span class="text-slate-400">-</span>';
+            const btn = (i, k, v, t, cls) => `<button onclick="adminAct(${i},'${k}',${v})" class="px-3 py-1.5 rounded-lg font-bold ${cls}">${t}</button>`;
+            adminShell(`<h3 class="font-arabic text-2xl text-emerald-900">Verifikasi & Laporan</h3>
+                <p class="text-[11px] text-slate-500 bg-amber-50 border border-amber-200 rounded-lg p-3 my-3 leading-relaxed"><b>Sebelum menyetujui:</b> (1) hubungi WhatsApp pengurus dan pastikan ia memang pengurus; (2) cocokkan lokasi di Google Maps; (3) pastikan nama pemilik rekening/QRIS sama dengan nama masjid, bukan rekening pribadi; (4) periksa foto dokumen.</p>
+                ${adminRows.length ? adminRows.map((r, i) => `<div class="bg-white border border-slate-200 rounded-2xl p-4 mb-3 text-xs space-y-2">
+                    <div class="flex flex-wrap items-center gap-2"><b class="text-sm text-slate-900">${esc(r.m.name)}</b>${chip(r.m.verified === true, r.m.verified === true ? 'Terverifikasi' : 'Menunggu')}</div>
+                    <p class="text-slate-600">${esc(r.m.address)} ${/^https?:\/\//.test(r.m.maps || '') ? `· <a href="${esc(r.m.maps)}" target="_blank" rel="noopener noreferrer" class="text-emerald-800 font-bold">Buka Maps</a>` : ''}</p>
+                    ${r.v ? `<p><b>Kontak:</b> ${esc(r.v.kontakNama)} (${esc(r.v.jabatan)}) · <a class="text-emerald-800 font-bold" target="_blank" rel="noopener noreferrer" href="https://wa.me/${encodeURIComponent(String(r.v.kontakWA).replace(/^0/, '62').replace(/\D/g, ''))}">WhatsApp ${esc(r.v.kontakWA)}</a> · ${esc(r.v.email)}</p><div>${img(r.v.dokumen, 'max-h-56')}</div>` : '<p class="text-rose-600 font-bold">Belum ada data verifikasi</p>'}
+                    ${r.p ? `<div class="border-t pt-2"><p><b>Rekening/QRIS:</b> a.n. ${esc(r.p.atasNama)} · ${esc(r.p.bank)} ${esc(r.p.rekening)} ${chip(r.p.approved === true, r.p.approved === true ? 'Aktif' : 'Menunggu')}</p>${img(r.p.qris, 'max-h-48 mt-1')}</div>` : ''}
+                    <div class="flex flex-wrap gap-2 pt-1">${r.m.verified === true ? btn(i, 'masjid', false, 'Cabut Verifikasi', 'bg-rose-100 text-rose-700') : btn(i, 'masjid', true, 'Setujui Masjid', 'bg-emerald-900 text-white')}
+                    ${r.p ? (r.p.approved === true ? btn(i, 'pay', false, 'Cabut Rekening/QRIS', 'bg-rose-100 text-rose-700') : btn(i, 'pay', true, 'Setujui Rekening/QRIS', 'bg-gold-500 text-emerald-950')) : ''}</div></div>`).join('') : '<p class="text-sm text-slate-400">Belum ada masjid terdaftar.</p>'}
+                <h4 class="font-bold text-slate-900 mt-6 mb-2 text-sm">Laporan jamaah (${adminLaporan.length})</h4>
+                ${adminLaporan.map(x => { const i = adminRows.findIndex(r => r.docId === x.masjidId); return `<div class="bg-white border border-rose-100 rounded-xl p-3 mb-2 text-xs"><p class="font-bold text-slate-800">${i >= 0 ? esc(adminRows[i].m.name) : esc(x.masjidId)}</p><p class="text-slate-600 break-words">${esc(x.alasan)}</p>${i >= 0 && adminRows[i].m.verified === true ? `<div class="pt-2">${btn(i, 'masjid', false, 'Cabut Verifikasi', 'bg-rose-100 text-rose-700')}</div>` : ''}</div>`; }).join('') || '<p class="text-xs text-slate-400">Tidak ada laporan.</p>'}`);
+        }
+        async function adminAct(i, kind, val) {
+            const r = adminRows[i];
+            if (!r || !isAdminUser) return;
+            if (!val && !confirm('Cabut status ini?')) return;
+            try {
+                const ref = db.collection('masjid').doc(r.docId), by = auth.currentUser.uid;
+                if (kind === 'masjid') await ref.update({ verified: val, verifiedAt: serverTs(), verifiedBy: by });
+                else await ref.collection('pembayaran').doc('info').update({ approved: val, approvedAt: serverTs(), approvedBy: by });
+                showToast('Tersimpan', val ? 'Disetujui.' : 'Dicabut.');
+                await openAdmin(); syncMasjid();
+            } catch (e) { showToast('Gagal', fbErr(e)); }
+        }
+
         // HALAMAN MASUK, TENTANG & PANDUAN
         function showAuth() {
             document.getElementById('auth-screen').classList.remove('hidden');
@@ -1392,7 +1625,7 @@
                 <div class="grid sm:grid-cols-2 gap-3">${card('Transparansi', 'Kas masuk dan keluar dapat dilihat jamaah sehingga tumbuh rasa percaya.')}${card('Kemudahan', 'Informasi ibadah dan layanan masjid ada dalam genggaman, tanpa perlu mencari-cari.')}${card('Kebersamaan', 'Memudahkan jamaah menemukan masjid, bergabung sebagai relawan, dan saling membantu.')}${card('Amanah', 'Data masjid dikelola oleh pengurus yang terverifikasi melalui akun resmi.')}</div>
                 ${hd('Fitur Utama')}
                 <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600 list-disc list-inside"><li>Jadwal sholat & kompas kiblat</li><li>Masjid terdekat dengan peta</li><li>Jadwal kajian & poster</li><li>Infaq QRIS / rekening</li><li>Kas masjid terbuka</li><li>Pinjam sarana & prasarana</li><li>Relawan & bantuan sosial</li><li>Tanya Ustadz & kotak saran</li></ul>
-                <div class="mt-8 p-4 rounded-2xl bg-gold-300/30 border border-gold-400/50 text-xs text-slate-700 leading-relaxed"><b>Catatan penting:</b> SatuMasjid tidak memproses atau menyimpan dana. Infaq ditransfer langsung ke rekening atau QRIS milik masjid, lalu dicatat setelah diverifikasi pengurus.</div>`,
+                <div class="mt-8 p-4 rounded-2xl bg-gold-300/30 border border-gold-400/50 text-xs text-slate-700 leading-relaxed"><b>Catatan penting:</b> SatuMasjid tidak memproses atau menyimpan dana. Infaq ditransfer langsung ke rekening atau QRIS milik masjid, lalu dicatat setelah diverifikasi pengurus. Rekening dan QRIS hanya tampil setelah ditinjau admin SatuMasjid.</div>`,
             jamaah: () => hd('Panduan Jamaah').replace('mt-8', 'mt-2') + steps([
                 ['Pilih masjid', 'gunakan pilihan masjid di bagian atas, atau cari lewat tab Masjid Terdekat.'],
                 ['Lihat jadwal & kiblat', 'jadwal sholat memakai waktu setempat. Buka Kompas Kiblat dan izinkan lokasi serta sensor gerak.'],
@@ -1404,7 +1637,8 @@
             takmir: () => hd('Panduan Takmir').replace('mt-8', 'mt-2') + steps([
                 ['Masuk atau daftar', 'dengan email dan kata sandi, atau akun Google, pada halaman masuk.'],
                 ['Daftarkan masjid', 'saat pertama kali masuk, isi nama, alamat, dan link Google Maps masjid Anda. Satu akun mengelola satu masjid.'],
-                ['Lengkapi profil', 'buka Profil & Rekening untuk mengubah nama, alamat, link Google Maps, rekening, dan mengunggah gambar QRIS.'],
+                ['Lengkapi profil & verifikasi', 'isi nama, alamat, link Google Maps, serta data verifikasi (nama, jabatan, WhatsApp, foto surat tugas). Masjid baru tampil ke jamaah setelah admin menyetujui.'],
+                ['Rekening & QRIS', 'isi rekening atas nama masjid dan unggah QRIS. Setiap perubahan ditinjau ulang admin sebelum tampil ke jamaah.'],
                 ['Catat kas', 'tambahkan pemasukan dan pengeluaran di menu Keuangan. Data tampil terbuka bagi jamaah.'],
                 ['Kelola kajian & inventaris', 'tambah, ubah, atau hapus jadwal kajian dan data sarana prasarana.'],
                 ['Proses permohonan', 'setujui atau tolak donasi, pinjaman, relawan, dan pengajuan bantuan dari dashboard. Donasi yang disetujui otomatis masuk kas.']
@@ -1415,6 +1649,7 @@
                 ['Bagaimana data saya disimpan?', 'Profil masjid dan QRIS tersimpan di server Firebase. Data lain seperti kas dan permohonan saat ini tersimpan di perangkat dan belum tersinkron antar perangkat.'],
                 ['Jadwal sholat tampak berbeda dengan masjid saya?', 'Jadwal dihitung berdasarkan kota dan metode Kemenag. Selisih beberapa menit (ihtiyat) bisa terjadi; ikuti jadwal resmi masjid.'],
                 ['Kiblat tidak bergerak?', 'Izinkan akses lokasi dan sensor gerak, kalibrasi kompas dengan gerakan angka 8, dan jauhkan dari benda logam atau magnet.'],
+                ['Bagaimana saya tahu rekening masjid itu asli?', 'Hanya masjid bertanda ✓ dengan rekening/QRIS yang sudah ditinjau admin yang dapat dipakai berinfaq. Pastikan nama penerima sesuai nama masjid. Jika ada yang janggal, tekan "Laporkan masjid ini" di jendela infaq.'],
                 ['Saya lupa kata sandi Takmir.', 'Isi email pada halaman masuk, lalu tekan "Lupa kata sandi?". Tautan atur ulang akan dikirim ke email Anda.']
             ])
         };
@@ -1428,40 +1663,37 @@
 
         // PROFIL MASJID (takmir)
         function openModalProfil() {
+            if (!guardTakmir()) return;
             const m = curM();
-            qrisTmp = null;
-            const mb = document.getElementById('modal-box'); mb.style.maxHeight = '85vh'; mb.style.overflowY = 'auto';
-            document.getElementById('modal-box').innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Profil & Rekening Masjid</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
-                <div class="space-y-3 text-xs">
-                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
-                </div>
-                <div class="mt-3">${MAPS_FIELD('pf-maps', 'pf-maps-info', m.maps)}</div>
-                <div class="text-xs mt-3">
-                    <label class="font-semibold text-slate-700">Gambar QRIS Masjid</label>
-                    <img id="pf-qris-prev" src="${m.qris && m.qris.startsWith('data:image/') ? m.qris : ''}" class="${m.qris ? '' : 'hidden'} w-32 h-32 object-contain border rounded-xl mt-1 bg-white">
-                    <input type="file" id="pf-qris" accept="image/*" onchange="pilihQRIS(this)" class="w-full mt-1 text-xs">
-                    <p class="text-[10px] text-slate-400 mt-1">Gambar diperkecil otomatis (maks. 640 px) agar ringan.</p>
-                </div>
+            showModal(mHead('Profil Masjid') + `<div class="space-y-3 text-xs mt-3">
+                ${m.verified ? '<p class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">Mengubah nama, alamat, atau lokasi akan mencabut status verifikasi sampai admin menyetujui ulang.</p>' : ''}
+                ${fld('pf-name', 'Nama Masjid', m.name)}${fld('pf-addr', 'Alamat', m.address)}${MAPS_FIELD('pf-maps', 'pf-maps-info', m.maps)}</div>
                 <button onclick="simpanProfil()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Simpan Profil</button>
-                <button onclick="logoutTakmir()" class="w-full py-2 text-rose-600 font-bold text-xs mt-1">Keluar Akun${auth && auth.currentUser ? ' (' + esc(auth.currentUser.email || '') + ')' : ''}</button>`;
-            document.getElementById('modal-backdrop').classList.remove('hidden');
-            lucide.createIcons();
+                <button onclick="logoutTakmir()" class="w-full py-2 text-rose-600 font-bold text-xs mt-1">Keluar Akun${auth && auth.currentUser ? ' (' + esc(auth.currentUser.email || '') + ')' : ''}</button>`);
         }
         function simpanProfil() { simpanProfilAsync(); }
 
         // JADWAL SHOLAT (Aladhan, metode Kemenag RI; nilai awal = cadangan offline)
         const KOTA_JADWAL = { city: 'Semarang', country: 'Indonesia' };
+        let ptOk = false, ptKey = '';
+        const TZ_LABEL = { 'Asia/Jakarta': 'WIB', 'Asia/Pontianak': 'WIB', 'Asia/Makassar': 'WITA', 'Asia/Jayapura': 'WIT' };
+        const tzLabel = () => TZ_LABEL[Intl.DateTimeFormat().resolvedOptions().timeZone] || '';
         let prayerTimes = { Subuh: '04:08', Syuruq: '05:23', Dzuhur: '11:36', Ashar: '14:52', Maghrib: '17:48', Isya: '19:00' };
         async function loadPrayerTimes() {
+            const m = curM(), loc = m.lat != null ? { lat: m.lat, lng: m.lng } : (userPos || { lat: -6.9932, lng: 110.4203 });
+            const d = new Date(), tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const key = `${d.toDateString()}|${loc.lat.toFixed(1)},${loc.lng.toFixed(1)}`, ck = 'sm_pt_' + key;
+            if (key === ptKey) return;
+            try { const c = JSON.parse(localStorage.getItem(ck)); if (c) { prayerTimes = c; ptKey = key; ptOk = true; renderPrayerCards(); return; } } catch (e) {}
             try {
-                const d = new Date();
-                const r = await fetch(`https://api.aladhan.com/v1/timingsByCity/${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}?city=${KOTA_JADWAL.city}&country=${KOTA_JADWAL.country}&method=20`);
+                const r = await fetch(`https://api.aladhan.com/v1/timings/${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}?latitude=${loc.lat}&longitude=${loc.lng}&method=20&timezonestring=${encodeURIComponent(tz)}`);
                 const t = (await r.json()).data.timings;
-                prayerTimes = { Subuh: t.Fajr.slice(0,5), Syuruq: t.Sunrise.slice(0,5), Dzuhur: t.Dhuhr.slice(0,5), Ashar: t.Asr.slice(0,5), Maghrib: t.Maghrib.slice(0,5), Isya: t.Isha.slice(0,5) };
+                prayerTimes = { Subuh: t.Fajr.slice(0, 5), Syuruq: t.Sunrise.slice(0, 5), Dzuhur: t.Dhuhr.slice(0, 5), Ashar: t.Asr.slice(0, 5), Maghrib: t.Maghrib.slice(0, 5), Isya: t.Isha.slice(0, 5) };
+                ptKey = key; ptOk = true;
+                Object.keys(localStorage).filter(k => k.startsWith('sm_pt_') && k !== ck).forEach(k => localStorage.removeItem(k));
+                localStorage.setItem(ck, JSON.stringify(prayerTimes));
                 renderPrayerCards();
-            } catch (e) { /* tetap pakai jadwal cadangan */ }
+            } catch (e) { /* tetap jadwal perkiraan */ }
         }
         function nextPrayer() {
             const now = new Date();
@@ -1471,7 +1703,8 @@
         let currentUserMode = 'jamaah'; // 'jamaah' or 'takmir'
 
         function saveState() {
-            try { localStorage.setItem('satumasjid_db', JSON.stringify(appState)); } catch (e) { showToast('Penyimpanan penuh', 'Data tidak dapat disimpan di perangkat ini.'); }
+            try { const { permohonan, mustahik, ...rest } = appState; localStorage.setItem('satumasjid_db', JSON.stringify({ ...rest, permohonan: [], mustahik: [] })); }
+            catch (e) { showToast('Penyimpanan penuh', 'Data tidak dapat disimpan di perangkat ini.'); }
             renderUI();
         }
 
@@ -1508,6 +1741,7 @@
             if (['kegiatan', 'sarpras-jamaah', 'konsultasi', 'takmir-wishlist', 'takmir-zis'].includes(tabKey)) document.querySelectorAll('.mnav-menu').forEach(b => { b.classList.add('text-gold-400', 'font-bold'); b.classList.remove('text-emerald-300'); });
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (tabKey === 'terdekat') setTimeout(initTerdekat, 50);
+            if (tabKey === 'takmir-dashboard' && hasAuth()) refreshPermohonan();
             if (tabKey === 'takmir-dashboard' || tabKey === 'takmir-keuangan') {
                 setTimeout(renderKasChart, 100);
             }
@@ -1557,6 +1791,7 @@
             appState.activeMasjidId = parseInt(masjidId);
             if (currentUserMode === 'takmir' && !hasAuth(appState.activeMasjidId)) switchUserMode('jamaah');
             saveState();
+            loadMasjidData(); loadPrayerTimes();
             showToast("Masjid Diperbarui", "Data disesuaikan dengan masjid pilihan Anda.");
         }
 
@@ -1565,14 +1800,13 @@
             const toast = document.getElementById('toast');
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-message').innerText = message;
-
             toast.classList.remove('translate-x-full', 'opacity-0');
             toast.classList.add('translate-x-0', 'opacity-100');
-
-            setTimeout(() => {
+            clearTimeout(window.__toastT);
+            window.__toastT = setTimeout(() => {
                 toast.classList.add('translate-x-full', 'opacity-0');
                 toast.classList.remove('translate-x-0', 'opacity-100');
-            }, 3000);
+            }, 3500);
         }
 
         // REALTIME CLOCK & PRAYER SCHEDULER
@@ -1581,9 +1815,9 @@
             document.getElementById('header-clock').innerText = now.toTimeString().split(' ')[0];
             const nx = nextPrayer(), diff = Math.max(0, Math.floor((nx.d - now) / 1000));
             const hms = [Math.floor(diff / 3600), Math.floor(diff % 3600 / 60), diff % 60].map(v => String(v).padStart(2, '0')).join(':');
-            document.getElementById('header-prayer-next').innerText = `${nx.n} ${nx.t} WIB`;
+            document.getElementById('header-prayer-next').innerText = `${nx.n} ${nx.t}${ptOk ? '' : '*'} ${tzLabel()}`;
             const a = document.getElementById('countdown-prayer-name'), b = document.getElementById('countdown-timer');
-            if (a) a.innerText = nx.n;
+            if (a) a.innerText = nx.n + (ptOk ? '' : ' (perkiraan)');
             if (b) b.innerText = hms;
         }
         setInterval(updateClock, 1000);
@@ -1594,7 +1828,7 @@
             if (appState.masjidList.length && !appState.masjidList.some(m => m.id === appState.activeMasjidId)) appState.activeMasjidId = appState.masjidList[0].id;
             const currentMasjid = curM();
             
-            document.getElementById('display-masjid-title').innerText = currentMasjid.name;
+            document.getElementById('display-masjid-title').innerText = currentMasjid.name + (currentMasjid.verified ? ' ✓' : '');
             document.getElementById('display-masjid-address').innerText = currentMasjid.address;
             document.getElementById('active-masjid-tag').innerText = currentMasjid.name;
             const sel = document.getElementById('masjid-selector');
@@ -1631,6 +1865,7 @@
             renderTakmirMustahikTable();
             renderQAPublic();
             renderPermohonan();
+            renderVerifBanner();
             renderTerdekat();
 
             lucide.createIcons();
@@ -1943,30 +2178,31 @@
         }
 
         // MODAL SIMULATION HANDLERS
-        function openModalQRIS(programName) {
+        async function openModalQRIS(programName) {
             modalCtx = programName;
             const m = curM();
-            document.getElementById('modal-box').innerHTML = `
-                <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Infaq QRIS & Transfer</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+            showModal(mHead('Infaq QRIS & Transfer') + '<p class="text-xs text-slate-500 py-6 text-center">Memuat data rekening…</p>');
+            let pay = null;
+            if (db && m.docId && m.verified) { try { const d = await mref(m).collection('pembayaran').doc('info').get(); if (d.exists && d.data().approved === true) pay = d.data(); } catch (e) {} }
+            if (!pay) return showModal(mHead('Infaq QRIS & Transfer') + `<div class="text-center space-y-2 py-4 text-xs text-slate-600"><p class="font-bold text-slate-900">Rekening / QRIS belum tersedia</p><p>Masjid ini belum memiliki rekening atau QRIS yang diverifikasi. Demi keamanan, <b>jangan transfer</b> ke rekening yang Anda terima dari sumber lain.</p></div>`);
+            showModal(mHead('Infaq QRIS & Transfer') + `
                 <div class="text-center space-y-3 py-2">
                     <p class="text-xs text-slate-600">Program: <strong class="text-emerald-900">${esc(programName)}</strong></p>
-                    <div class="w-52 bg-slate-100 border-2 border-dashed border-emerald-900 rounded-2xl mx-auto p-2">${m.qris && m.qris.startsWith('data:image/') ? `<img src="${esc(m.qris)}" alt="QRIS ${esc(m.name)}" class="w-full object-contain rounded-lg">` : '<p class="text-[11px] text-slate-500 p-6">Takmir belum mengunggah QRIS. Gunakan transfer rekening di bawah.</p>'}</div>
-                    <div class="bg-slate-50 p-3 rounded-xl text-xs text-left space-y-1 font-mono"><p class="text-slate-500">Rekening ${esc(m.bank)}:</p><p class="font-bold text-slate-900">${esc(m.rekening)} (a.n. ${esc(m.name)})</p></div>
+                    <p>${chip(true, 'Terverifikasi SatuMasjid ✓')}</p>
+                    ${pay.qris && pay.qris.startsWith('data:image/') ? `<div class="w-52 bg-slate-100 border-2 border-dashed border-emerald-900 rounded-2xl mx-auto p-2"><img src="${esc(pay.qris)}" alt="QRIS ${esc(m.name)}" class="w-full object-contain rounded-lg"></div>` : ''}
+                    ${pay.rekening ? `<div class="bg-slate-50 p-3 rounded-xl text-xs text-left space-y-1 font-mono"><p class="text-slate-500">Rekening ${esc(pay.bank)}:</p><p class="font-bold text-slate-900 break-all">${esc(pay.rekening)}</p><p class="text-slate-700">a.n. ${esc(pay.atasNama)}</p><button onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.v); showToast('Disalin', 'Nomor rekening disalin.')" data-v="${esc(pay.rekening)}" class="text-emerald-800 font-bold">Salin nomor</button></div>` : `<p class="text-xs text-slate-700">a.n. <b>${esc(pay.atasNama)}</b></p>`}
+                    <p class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 text-left">Pastikan nama penerima sesuai nama masjid. SatuMasjid tidak pernah meminta transfer ke rekening pribadi.</p>
                     <div class="text-left text-xs"><label class="font-semibold text-slate-700">Nominal yang Anda transfer (Rp)</label><input type="number" id="donasi-nominal" min="1000" placeholder="100000" class="w-full mt-1 p-2 border rounded-xl"></div>
                     <p class="text-[10px] text-slate-400">Infaq masuk ke kas setelah diverifikasi Takmir.</p>
                 </div>
-                <button onclick="confirmDonasiMasuk()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">Konfirmasi Saya Sudah Transfer</button>`;
-            document.getElementById('modal-backdrop').classList.remove('hidden');
-            lucide.createIcons();
+                <button onclick="confirmDonasiMasuk()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">Konfirmasi Saya Sudah Transfer</button>
+                <button onclick="laporkanMasjid()" class="w-full py-2 text-rose-600 font-bold text-[11px] mt-1">Laporkan masjid ini</button>`);
         }
 
-        function confirmDonasiMasuk() {
+        async function confirmDonasiMasuk() {
             const n = parseInt(document.getElementById('donasi-nominal').value) || 0;
             if (n < 1000) return showToast('Nominal belum valid', 'Minimal Rp 1.000.');
-            addPermohonan('donasi', modalCtx, 'Konfirmasi transfer jamaah', n);
-            closeModal();
-            showToast('Jazakallahu Khairan!', `Konfirmasi Rp ${n.toLocaleString('id-ID')} terkirim, menunggu verifikasi Takmir.`);
+            if (await addPermohonan('donasi', modalCtx, 'Konfirmasi transfer jamaah', n)) { closeModal(); showToast('Jazakallahu Khairan!', `Konfirmasi Rp ${n.toLocaleString('id-ID')} terkirim, menunggu verifikasi Takmir.`); }
         }
 
         function openModalKiblat() {
@@ -2029,12 +2265,10 @@
             lucide.createIcons();
         }
 
-        function simpanRelawan() {
+        async function simpanRelawan() {
             const nama = document.getElementById('relawan-nama').value.trim(), hp = document.getElementById('relawan-hp').value.trim();
             if (!nama || !hp) return showToast('Data belum lengkap', 'Isi nama dan nomor WhatsApp.');
-            addPermohonan('relawan', modalCtx, nama + ' — ' + hp);
-            closeModal();
-            showToast('Alhamdulillah!', 'Pendaftaran relawan terkirim. Takmir akan menghubungi via WhatsApp.');
+            if (await addPermohonan('relawan', modalCtx, nama + ' — ' + hp)) { closeModal(); showToast('Alhamdulillah!', 'Pendaftaran relawan terkirim. Takmir akan menghubungi via WhatsApp.'); }
         }
 
         function openModalPinjamSarpras(namaBarang) {
@@ -2068,42 +2302,35 @@
             lucide.createIcons();
         }
 
-        function simpanPinjamSarpras() {
+        async function simpanPinjamSarpras() {
             const pj = document.getElementById('pj-nama').value.trim(), t = document.getElementById('pj-tgl').value, tj = document.getElementById('pj-tujuan').value.trim();
             if (!pj || !t) return showToast('Data belum lengkap', 'Isi penanggung jawab dan tanggal.');
-            addPermohonan('pinjam', modalCtx, `${pj} · ${t} · ${tj || '-'}`);
-            closeModal();
-            showToast('Permohonan Terkirim', 'Menunggu persetujuan Pengurus Takmir.');
+            if (await addPermohonan('pinjam', modalCtx, `${pj} · ${t} · ${tj || '-'}`)) { closeModal(); showToast('Permohonan Terkirim', 'Menunggu persetujuan Pengurus Takmir.'); }
         }
 
         function closeModal() {
             document.getElementById('modal-backdrop').classList.add('hidden');
+            const mb = document.getElementById('modal-box'); mb.style.maxHeight = ''; mb.style.overflowY = '';
         }
 
         // SUBMIT HANDLERS FOR FORMS
-        function submitBantuanSocial(e) {
+        async function submitBantuanSocial(e) {
             e.preventDefault();
-            addPermohonan('bantuan', 'Pengajuan Bantuan Sosial', [...e.target.elements].filter(x => x.value && x.tagName !== 'BUTTON').map(x => x.value).join(' | '));
-            showToast('Pengajuan Terkirim', 'Pengajuan Anda masuk ke Takmir Sosial.');
-            e.target.reset();
+            const f = e.target, d = [...f.elements].filter(x => x.value && x.tagName !== 'BUTTON').map(x => x.value).join(' | ');
+            if (await addPermohonan('bantuan', 'Pengajuan Bantuan Sosial', d)) { showToast('Pengajuan Terkirim', 'Pengajuan Anda masuk ke Takmir Sosial.'); f.reset(); }
         }
 
-        function submitPertanyaanUstadz(e) {
+        async function submitPertanyaanUstadz(e) {
             e.preventDefault();
-            const ustadz = document.getElementById('tanya-ustadz-select').value;
-            const tanya = document.getElementById('tanya-pertanyaan').value;
-            
-            appState.qaPublic.unshift({ id: Date.now(), ustadz, tanya, jawab: "Pertanyaan baru diterima, dalam antrean jawaban Ustadz." });
-            saveState();
-            showToast("Pertanyaan Terkirim", "Ustadz akan menjawab konsultasi Anda.");
-            e.target.reset();
+            const f = e.target, ustadz = document.getElementById('tanya-ustadz-select').value, tanya = document.getElementById('tanya-pertanyaan').value.trim();
+            if (!tanya) return showToast('Pertanyaan kosong', 'Tulis pertanyaan Anda.');
+            if (await addPermohonan('tanya', ustadz, tanya)) { showToast('Pertanyaan Terkirim', 'Ustadz akan menjawab. Jawaban yang diterbitkan tampil di daftar Tanya Jawab.'); f.reset(); }
         }
 
-        function submitKotakSaran(e) {
+        async function submitKotakSaran(e) {
             e.preventDefault();
-            addPermohonan('saran', document.getElementById('saran-kategori').value, document.getElementById('saran-isi').value);
-            showToast('Masukan Diterima', 'Jazakallahu khairan atas masukan Anda.');
-            e.target.reset();
+            const f = e.target;
+            if (await addPermohonan('saran', document.getElementById('saran-kategori').value, document.getElementById('saran-isi').value)) { showToast('Masukan Diterima', 'Jazakallahu khairan atas masukan Anda.'); f.reset(); }
         }
 
         // TAKMIR ADMIN ADD DATA MODALS
@@ -2141,29 +2368,33 @@
         }
 
         function simpanTrans(tipe) {
-            const tanggal = document.getElementById('trans-date').value;
+            if (!guardTakmir()) return;
+            const tanggal = document.getElementById('trans-date').value || new Date().toISOString().slice(0, 10);
             const kategori = document.getElementById('trans-kat').value || 'Umum';
             const keterangan = document.getElementById('trans-ket').value || '-';
             const nominal = parseFloat(document.getElementById('trans-nom').value) || 0;
 
-            if (nominal <= 0) return;
+            if (nominal <= 0) return showToast('Nominal belum valid', 'Isi nominal lebih dari 0.');
 
-            appState.keuangan.unshift({ id: Date.now(), tanggal, tipe, kategori, keterangan, nominal });
+            appState.keuangan.unshift({ id: Date.now(), masjidId: appState.activeMasjidId, tanggal, tipe, kategori, keterangan, nominal });
             saveState();
+            persistCol('keuangan');
             closeModal();
             showToast("Transaksi Disimpan", "Catatan kas keuangan diperbarui.");
         }
 
         function hapusTrans(id) {
+            if (!guardTakmir()) return;
             if (confirm("Hapus catatan transaksi kas ini?")) {
                 appState.keuangan = appState.keuangan.filter(k => k.id !== id);
                 saveState();
+            persistCol('keuangan');
             }
         }
 
         function exportKeuanganCSV() {
-            const q = v => '"' + String(v).replace(/"/g, '""') + '"';
-            const rows = byM(appState.keuangan).map(k => [k.tanggal, k.tipe, q(k.kategori), q(k.keterangan), k.nominal].join(','));
+            const q = v => { v = String(v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+            const rows = byM(appState.keuangan).map(k => [q(k.tanggal), q(k.tipe), q(k.kategori), q(k.keterangan), k.nominal].join(','));
             const blob = new Blob(['\ufeffTanggal,Tipe,Kategori,Keterangan,Nominal\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -2202,28 +2433,32 @@
         }
 
         function simpanKajianBaru() {
+            if (!guardTakmir()) return;
             const tema = document.getElementById('add-kajian-tema').value;
             const ustaz = document.getElementById('add-kajian-ustaz').value;
             const waktu = document.getElementById('add-kajian-waktu').value || "Jadwal Menyusul";
 
-            if (!tema) return;
+            if (!tema) return showToast('Data belum lengkap', 'Isi tema kajian.');
 
             appState.kajian.push({
-                id: Date.now(),
+                id: Date.now(), masjidId: appState.activeMasjidId,
                 tema, ustaz, waktu,
                 lokasi: "Ruang Utama Sholat",
                 poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80",
                 live: false
             });
             saveState();
+            persistCol('kajian');
             closeModal();
             showToast("Sukses", "Agenda kajian baru telah terpublikasi ke Jamaah.");
         }
 
         function hapusKajian(id) {
+            if (!guardTakmir()) return;
             if (!confirm('Hapus data ini?')) return;
             appState.kajian = appState.kajian.filter(k => k.id !== id);
             saveState();
+            persistCol('kajian');
         }
 
         function openModalTambahSarpras() {
@@ -2260,23 +2495,27 @@
         }
 
         function simpanSarprasBaru() {
+            if (!guardTakmir()) return;
             const nama = document.getElementById('add-sarp-nama').value;
             const kategori = document.getElementById('add-sarp-kat').value || "Umum";
             const jumlah = parseInt(document.getElementById('add-sarp-jml').value) || 1;
             const lokasi = document.getElementById('add-sarp-lok').value || "Gudang";
 
-            if (!nama) return;
+            if (!nama) return showToast('Data belum lengkap', 'Isi nama terlebih dahulu.');
 
-            appState.sarpras.push({ id: Date.now(), nama, kategori, jumlah, lokasi, kondisi: "Baik", publik: false });
+            appState.sarpras.push({ id: Date.now(), masjidId: appState.activeMasjidId, nama, kategori, jumlah, lokasi, kondisi: "Baik", publik: false });
             saveState();
+            persistCol('sarpras');
             closeModal();
             showToast("Tersimpan", "Data inventaris masjid ditambahkan.");
         }
 
         function hapusSarpras(id) {
+            if (!guardTakmir()) return;
             if (!confirm('Hapus data ini?')) return;
             appState.sarpras = appState.sarpras.filter(s => s.id !== id);
             saveState();
+            persistCol('sarpras');
         }
 
         function openModalTambahHajat() {
@@ -2313,23 +2552,27 @@
         }
 
         function simpanHajatBaru() {
+            if (!guardTakmir()) return;
             const judul = document.getElementById('add-hajat-judul').value;
             const target = parseFloat(document.getElementById('add-hajat-target').value) || 0;
             const batasWaktu = document.getElementById('add-hajat-batas').value || "Segera";
             const ket = document.getElementById('add-hajat-ket').value || "-";
 
-            if (!judul || target <= 0) return;
+            if (!judul || target <= 0) return showToast('Data belum lengkap', 'Isi judul dan target dana lebih dari 0.');
 
-            appState.hajat.push({ id: Date.now(), judul, target, terkumpul: 0, batasWaktu, ket });
+            appState.hajat.push({ id: Date.now(), masjidId: appState.activeMasjidId, judul, target, terkumpul: 0, batasWaktu, ket });
             saveState();
+            persistCol('hajat');
             closeModal();
             showToast("Dipublikasikan", "Program kebutuhan masjid telah dipublikasikan.");
         }
 
         function hapusHajat(id) {
+            if (!guardTakmir()) return;
             if (!confirm('Hapus data ini?')) return;
             appState.hajat = appState.hajat.filter(h => h.id !== id);
             saveState();
+            persistCol('hajat');
         }
 
         function openModalTambahMustahik() {
@@ -2367,22 +2610,26 @@
         }
 
         function simpanMustahikBaru() {
+            if (!guardTakmir()) return;
             const nama = document.getElementById('add-must-nama').value;
             const kategori = document.getElementById('add-must-kat').value;
             const alamat = document.getElementById('add-must-alamat').value || "-";
 
-            if (!nama) return;
+            if (!nama) return showToast('Data belum lengkap', 'Isi nama terlebih dahulu.');
 
-            appState.mustahik.push({ id: Date.now(), nama, kategori, alamat, status: "Terdaftar Penerima" });
+            appState.mustahik.push({ id: Date.now(), masjidId: appState.activeMasjidId, nama, kategori, alamat, status: "Terdaftar Penerima" });
             saveState();
+            persistCol('mustahik');
             closeModal();
             showToast("Pendataan Berhasil", "Data Mustahik berhasil ditambahkan ke database ZIS.");
         }
 
         function hapusMustahik(id) {
+            if (!guardTakmir()) return;
             if (!confirm('Hapus data ini?')) return;
             appState.mustahik = appState.mustahik.filter(m => m.id !== id);
             saveState();
+            persistCol('mustahik');
         }
 
         // CHART VISUALIZATION TAKMIR
@@ -2428,7 +2675,13 @@
             if (tp && document.getElementById('view-' + tp)) { hideAuth(); switchTab(tp); }
             setTimeout(maybeShowInstallBanner, 4500);
             updateInstallUI();
-            if (auth) auth.onAuthStateChanged(() => renderUI());
+            if (auth) auth.onAuthStateChanged(u => {
+                if (!u || u.isAnonymous) {
+                    if (currentUserMode === 'takmir') switchUserMode('jamaah');
+                    appState.permohonan = []; appState.mustahik = []; payInfo = null; verifInfo = null; isAdminUser = false;
+                } else { checkAdmin(u).then(() => renderUI()); syncMasjid(); }
+                renderUI();
+            });
             renderUI();
         };
     </script>

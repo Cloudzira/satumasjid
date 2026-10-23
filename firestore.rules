@@ -1,0 +1,203 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =====================================================================
+    //  SatuMasjid - Firestore Rules
+    //  Prinsip: tidak ada data yang tampil ke jamaah sebelum admin
+    //  memverifikasi masjid; rekening/QRIS punya persetujuan terpisah;
+    //  data pribadi (verifikasi, mustahik, permohonan) tidak pernah publik.
+    // =====================================================================
+
+    // ---------- Fungsi bantu ----------
+    function signedIn() { return request.auth != null; }
+
+    // Email harus sudah diverifikasi (akun Google otomatis terverifikasi)
+    function emailOk() {
+      return signedIn() && request.auth.token.get('email_verified', false) == true;
+    }
+
+    // Admin = ada dokumen /admins/{uid} (dibuat manual lewat Firebase Console)
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function masjidPath(id) { return /databases/$(database)/documents/masjid/$(id); }
+
+    function isOwnerOf(id) {
+      return signedIn() && exists(masjidPath(id))
+          && get(masjidPath(id)).data.ownerUid == request.auth.uid;
+    }
+
+    function isVerified(id) {
+      return exists(masjidPath(id)) && get(masjidPath(id)).data.get('verified', false) == true;
+    }
+
+    // ---------- Validasi ----------
+    function validMasjid(d) {
+      return d.keys().hasAll(['id', 'name', 'address', 'lat', 'lng', 'maps', 'ownerUid', 'verified'])
+        && d.keys().hasOnly(['id', 'name', 'address', 'lat', 'lng', 'maps', 'ownerUid', 'verified', 'createdAt', 'verifiedAt', 'verifiedBy'])
+        && d.id is number
+        && d.name is string && d.name.size() > 1 && d.name.size() <= 120
+        && d.address is string && d.address.size() > 1 && d.address.size() <= 300
+        && d.maps is string && d.maps.size() <= 600
+        && (d.lat == null || (d.lat is number && d.lat >= -90 && d.lat <= 90))
+        && (d.lng == null || (d.lng is number && d.lng >= -180 && d.lng <= 180))
+        && d.verified is bool;
+    }
+
+    function sameIdentity(n, o) {
+      return n.name == o.name && n.address == o.address && n.maps == o.maps
+          && n.lat == o.lat && n.lng == o.lng;
+    }
+
+    function validVerif(d) {
+      return d.keys().hasOnly(['kontakNama', 'jabatan', 'kontakWA', 'email', 'dokumen', 'updatedAt'])
+        && d.kontakNama is string && d.kontakNama.size() > 1 && d.kontakNama.size() <= 100
+        && d.jabatan is string && d.jabatan.size() > 0 && d.jabatan.size() <= 60
+        && d.kontakWA is string && d.kontakWA.size() >= 9 && d.kontakWA.size() <= 20
+        && d.email is string && d.email.size() <= 120
+        && d.dokumen is string && d.dokumen.size() > 20 && d.dokumen.size() <= 700000;
+    }
+
+    // Pemilik SELALU menulis approved=false: setiap perubahan rekening/QRIS
+    // wajib disetujui ulang admin sebelum tampil ke jamaah.
+    function validPay(d) {
+      return d.keys().hasOnly(['bank', 'rekening', 'atasNama', 'qris', 'approved', 'updatedAt'])
+        && d.approved == false
+        && d.atasNama is string && d.atasNama.size() > 1 && d.atasNama.size() <= 120
+        && d.bank is string && d.bank.size() <= 60
+        && d.rekening is string && d.rekening.size() <= 40
+        && d.qris is string && d.qris.size() <= 700000
+        && (d.rekening.size() > 0 || d.qris.size() > 0);
+    }
+
+    // ---------- Admin ----------
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;   // hanya untuk mengecek diri sendiri
+      allow list, write: if false;                           // dibuat manual lewat Console
+    }
+
+    // ---------- Identitas masjid ----------
+    match /masjid/{id} {
+      // Publik hanya melihat masjid TERVERIFIKASI. Pemilik & admin melihat miliknya.
+      allow read: if resource.data.verified == true
+                  || (signedIn() && resource.data.ownerUid == request.auth.uid)
+                  || isAdmin();
+
+      // Satu akun = satu masjid (ID dokumen = UID). Selalu mulai belum terverifikasi.
+      allow create: if emailOk()
+                    && id == request.auth.uid
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.verified == false
+                    && validMasjid(request.resource.data);
+
+      allow update: if (
+          // Pemilik: hanya kolom identitas. Mengubah identitas mencabut verifikasi.
+          signedIn() && resource.data.ownerUid == request.auth.uid && emailOk()
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.id == resource.data.id
+          && validMasjid(request.resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['name', 'address', 'maps', 'lat', 'lng', 'verified'])
+          && (
+               (sameIdentity(request.resource.data, resource.data)
+                  && request.resource.data.verified == resource.data.verified)
+               || (!sameIdentity(request.resource.data, resource.data)
+                  && request.resource.data.verified == false)
+             )
+        ) || (
+          // Admin: hanya boleh mengubah status verifikasi
+          isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['verified', 'verifiedAt', 'verifiedBy'])
+        );
+
+      allow delete: if signedIn() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+    }
+
+    // ---------- Data verifikasi pengurus (RAHASIA: pemilik & admin saja) ----------
+    match /masjid/{id}/private/{doc} {
+      allow read: if isOwnerOf(id) || isAdmin();
+      allow create, update: if isOwnerOf(id) && emailOk() && doc == 'verifikasi'
+                            && validVerif(request.resource.data);
+      allow delete: if isOwnerOf(id) || isAdmin();
+    }
+
+    // ---------- Rekening & QRIS ----------
+    match /masjid/{id}/pembayaran/{doc} {
+      // Jamaah baru bisa membaca bila masjid terverifikasi DAN rekening disetujui admin
+      allow read: if isOwnerOf(id) || isAdmin()
+                  || (isVerified(id) && resource.data.approved == true);
+
+      allow create, update: if (
+          isOwnerOf(id) && emailOk() && doc == 'info' && validPay(request.resource.data)
+        ) || (
+          isAdmin() && resource != null
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['approved', 'approvedAt', 'approvedBy'])
+        );
+
+      allow delete: if isOwnerOf(id) || isAdmin();
+    }
+
+    // ---------- Data masjid: kas, kajian, wakaf, sarpras, tanya-jawab, mustahik ----------
+    match /masjid/{id}/data/{col} {
+      allow read: if isOwnerOf(id)
+                  || (col != 'mustahik' && (isAdmin() || isVerified(id)));   // mustahik: pemilik saja
+
+      allow create, update: if isOwnerOf(id)
+                            && col in ['keuangan', 'kajian', 'hajat', 'sarpras', 'mustahik', 'qaPublic']
+                            && request.resource.data.keys().hasOnly(['items', 'updatedAt'])
+                            && request.resource.data.items is list
+                            && request.resource.data.items.size() <= 1500;
+
+      allow delete: if isOwnerOf(id);
+    }
+
+    // ---------- Permohonan jamaah (donasi, pinjam, relawan, bantuan, saran, tanya) ----------
+    match /masjid/{id}/permohonan/{pid} {
+      // Hanya masjid terverifikasi yang bisa menerima permohonan; pengirim (anonim) harus login.
+      allow create: if signedIn() && isVerified(id)
+                    && request.resource.data.keys().hasOnly(['uid', 'jenis', 'judul', 'detail', 'nominal', 'status', 'tgl', 'createdAt'])
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == 'menunggu'
+                    && request.resource.data.jenis in ['donasi', 'pinjam', 'relawan', 'bantuan', 'saran', 'tanya']
+                    && request.resource.data.judul is string && request.resource.data.judul.size() <= 200
+                    && request.resource.data.detail is string && request.resource.data.detail.size() <= 1200
+                    && request.resource.data.tgl is string && request.resource.data.tgl.size() <= 10
+                    && request.resource.data.nominal is number
+                    && request.resource.data.nominal >= 0 && request.resource.data.nominal <= 1000000000
+                    && request.resource.data.createdAt == request.time;
+
+      // Dibaca pengurus masjid & pengirimnya sendiri (admin tidak perlu melihat data pribadi)
+      allow read: if isOwnerOf(id) || (signedIn() && resource.data.uid == request.auth.uid);
+
+      // Pengurus hanya boleh mengubah status
+      allow update: if isOwnerOf(id)
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && request.resource.data.status in ['disetujui', 'ditolak'];
+
+      allow delete: if isOwnerOf(id);
+    }
+
+    // ---------- Laporan jamaah (rekening mencurigakan, dll.) ----------
+    match /laporan/{lid} {
+      allow create: if signedIn()
+                    && request.resource.data.keys().hasOnly(['masjidId', 'alasan', 'uid', 'createdAt'])
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.masjidId is string && request.resource.data.masjidId.size() <= 128
+                    && request.resource.data.alasan is string
+                    && request.resource.data.alasan.size() >= 5 && request.resource.data.alasan.size() <= 500
+                    && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ---------- Selain itu: tolak semua ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

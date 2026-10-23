@@ -1,5 +1,5 @@
 /* SatuMasjid service worker: cache shell + stale-while-revalidate untuk aset statis */
-const V = 'satumasjid-v2';
+const V = 'satumasjid-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
 const SKIP = /(firestore|identitytoolkit|securetoken|firebaseinstallations|aladhan|overpass|openstreetmap|accounts\.google|apis\.google|firebaseapp\.com)/i;
 
