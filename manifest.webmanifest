@@ -26,5 +26,33 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "id": "./",
+  "prefer_related_applications": false,
+  "categories": [
+    "religion",
+    "lifestyle"
+  ],
+  "shortcuts": [
+    {
+      "name": "Masjid Terdekat",
+      "url": "./?tab=terdekat",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Infaq Digital",
+      "url": "./?tab=infaq",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
