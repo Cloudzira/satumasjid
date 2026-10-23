@@ -1164,13 +1164,20 @@
 
         // SIDEBAR
         let sbActions = [];
+        function accountGroup() {
+            const u = auth && auth.currentUser;
+            if (u && !u.isAnonymous) return [['Akun', [
+                ['copy', 'Salin UID akun (untuk admin)', () => { if (navigator.clipboard) navigator.clipboard.writeText(u.uid); showToast('UID disalin', 'Tempel sebagai Document ID di koleksi admins.'); }],
+                ['log-out', 'Keluar' + (u.email ? ' (' + u.email + ')' : ''), () => logoutTakmir()]]]];
+            return [['Akun', [['log-in', 'Masuk Pengurus / Admin', () => showAuth()]]]];
+        }
         function renderSidebar() {
             sbActions = [];
             const groups = (isAdminUser ? [['Admin SatuMasjid', [['shield-check', 'Verifikasi & Laporan' + (adminPending ? ` (${adminPending} menunggu)` : ''), () => openAdmin()]]]] : []).concat(currentUserMode === 'takmir'
                 ? [['Pengelolaan Takmir', [['target', 'Daftar Kebutuhan Masjid', () => switchTab('takmir-wishlist')], ['heart-handshake', 'ZIS & Mustahik', () => switchTab('takmir-zis')], ['settings', 'Profil Masjid', () => openModalProfil()], ['qr-code', 'Rekening & QRIS', () => openModalPembayaran()], ['badge-check', 'Data Verifikasi', () => openModalVerifikasi()]]]]
                 : [['Layanan Jamaah', [['hand-heart', 'Volunter & Sosial', () => switchTab('kegiatan')], ['package-check', 'Pinjam Sarpras', () => switchTab('sarpras-jamaah')], ['message-square', 'Tanya Ustadz & Saran', () => switchTab('konsultasi')]]]]
-            ).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]);
-            document.getElementById('sidebar-nav').innerHTML = groups.map(g => `<div><p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold px-3 mb-1">${g[0]}</p>${g[1].map(it => { sbActions.push(it[2]); return `<button onclick="sbRun(${sbActions.length - 1})" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 text-left"><i data-lucide="${it[0]}" class="w-5 h-5 text-emerald-900 flex-shrink-0"></i><span>${it[1]}</span></button>`; }).join('')}</div>`).join('');
+            ).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]).concat(accountGroup());
+            document.getElementById('sidebar-nav').innerHTML = groups.map(g => `<div><p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold px-3 mb-1">${g[0]}</p>${g[1].map(it => { sbActions.push(it[2]); return `<button onclick="sbRun(${sbActions.length - 1})" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 text-left"><i data-lucide="${it[0]}" class="w-5 h-5 text-emerald-900 flex-shrink-0"></i><span>${esc(it[1])}</span></button>`; }).join('')}</div>`).join('');
             document.getElementById('sb-masjid').innerText = curM().name;
         }
         function openSidebar() {
