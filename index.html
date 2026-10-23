@@ -219,12 +219,13 @@
                     <p class="text-[11px] text-slate-400 text-center mt-2">Tanpa akun. Cukup untuk melihat jadwal, kajian, dan berinfaq.</p>
                     <div class="flex items-center gap-3 my-6 text-[11px] text-slate-400 uppercase tracking-wider"><span class="flex-1 h-px bg-slate-200"></span>Pengurus / Takmir<span class="flex-1 h-px bg-slate-200"></span></div>
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3 text-xs">
-                        <div><label class="font-semibold text-slate-700">Masjid</label><select id="lg-masjid" onchange="changeMasjid(this.value)" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl bg-white"></select></div>
                         <div><label class="font-semibold text-slate-700">Email</label><input id="lg-email" type="email" autocomplete="email" placeholder="nama@email.com" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl"></div>
-                        <div><div class="flex justify-between"><label class="font-semibold text-slate-700">Kata Sandi</label><button type="button" onclick="lupaSandi()" class="text-emerald-800 font-semibold">Lupa kata sandi?</button></div>
-                            <div class="relative"><input id="lg-pass" type="password" autocomplete="current-password" class="w-full mt-1 p-2.5 pr-10 border border-slate-300 rounded-xl"><button type="button" onclick="togglePass()" class="absolute right-3 top-3.5 text-slate-400"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div>
-                        <button onclick="doLogin(false)" class="w-full py-2.5 bg-gold-500 hover:bg-gold-600 text-emerald-950 font-bold rounded-xl">Masuk sebagai Takmir</button>
-                        <div class="grid grid-cols-2 gap-2"><button onclick="doLogin(true)" class="py-2.5 bg-emerald-50 text-emerald-900 font-bold rounded-xl">Daftar Akun Baru</button><button onclick="doGoogle()" class="py-2.5 border border-slate-300 text-slate-700 font-bold rounded-xl">Google</button></div>
+                        <div><label class="font-semibold text-slate-700">Kata Sandi</label>
+                            <div class="relative"><input id="lg-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin(false)" class="w-full mt-1 p-2.5 pr-10 border border-slate-300 rounded-xl"><button type="button" onclick="togglePass()" aria-label="Tampilkan kata sandi" class="absolute right-3 top-3.5 text-slate-400"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div>
+                        <button onclick="doLogin(false)" class="w-full py-2.5 bg-gold-500 hover:bg-gold-600 text-emerald-950 font-bold rounded-xl">Masuk</button>
+                        <div class="flex items-center gap-3 text-[10px] text-slate-400"><span class="flex-1 h-px bg-slate-200"></span>atau<span class="flex-1 h-px bg-slate-200"></span></div>
+                        <button onclick="doGoogle()" class="w-full py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold rounded-xl flex items-center justify-center gap-2"><i class="fa-brands fa-google"></i>Masuk dengan Google</button>
+                        <p class="text-center text-slate-500">Belum punya akun? <button type="button" onclick="doLogin(true)" class="font-bold text-emerald-900">Daftar</button> · <button type="button" onclick="lupaSandi()" class="font-bold text-emerald-900">Lupa kata sandi?</button></p>
                     </div>
                     <p class="text-center text-xs text-slate-500 mt-6"><button onclick="openInfo('tentang')" class="font-semibold text-emerald-900">Tentang</button> · <button onclick="openInfo('jamaah')" class="font-semibold text-emerald-900">Panduan</button> · <button onclick="openInfo('faq')" class="font-semibold text-emerald-900">FAQ</button></p>
                     <p class="text-center text-[11px] text-slate-400 mt-3">Crafted with <span style="color:#ff007f">♥</span> by <a href="https://kurniapedia.my.id" target="_blank" rel="noopener noreferrer" class="font-semibold text-emerald-900">Kurniapedia</a> 2026</p>
@@ -267,9 +268,7 @@
                 <div class="relative">
                     <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-emerald-300"></i>
                     <select id="masjid-selector" onchange="changeMasjid(this.value)" class="w-full pl-9 pr-8 py-2 bg-emerald-950/60 text-emerald-100 border border-emerald-700/50 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-gold-400 appearance-none">
-                        <option value="1">Masjid Raya Al-Ikhlas (Pusat Kota)</option>
-                        <option value="2">Masjid An-Nur (Kampung Damai)</option>
-                        <option value="3">Masjid Al-Jihad (Kompleks Permata)</option>
+                        <option value="">Memuat…</option>
                     </select>
                     <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-2.5 text-emerald-300 pointer-events-none"></i>
                 </div>
@@ -349,7 +348,7 @@
                 </div>
 
                 <div class="flex items-center gap-2"><button onclick="openSidebar()" class="text-[11px] font-semibold text-emerald-100 hover:text-white px-3 py-1 rounded-lg border border-emerald-700/50 flex items-center gap-1.5"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>Menu Lainnya</button><div class="text-[11px] text-gold-300 font-semibold bg-emerald-900/80 px-3 py-1 rounded-lg border border-emerald-700/50">
-                    <span id="active-masjid-tag">Masjid Raya Al-Ikhlas</span>
+                    <span id="active-masjid-tag">SatuMasjid</span>
                 </div></div>
             </div>
         </nav>
@@ -362,6 +361,7 @@
         <!-- TAB 1: BERANDA JAMAAH & JADWAL SHOLAT -->
         <!-- ========================================== -->
         <section id="view-home" class="view-content space-y-6">
+            <div id="empty-masjid-banner" class="hidden p-4 rounded-2xl bg-gold-300/30 border border-gold-400/50 text-xs text-slate-700 leading-relaxed"><b>Belum ada masjid terdaftar.</b> Pengurus masjid dapat mendaftar lewat tombol <b>Takmir Admin</b>. Sementara itu, gunakan tab <b>Masjid Terdekat</b> untuk menemukan masjid di sekitar Anda.</div>
             
             <!-- Hero Islamic Greeting Banner -->
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-950 text-white p-6 sm:p-8 shadow-xl border border-emerald-700/30">
@@ -369,14 +369,14 @@
                 <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
                     <div class="md:col-span-2 space-y-2">
                         <p class="text-arabic text-2xl sm:text-3xl text-gold-300 font-bold">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
-                        <h2 class="text-xl sm:text-2xl font-black">Selamat Datang di Portal <span id="display-masjid-title">Masjid Raya Al-Ikhlas</span></h2>
+                        <h2 class="text-xl sm:text-2xl font-black">Selamat Datang di Portal <span id="display-masjid-title">SatuMasjid</span></h2>
                         <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed max-w-xl">
                             Mari makmurkan masjid bersama. Dapatkan informasi jadwal sholat, agenda kajian, wakaf digital, serta program sosial kemasyarakatan dalam satu platform.
                         </p>
                         <div class="pt-2 flex flex-wrap gap-2 text-xs">
                             <span class="bg-emerald-800/80 text-emerald-100 px-3 py-1 rounded-full border border-emerald-700/50 flex items-center space-x-1">
                                 <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-400"></i>
-                                <span id="display-masjid-address">Jl. H. Rangkayo Sutan No. 12, Pusat Kota</span>
+                                <span id="display-masjid-address">Belum ada masjid terdaftar</span>
                             </span>
                             <span class="bg-emerald-800/80 text-gold-300 px-3 py-1 rounded-full border border-emerald-700/50 flex items-center space-x-1 font-semibold">
                                 <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
@@ -1025,69 +1025,35 @@
     <!-- APPLICATION JAVASCRIPT LOGIC -->
     <script>
         // MOCK INITIAL DATA persistence
-        const DEFAULT_MASJID_DATA = {
-            masjidList: [
-                { id: 1, name: "Masjid Raya Al-Ikhlas", address: "Jl. H. Rangkayo Sutan No. 12, Pusat Kota" },
-                { id: 2, name: "Masjid An-Nur", address: "Jl. Damai Sejahtera No. 45, Kampung Damai" },
-                { id: 3, name: "Masjid Al-Jihad", address: "Kompleks Permata Indah Blok B" }
-            ],
-            activeMasjidId: 1,
-            userBookmarks: [],
-            keuangan: [
-                { id: 1, tanggal: "2026-10-18", tipe: "pemasukan", kategori: "Infaq Jumat", keterangan: "Kotak Amal Sholat Jumat Berjamaah", nominal: 6850000 },
-                { id: 2, tanggal: "2026-10-19", tipe: "pengeluaran", kategori: "Operasional", keterangan: "Tagihan Listrik AC & Air Masjid", nominal: 2400000 },
-                { id: 3, tanggal: "2026-10-20", tipe: "pemasukan", kategori: "Wakaf Hajat", keterangan: "Donasi Pengadaan Digital TV dari H. Budi", nominal: 8500000 },
-                { id: 4, tanggal: "2026-10-21", tipe: "pengeluaran", kategori: "Kajian", keterangan: "Honorarium & Akomodasi Ustadz Penceramah", nominal: 1200000 }
-            ],
-            kajian: [
-                { id: 1, tema: "Tafsir Surah Al-Kahfi & Hikmah Akhir Zaman", ustaz: "Ust. Dr. Hilman Fauzi", waktu: "Sabtu, Ba'da Subuh", lokasi: "Ruang Utama Sholat", poster: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=400&q=80", live: true },
-                { id: 2, tema: "Fiqih Muamalah & Akad Syariah Modern", ustaz: "Ust. Ammi Nur Baits", waktu: "Ahad, Ba'da Maghrib", lokasi: "Ruang Utama Sholat", poster: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80", live: false },
-                { id: 3, tema: "Tazkiyatun Nafs: Menyucikan Hati", ustaz: "Ust. Ahmad Ridwan, Lc", waktu: "Rabu, Ba'da Isya", lokasi: "Aula Lt. 2 Masjid", poster: "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=400&q=80", live: false }
-            ],
-            hajat: [
-                { id: 1, judul: "Pengadaan Digital Display Jam Shalat 65 Inch", target: 15000000, terkumpul: 11200000, batasWaktu: "15 Nov 2026", ket: "Pengadaan Layanan Digital Signage jadwal iqamah & slide materi kajian." },
-                { id: 2, judul: "Renovasi Karpet Area Wudhu & Toilet Wanita", target: 6500000, terkumpul: 6500000, batasWaktu: "01 Nov 2026", ket: "Penggantian karpet anti licin dan pembaruan kran wudhu." }
-            ],
-            sarpras: [
-                { id: 1, nama: "Mobil Ambulans Masjid (Layanan 24 Jam)", kategori: "Kendaraan", jumlah: 1, lokasi: "Garansi Utama", kondisi: "Sangat Baik", publik: true },
-                { id: 2, nama: "Set Perlengkapan Jenazah & Kain Kafan", kategori: "Sosial", jumlah: 5, lokasi: "Gudang Khusus", kondisi: "Tersedia", publik: true },
-                { id: 3, nama: "Tenda Acara & 100 Kursi Lipat", kategori: "Peralatan", jumlah: 2, lokasi: "Gudang Belakang", kondisi: "Baik", publik: true },
-                { id: 4, nama: "Mixer Audio Sound System Yamaha 16 Ch", kategori: "Elektronik", jumlah: 1, lokasi: "Ruang Audio", kondisi: "Baik", publik: false }
-            ],
-            mustahik: [
-                { id: 1, nama: "Ibu Maryam (Janda Dhuafa)", kategori: "Fakir / Miskin", alamat: "RT 03 / RW 02 No. 14", status: "Rutin Menerima Bulanan" },
-                { id: 2, nama: "Bpk. Suwandi (Mualaf)", kategori: "Mualaf", alamat: "RT 01 / RW 04 No. 08", status: "Bantuan Pembinaan" }
-            ],
-            qaPublic: [
-                { id: 1, ustadz: "Ust. Dr. Hilman Fauzi", tanya: "Bagaimana hukumnya sholat tahajud jamaah di masjid?", jawab: "Sholat tahajud jamaah diperbolehkan sesekali untuk pengajaran dan syiar." }
-            ]
-        };
+        const DEFAULT_MASJID_DATA = { masjidList: [], activeMasjidId: 0, userBookmarks: [], keuangan: [], kajian: [], hajat: [], sarpras: [], mustahik: [], qaPublic: [] };
 
         // State Store
-        const D = DEFAULT_MASJID_DATA, P = 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&w=400&q=80';
+        const D = DEFAULT_MASJID_DATA;
         const COLS = ['keuangan','kajian','hajat','sarpras','mustahik','qaPublic'];
-        COLS.forEach(k => D[k].forEach(x => x.masjidId = 1));
-        D.ver = 2; D.permohonan = []; D.userBookmarks = [];
-        D.masjidList.forEach((m,i) => Object.assign(m, { bank: 'BSI', rekening: ['7123-4567-89','8800-1122-33','5566-7788-90'][i], lat: [-6.9932, -7.0051, -6.9667][i], lng: [110.4203, 110.4381, 110.4167][i] }));
-        D.kajian.push({id:101,masjidId:2,tema:'Kajian Kitab Riyadhus Shalihin',ustaz:'Ust. Fauzan, Lc',waktu:"Jumat, Ba'da Maghrib",lokasi:'Teras Masjid',poster:P,live:false},{id:102,masjidId:3,tema:"Tahsin Al-Qur'an Dewasa",ustaz:'Ust. Hasan, S.Pd.I',waktu:"Selasa, Ba'da Isya",lokasi:'Aula Masjid',poster:P,live:false});
-        D.hajat.push({id:101,masjidId:2,judul:'Pembangunan Tempat Wudhu Baru',target:20000000,terkumpul:4500000,batasWaktu:'31 Des 2026',ket:'Perluasan area wudhu jamaah.'});
-        D.keuangan.push({id:101,masjidId:2,tanggal:'2026-10-20',tipe:'pemasukan',kategori:'Infaq Jumat',keterangan:'Kotak amal Jumat',nominal:3200000});
-        D.sarpras.push({id:101,masjidId:2,nama:'Tenda Acara 5x10',kategori:'Peralatan',jumlah:1,lokasi:'Gudang',kondisi:'Baik',publik:true});
+        const DEMO_IDS = [1, 2, 3];
+        D.masjidList = []; D.activeMasjidId = 0; COLS.forEach(k => D[k] = []);
+        D.ver = 3; D.permohonan = []; D.userBookmarks = [];
 
         function loadState() {
             const fresh = () => JSON.parse(JSON.stringify(D));
             try {
                 const old = JSON.parse(localStorage.getItem('satumasjid_db'));
-                if (old && old.ver === 2) return old;
+                if (old && old.ver === 3) return old;
                 const d = fresh();
-                if (old) COLS.forEach(k => { if (Array.isArray(old[k])) d[k] = [...old[k].map(x => ({ masjidId: 1, ...x })), ...d[k].filter(x => x.masjidId !== 1)]; });
+                if (old && old.ver === 2) { // buang masjid & data contoh dari versi sebelumnya
+                    d.masjidList = (old.masjidList || []).filter(m => !DEMO_IDS.includes(m.id));
+                    COLS.forEach(k => { d[k] = (old[k] || []).filter(x => !DEMO_IDS.includes(x.masjidId)); });
+                    d.permohonan = (old.permohonan || []).filter(x => !DEMO_IDS.includes(x.masjidId));
+                    d.activeMasjidId = d.masjidList.length ? d.masjidList[0].id : 0;
+                }
                 return d;
             } catch (e) { return fresh(); }
         }
         let appState = loadState();
-        appState.masjidList.forEach(m => { const d = D.masjidList.find(x => x.id === m.id); if (d && m.lat == null) { m.lat = d.lat; m.lng = d.lng; } });
+        
         let modalCtx = '';
-        const curM = () => appState.masjidList.find(m => m.id === appState.activeMasjidId) || appState.masjidList[0];
+        const EMPTY_M = { id: 0, name: 'Belum ada masjid', address: 'Belum ada masjid terdaftar', bank: '', rekening: '', lat: null, lng: null, maps: '', qris: '' };
+        const curM = () => appState.masjidList.find(m => m.id === appState.activeMasjidId) || EMPTY_M;
         const byM = arr => arr.filter(x => x.masjidId === appState.activeMasjidId);
         const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         const hasAuth = (id = appState.activeMasjidId) => { const m = appState.masjidList.find(x => x.id === id); return !!(auth && auth.currentUser && m && m.ownerUid === auth.currentUser.uid); };
@@ -1172,12 +1138,12 @@
             const o = origin();
             mapLayer.clearLayers();
             const all = [
-                ...appState.masjidList.filter(m => m.lat != null).map(m => ({ id: m.id, name: m.name, sub: m.address, lat: m.lat, lng: m.lng, reg: true })),
+                ...appState.masjidList.filter(m => m.lat != null).map(m => ({ id: m.id, name: m.name, sub: m.address, lat: m.lat, lng: m.lng, maps: m.maps, reg: true })),
                 ...osmCache.map(x => ({ ...x, sub: 'Data OpenStreetMap', reg: false }))
             ].map(x => ({ ...x, d: hav(o.lat, o.lng, x.lat, x.lng) })).sort((a, b) => a.d - b.d);
             if (userPos) L.circleMarker([o.lat, o.lng], { radius: 8, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: .9 }).addTo(mapLayer).bindPopup('Lokasi Anda');
             all.forEach(x => {
-                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${x.d.toFixed(1)} km${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
+                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${x.d.toFixed(1)} km${x.maps && /^https?:\/\//.test(x.maps) ? `<br><a href="${esc(x.maps)}" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>` : ''}${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
                 (x.reg ? L.marker([x.lat, x.lng]) : L.circleMarker([x.lat, x.lng], { radius: 6, color: '#0d5c3a', fillColor: '#34d399', fillOpacity: .9 })).addTo(mapLayer).bindPopup(pop);
             });
             document.getElementById('terdekat-list').innerHTML = all.slice(0, 20).map(x => `
@@ -1217,7 +1183,14 @@
             if (!db) return;
             try {
                 const snap = await db.collection('masjid').get();
-                snap.forEach(d => { const m = appState.masjidList.find(x => String(x.id) === d.id); if (m) Object.assign(m, d.data()); });
+                snap.forEach(d => {
+                    const dat = d.data(), lid = dat.id ?? Number(d.id);
+                    if (['1', '2', '3'].includes(d.id) && dat.id === undefined) return; // sisa data contoh lama
+                    if (!Number.isFinite(lid)) return;
+                    const m = appState.masjidList.find(x => x.id === lid);
+                    if (m) Object.assign(m, dat, { id: m.id, docId: d.id });
+                    else appState.masjidList.push({ ...dat, id: lid, docId: d.id });
+                });
                 saveState();
             } catch (e) { console.warn('Sync gagal', e); }
         }
@@ -1237,15 +1210,43 @@
         async function afterLogin() {
             closeModal(); hideAuth();
             await syncMasjid();
-            const m = curM();
-            if (!m.ownerUid && confirm('Masjid ini belum punya pengurus terdaftar. Jadikan akun Anda pengurus ' + m.name + '?')) {
-                try {
-                    await db.collection('masjid').doc(String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, qris: m.qris || '', ownerUid: auth.currentUser.uid });
-                    m.ownerUid = auth.currentUser.uid; saveState();
-                } catch (e) { return showToast('Gagal klaim masjid', fbErr(e)); }
-            }
-            if (hasAuth()) { switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
-            else showToast('Akses ditolak', 'Akun ini bukan pengurus masjid ini.');
+            const m = appState.masjidList.find(x => x.ownerUid === auth.currentUser.uid);
+            if (m) { appState.activeMasjidId = m.id; saveState(); switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
+            else openModalMasjidBaru();
+        }
+        function openModalMasjidBaru() {
+            document.getElementById('modal-box').innerHTML = `
+                <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Daftarkan Masjid Anda</h3></div>
+                <p class="text-xs text-slate-500">Isi data dasar masjid. Rekening dan QRIS dapat dilengkapi nanti di menu Profil & Rekening.</p>
+                <div class="space-y-3 text-xs">
+                    <div><label class="font-semibold text-slate-700">Nama Masjid</label><input id="nb-name" placeholder="Masjid Al-Ikhlas" class="w-full mt-1 p-2 border rounded-xl"></div>
+                    <div><label class="font-semibold text-slate-700">Alamat</label><input id="nb-addr" placeholder="Jl. Contoh No. 1, Kelurahan, Kota" class="w-full mt-1 p-2 border rounded-xl"></div>
+                    ${MAPS_FIELD('nb-maps', 'nb-maps-info', '')}
+                </div>
+                <button onclick="simpanMasjidBaru()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow">Simpan & Masuk Dashboard</button>
+                <button onclick="logoutTakmir()" class="w-full py-2 text-slate-500 font-bold text-xs">Batal & keluar</button>`;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            lucide.createIcons();
+        }
+        async function simpanMasjidBaru() {
+            const g = id => document.getElementById(id).value.trim(), name = g('nb-name'), addr = g('nb-addr'), maps = g('nb-maps');
+            if (!name || !addr) return showToast('Data belum lengkap', 'Isi nama dan alamat masjid.');
+            const u = auth.currentUser, c = parseMapsLink(maps);
+            try {
+                const ref = db.collection('masjid').doc(u.uid), ex = await ref.get();
+                let m;
+                if (ex.exists) m = { ...ex.data(), docId: u.uid };
+                else {
+                    m = { id: Date.now(), name, address: addr, bank: '', rekening: '', lat: c ? c.lat : null, lng: c ? c.lng : null, maps, qris: '', ownerUid: u.uid };
+                    await ref.set(m);
+                    m.docId = u.uid;
+                }
+                const i = appState.masjidList.findIndex(x => x.id === m.id);
+                if (i >= 0) Object.assign(appState.masjidList[i], m); else appState.masjidList.push(m);
+                appState.activeMasjidId = m.id;
+                saveState(); closeModal(); switchUserMode('takmir');
+                showToast('Masjid terdaftar', m.name + ' siap dikelola.');
+            } catch (e) { showToast('Gagal menyimpan', fbErr(e)); }
         }
         function logoutTakmir() { if (auth) auth.signOut(); closeModal(); switchUserMode('jamaah'); showToast('Keluar', 'Anda telah keluar dari akun Takmir.'); }
         function pilihQRIS(inp) {
@@ -1267,14 +1268,18 @@
         async function simpanProfilAsync() {
             const m = curM(), g = id => document.getElementById(id).value.trim();
             m.name = g('pf-name') || m.name; m.address = g('pf-addr') || m.address; m.bank = g('pf-bank') || m.bank; m.rekening = g('pf-rek') || m.rekening;
-            const la = parseFloat(g('pf-lat')), ln = parseFloat(g('pf-lng'));
-            if (!isNaN(la) && !isNaN(ln)) { m.lat = la; m.lng = ln; }
+            const mp = g('pf-maps');
+            if (mp !== (m.maps || '')) {
+                m.maps = mp;
+                const c = parseMapsLink(mp);
+                if (c) { m.lat = c.lat; m.lng = c.lng; } else if (mp) showToast('Koordinat belum terbaca', 'Link pendek tidak bisa dibaca. Gunakan link panjang atau tempel koordinat.');
+            }
             if (qrisTmp) { m.qris = qrisTmp; qrisTmp = null; }
             saveState(); closeModal();
             if (db && hasAuth()) {
                 try {
-                    await db.collection('masjid').doc(String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, qris: m.qris || '' }, { merge: true });
-                    showToast('Profil tersimpan', 'Tersinkron ke server, QRIS terlihat oleh semua jamaah.');
+                    await db.collection('masjid').doc(m.docId || String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, maps: m.maps || '', qris: m.qris || '' }, { merge: true });
+                    showToast('Profil tersimpan', 'Tersinkron ke server, terlihat oleh semua jamaah.');
                 } catch (e) { showToast('Tersimpan di perangkat saja', 'Gagal sinkron: ' + fbErr(e)); }
             } else showToast('Profil tersimpan', 'Hanya di perangkat ini.');
         }
@@ -1340,11 +1345,29 @@
         }
         if ('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 
+        // LINK GOOGLE MAPS -> koordinat
+        function parseMapsLink(u) {
+            let t = String(u || '').trim();
+            try { t = decodeURIComponent(t); } catch (e) {}
+            let m = t.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || t.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || t.match(/[?&](?:q|ll|query|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || t.match(/^(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/);
+            if (m) return { lat: +m[1], lng: +m[2] };
+            m = t.match(/!2d(-?\d+\.\d+)!3d(-?\d+\.\d+)/);
+            return m ? { lat: +m[2], lng: +m[1] } : null;
+        }
+        function mapsHint(inId, outId) {
+            const v = document.getElementById(inId).value.trim(), el = document.getElementById(outId), c = parseMapsLink(v);
+            el.className = 'text-[10px] mt-1 ' + (c ? 'text-emerald-700 font-semibold' : 'text-slate-400');
+            el.innerText = !v ? 'Tempel link Google Maps atau koordinat (mis. -6.9932, 110.4203).'
+                : c ? `✓ Lokasi terbaca: ${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`
+                : /goo\.gl|maps\.app/.test(v) ? 'Link pendek tidak bisa dibaca otomatis. Buka link-nya, salin URL panjang dari browser, atau tempel koordinat.'
+                : 'Koordinat belum terbaca dari link ini.';
+        }
+        const MAPS_FIELD = (id, info, val) => `<div class="text-xs"><label class="font-semibold text-slate-700">Link Google Maps</label>
+            <input id="${id}" value="${esc(val || '')}" oninput="mapsHint('${id}','${info}')" placeholder="https://www.google.com/maps/..." class="w-full mt-1 p-2 border rounded-xl">
+            <p id="${info}" class="text-[10px] text-slate-400 mt-1">Buka masjid di Google Maps, ketuk Bagikan, lalu salin link. Atau tempel koordinat, mis. -6.9932, 110.4203.</p></div>`;
+
         // HALAMAN MASUK, TENTANG & PANDUAN
         function showAuth() {
-            const sel = document.getElementById('lg-masjid');
-            sel.innerHTML = appState.masjidList.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
-            sel.value = appState.activeMasjidId;
             document.getElementById('auth-screen').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -1379,9 +1402,9 @@
                 ['Tanya & beri masukan', 'kirim pertanyaan kepada ustadz atau saran kepada pengurus lewat tab Tanya.']
             ]) + hd('Pasang di Layar Utama') + '<p class="text-sm text-slate-600 leading-relaxed">Android (Chrome): menu ⋮ lalu "Tambahkan ke layar utama". iPhone (Safari): tombol Bagikan lalu "Tambah ke Layar Utama".</p>',
             takmir: () => hd('Panduan Takmir').replace('mt-8', 'mt-2') + steps([
-                ['Masuk atau daftar', 'pilih masjid Anda, lalu masuk dengan email atau Google pada halaman masuk.'],
-                ['Jadikan akun pengurus', 'jika masjid belum memiliki pengurus, Anda akan ditawari untuk mengklaimnya. Hanya satu akun pengurus per masjid.'],
-                ['Lengkapi profil', 'buka Profil & Rekening: isi alamat, rekening, koordinat peta, dan unggah gambar QRIS.'],
+                ['Masuk atau daftar', 'dengan email dan kata sandi, atau akun Google, pada halaman masuk.'],
+                ['Daftarkan masjid', 'saat pertama kali masuk, isi nama, alamat, dan link Google Maps masjid Anda. Satu akun mengelola satu masjid.'],
+                ['Lengkapi profil', 'buka Profil & Rekening untuk mengubah nama, alamat, link Google Maps, rekening, dan mengunggah gambar QRIS.'],
                 ['Catat kas', 'tambahkan pemasukan dan pengeluaran di menu Keuangan. Data tampil terbuka bagi jamaah.'],
                 ['Kelola kajian & inventaris', 'tambah, ubah, atau hapus jadwal kajian dan data sarana prasarana.'],
                 ['Proses permohonan', 'setujui atau tolak donasi, pinjaman, relawan, dan pengajuan bantuan dari dashboard. Donasi yang disetujui otomatis masuk kas.']
@@ -1412,8 +1435,9 @@
                 <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Profil & Rekening Masjid</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
                 <div class="space-y-3 text-xs">
-                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening],['pf-lat','Latitude (untuk peta)',m.lat],['pf-lng','Longitude (untuk peta)',m.lng]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
+                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
                 </div>
+                <div class="mt-3">${MAPS_FIELD('pf-maps', 'pf-maps-info', m.maps)}</div>
                 <div class="text-xs mt-3">
                     <label class="font-semibold text-slate-700">Gambar QRIS Masjid</label>
                     <img id="pf-qris-prev" src="${m.qris && m.qris.startsWith('data:image/') ? m.qris : ''}" class="${m.qris ? '' : 'hidden'} w-32 h-32 object-contain border rounded-xl mt-1 bg-white">
@@ -1529,6 +1553,7 @@
 
         // CHANGE ACTIVE MASJID
         function changeMasjid(masjidId) {
+            if (!masjidId) return;
             appState.activeMasjidId = parseInt(masjidId);
             if (currentUserMode === 'takmir' && !hasAuth(appState.activeMasjidId)) switchUserMode('jamaah');
             saveState();
@@ -1566,20 +1591,22 @@
 
         // RENDER ALL UI DATA
         function renderUI() {
-            const currentMasjid = appState.masjidList.find(m => m.id === appState.activeMasjidId) || appState.masjidList[0];
+            if (appState.masjidList.length && !appState.masjidList.some(m => m.id === appState.activeMasjidId)) appState.activeMasjidId = appState.masjidList[0].id;
+            const currentMasjid = curM();
             
             document.getElementById('display-masjid-title').innerText = currentMasjid.name;
             document.getElementById('display-masjid-address').innerText = currentMasjid.address;
             document.getElementById('active-masjid-tag').innerText = currentMasjid.name;
             const sel = document.getElementById('masjid-selector');
-            sel.innerHTML = appState.masjidList.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+            sel.innerHTML = appState.masjidList.length ? appState.masjidList.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('') : '<option value="">Belum ada masjid terdaftar</option>';
+            document.getElementById('empty-masjid-banner').classList.toggle('hidden', appState.masjidList.length > 0);
             sel.value = appState.activeMasjidId;
             document.getElementById('display-masehi-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             try { document.getElementById('display-hijri-date').innerText = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()).replace(/ ?(AH|H)$/, '') + ' H'; } catch (e) {}
 
             // Compute Total Financial Balance
-            let totalIn = appState.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
-            let totalOut = appState.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalIn = byM(appState.keuangan).filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalOut = byM(appState.keuangan).filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
             let saldo = totalIn - totalOut;
 
             document.getElementById('infaq-total-kas').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
@@ -1623,7 +1650,7 @@
         // HOME KAJIAN & HAJAT RENDER
         function renderHomeKajian() {
             const container = document.getElementById('home-kajian-list');
-            container.innerHTML = appState.kajian.slice(0, 2).map(k => `
+            container.innerHTML = byM(appState.kajian).slice(0, 2).map(k => `
                 <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <img src="${esc(k.poster)}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" alt="Poster">
                     <div class="flex-1 min-w-0">
@@ -1637,7 +1664,7 @@
 
         function renderHomeHajat() {
             const container = document.getElementById('home-hajat-list');
-            container.innerHTML = appState.hajat.map(h => {
+            container.innerHTML = byM(appState.hajat).map(h => {
                 let pct = Math.min(100, Math.round((h.terkumpul / h.target) * 100));
                 return `
                     <div class="space-y-1.5 p-3.5 bg-emerald-50/50 rounded-xl border border-emerald-100">
@@ -1662,7 +1689,7 @@
             const container = document.getElementById('kajian-cards-container');
             const search = document.getElementById('search-kajian-input')?.value.toLowerCase() || '';
 
-            let filtered = appState.kajian.filter(k => k.tema.toLowerCase().includes(search) || k.ustaz.toLowerCase().includes(search));
+            let filtered = byM(appState.kajian).filter(k => k.tema.toLowerCase().includes(search) || k.ustaz.toLowerCase().includes(search));
 
             container.innerHTML = filtered.map(k => `
                 <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
@@ -1709,7 +1736,7 @@
         // INFAQ PROGRAM RENDER
         function renderInfaqPrograms() {
             const container = document.getElementById('infaq-program-grid');
-            container.innerHTML = appState.hajat.map(h => {
+            container.innerHTML = byM(appState.hajat).map(h => {
                 let pct = Math.min(100, Math.round((h.terkumpul / h.target) * 100));
                 return `
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
@@ -1772,7 +1799,7 @@
         // PUBLIC SARPRAS BORROW RENDER
         function renderPublicSarpras() {
             const container = document.getElementById('public-sarpras-grid');
-            const publicItems = appState.sarpras.filter(s => s.publik);
+            const publicItems = byM(appState.sarpras).filter(s => s.publik);
 
             container.innerHTML = publicItems.map(s => `
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
@@ -1817,7 +1844,7 @@
             const search = document.getElementById('filter-keuangan-search')?.value.toLowerCase() || '';
             const typeFilter = document.getElementById('filter-keuangan-type')?.value || 'all';
 
-            let filtered = appState.keuangan.filter(k => {
+            let filtered = byM(appState.keuangan).filter(k => {
                 let matchSearch = k.keterangan.toLowerCase().includes(search) || k.kategori.toLowerCase().includes(search);
                 let matchType = typeFilter === 'all' ? true : k.tipe === typeFilter;
                 return matchSearch && matchType;
@@ -1847,7 +1874,7 @@
         // TAKMIR KAJIAN GRID
         function renderTakmirKajianGrid() {
             const container = document.getElementById('takmir-kajian-grid');
-            container.innerHTML = appState.kajian.map(k => `
+            container.innerHTML = byM(appState.kajian).map(k => `
                 <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
                     <h4 class="font-bold text-slate-900 text-base">${esc(k.tema)}</h4>
                     <p class="text-xs text-emerald-900 font-bold">${esc(k.ustaz)}</p>
@@ -1860,7 +1887,7 @@
         // TAKMIR INVENTARIS TABLE
         function renderTakmirSarprasTable() {
             const tbody = document.getElementById('table-sarpras-body');
-            tbody.innerHTML = appState.sarpras.map(s => `
+            tbody.innerHTML = byM(appState.sarpras).map(s => `
                 <tr class="border-b border-slate-100">
                     <td class="p-3 font-semibold text-slate-800">${esc(s.nama)}</td>
                     <td class="p-3 text-slate-600">${esc(s.kategori)}</td>
@@ -1878,7 +1905,7 @@
         // TAKMIR HAJAT GRID
         function renderTakmirHajatGrid() {
             const container = document.getElementById('takmir-hajat-grid');
-            container.innerHTML = appState.hajat.map(h => `
+            container.innerHTML = byM(appState.hajat).map(h => `
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                     <h4 class="font-bold text-slate-900 text-base">${esc(h.judul)}</h4>
                     <p class="text-xs text-slate-500">Target: Rp ${h.target.toLocaleString('id-ID')} | Terkumpul: Rp ${h.terkumpul.toLocaleString('id-ID')}</p>
@@ -1890,7 +1917,7 @@
         // TAKMIR MUSTAHIK TABLE
         function renderTakmirMustahikTable() {
             const tbody = document.getElementById('table-mustahik-body');
-            tbody.innerHTML = appState.mustahik.map(m => `
+            tbody.innerHTML = byM(appState.mustahik).map(m => `
                 <tr class="border-b border-slate-100">
                     <td class="p-3 font-semibold text-slate-800">${esc(m.nama)}</td>
                     <td class="p-3 font-bold text-emerald-800">${esc(m.kategori)}</td>
@@ -1906,7 +1933,7 @@
 
         function renderQAPublic() {
             const container = document.getElementById('qa-public-list');
-            container.innerHTML = appState.qaPublic.map(q => `
+            container.innerHTML = byM(appState.qaPublic).map(q => `
                 <div class="p-3 bg-slate-50 rounded-xl space-y-1 text-xs">
                     <span class="font-bold text-emerald-900">${esc(q.ustadz)}</span>
                     <p class="text-slate-700 font-semibold">T: ${esc(q.tanya)}</p>
@@ -2366,8 +2393,8 @@
 
             if (chartKasInstance) chartKasInstance.destroy();
 
-            let totalIn = appState.keuangan.filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
-            let totalOut = appState.keuangan.filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalIn = byM(appState.keuangan).filter(k => k.tipe === 'pemasukan').reduce((acc, curr) => acc + curr.nominal, 0);
+            let totalOut = byM(appState.keuangan).filter(k => k.tipe === 'pengeluaran').reduce((acc, curr) => acc + curr.nominal, 0);
 
             chartKasInstance = new Chart(ctx, {
                 type: 'doughnut',
