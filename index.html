@@ -159,8 +159,8 @@
     <aside id="sidebar" aria-label="Menu samping" class="fixed top-0 left-0 bottom-0 z-[110] w-[84%] max-w-xs bg-white shadow-2xl flex flex-col">
         <div class="sm-pattern relative text-white px-5 pb-5" style="padding-top:calc(1.25rem + env(safe-area-inset-top))">
             <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-emerald-950/90"></div>
-            <button onclick="closeSidebar()" aria-label="Tutup menu" class="absolute right-3 p-2 rounded-lg hover:bg-white/10" style="top:calc(.5rem + env(safe-area-inset-top))"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <div class="relative flex items-center gap-3"><svg class="w-11 h-11"><use href="#sm-logo"/></svg><div><p class="font-arabic text-2xl leading-none">Satu<span class="text-gold-400">Masjid</span></p><p id="sb-masjid" class="text-[11px] text-gold-300 mt-1 truncate max-w-[10rem]"></p></div></div>
+            <button onclick="closeSidebar()" aria-label="Tutup menu" class="absolute right-2 z-20 p-3 rounded-lg hover:bg-white/10" style="top:calc(.5rem + env(safe-area-inset-top))"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="relative flex items-center gap-3 pr-12"><svg class="w-11 h-11"><use href="#sm-logo"/></svg><div><p class="font-arabic text-2xl leading-none">Satu<span class="text-gold-400">Masjid</span></p><p id="sb-masjid" class="text-[11px] text-gold-300 mt-1 truncate max-w-[10rem]"></p></div></div>
         </div>
         <nav id="sidebar-nav" class="flex-1 overflow-y-auto p-3 space-y-5"></nav>
         <div class="border-t border-slate-200 p-3 space-y-3" style="padding-bottom:calc(.75rem + env(safe-area-inset-bottom))">
@@ -255,7 +255,7 @@
             
             <!-- Brand Logo -->
             <div class="flex items-center space-x-3">
-                <button onclick="openSidebar()" aria-label="Buka menu" class="p-2 -ml-1 rounded-xl hover:bg-white/10 text-gold-300"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <button onclick="openSidebar()" aria-label="Buka menu" class="relative p-2 -ml-1 rounded-xl hover:bg-white/10 text-gold-300"><i data-lucide="menu" class="w-6 h-6"></i><span id="menu-dot" class="hidden absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border border-emerald-900"></span></button>
                 <svg class="w-10 h-10 drop-shadow-lg flex-shrink-0" role="img" aria-label="Logo SatuMasjid"><use href="#sm-logo"/></svg>
                 <div>
                     <h1 class="font-black text-xl tracking-tight text-white leading-none">SatuMasjid</h1>
@@ -1005,14 +1005,12 @@
             <button onclick="switchTab('terdekat')" id="mobnav-terdekat" aria-label="Terdekat" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="map-pin" class="w-5 h-5 mb-0.5"></i><span>Terdekat</span></button>
             <button onclick="switchTab('infaq')" id="mobnav-infaq" aria-label="Infaq" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="heart" class="w-5 h-5 mb-0.5"></i><span>Infaq</span></button>
             <button onclick="switchTab('fasilitas')" id="mobnav-fasilitas" aria-label="Fasilitas" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="info" class="w-5 h-5 mb-0.5"></i><span>Fasilitas</span></button>
-            <button onclick="openSidebar()" aria-label="Menu lainnya" class="mnav-menu flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="menu" class="w-5 h-5 mb-0.5"></i><span>Menu</span></button>
         </div>
         <div id="mobile-nav-takmir" class="flex text-center text-[10px] hidden">
             <button onclick="switchTab('takmir-dashboard')" id="mobnav-takmir-dashboard" aria-label="Dashboard" class="flex-1 min-w-0 flex flex-col items-center py-1 text-gold-400 font-bold"><i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i><span>Dashboard</span></button>
             <button onclick="switchTab('takmir-keuangan')" id="mobnav-takmir-keuangan" aria-label="Kas" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="wallet" class="w-5 h-5 mb-0.5"></i><span>Kas</span></button>
             <button onclick="switchTab('takmir-agenda')" id="mobnav-takmir-agenda" aria-label="Agenda" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i><span>Agenda</span></button>
             <button onclick="switchTab('takmir-inventaris')" id="mobnav-takmir-inventaris" aria-label="Aset" class="flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="boxes" class="w-5 h-5 mb-0.5"></i><span>Aset</span></button>
-            <button onclick="openSidebar()" aria-label="Menu lainnya" class="mnav-menu flex-1 min-w-0 flex flex-col items-center py-1 text-emerald-300"><i data-lucide="menu" class="w-5 h-5 mb-0.5"></i><span>Menu</span></button>
         </div>
     </div>
 
@@ -1168,10 +1166,10 @@
         let sbActions = [];
         function renderSidebar() {
             sbActions = [];
-            const groups = (currentUserMode === 'takmir'
+            const groups = (isAdminUser ? [['Admin SatuMasjid', [['shield-check', 'Verifikasi & Laporan' + (adminPending ? ` (${adminPending} menunggu)` : ''), () => openAdmin()]]]] : []).concat(currentUserMode === 'takmir'
                 ? [['Pengelolaan Takmir', [['target', 'Daftar Kebutuhan Masjid', () => switchTab('takmir-wishlist')], ['heart-handshake', 'ZIS & Mustahik', () => switchTab('takmir-zis')], ['settings', 'Profil Masjid', () => openModalProfil()], ['qr-code', 'Rekening & QRIS', () => openModalPembayaran()], ['badge-check', 'Data Verifikasi', () => openModalVerifikasi()]]]]
                 : [['Layanan Jamaah', [['hand-heart', 'Volunter & Sosial', () => switchTab('kegiatan')], ['package-check', 'Pinjam Sarpras', () => switchTab('sarpras-jamaah')], ['message-square', 'Tanya Ustadz & Saran', () => switchTab('konsultasi')]]]]
-            ).concat(isAdminUser ? [['Admin SatuMasjid', [['shield-check', 'Verifikasi & Laporan', () => openAdmin()]]]] : []).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]);
+            ).concat([['Informasi', [['info', 'Tentang SatuMasjid', () => openInfo('tentang')], ['book-open', 'Panduan Jamaah', () => openInfo('jamaah')], ['shield-check', 'Panduan Takmir', () => openInfo('takmir')], ['circle-help', 'FAQ', () => openInfo('faq')]]]]);
             document.getElementById('sidebar-nav').innerHTML = groups.map(g => `<div><p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold px-3 mb-1">${g[0]}</p>${g[1].map(it => { sbActions.push(it[2]); return `<button onclick="sbRun(${sbActions.length - 1})" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 text-left"><i data-lucide="${it[0]}" class="w-5 h-5 text-emerald-900 flex-shrink-0"></i><span>${it[1]}</span></button>`; }).join('')}</div>`).join('');
             document.getElementById('sb-masjid').innerText = curM().name;
         }
@@ -1248,7 +1246,7 @@
 
         // ===== ARSITEKTUR DATA & KEAMANAN (Firestore) =====
         const COLS_PUB = ['keuangan', 'kajian', 'hajat', 'sarpras', 'qaPublic'];
-        let isAdminUser = false, payInfo = null, verifInfo = null, dokTmp = null, adminRows = [], adminLaporan = [];
+        let adminPending = 0, isAdminUser = false, payInfo = null, verifInfo = null, dokTmp = null, adminRows = [], adminLaporan = [];
         const mref = m => db.collection('masjid').doc(m.docId || String(m.id));
         const serverTs = () => firebase.firestore.FieldValue.serverTimestamp();
         const pickPub = (d, id) => ({ id: d.id, name: d.name, address: d.address, lat: d.lat ?? null, lng: d.lng ?? null, maps: d.maps || '', ownerUid: d.ownerUid, verified: d.verified === true, docId: id });
@@ -1257,6 +1255,7 @@
         const fld = (id, label, val, ph = '') => `<div><label class="font-semibold text-slate-700">${label}</label><input id="${id}" value="${esc(val || '')}" placeholder="${esc(ph)}" class="w-full mt-1 p-2 border rounded-xl"></div>`;
         const chip = (ok, t) => `<span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${ok ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${t}</span>`;
 
+        function updateMenuDot() { const d = document.getElementById('menu-dot'); if (d) d.classList.toggle('hidden', !(isAdminUser && adminPending > 0)); }
         function guardTakmir() {
             if (hasAuth()) return true;
             showToast('Akses ditolak', 'Hanya pengurus masjid ini yang dapat mengubah data.');
@@ -1270,6 +1269,9 @@
         async function checkAdmin(u) {
             isAdminUser = false;
             if (db && u && !u.isAnonymous) { try { isAdminUser = (await db.collection('admins').doc(u.uid).get()).exists; } catch (e) {} }
+            adminPending = 0;
+            if (isAdminUser) { try { adminPending = (await db.collection('masjid').where('verified', '==', false).get()).size; } catch (e) {} }
+            updateMenuDot();
         }
         async function persistCol(col) {
             const m = curM();
@@ -1532,7 +1534,7 @@
             await syncMasjid();
             const m = appState.masjidList.find(x => x.ownerUid === u.uid);
             if (m) { appState.activeMasjidId = m.id; saveState(); await loadMasjidData(); switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
-            else if (isAdminUser) showToast('Admin', 'Buka menu samping > Verifikasi & Laporan.');
+            else if (isAdminUser) openAdmin();
             else openModalMasjidBaru();
         }
         function openModalVerifEmail() {
@@ -1568,6 +1570,7 @@
                     return { docId: d.id, m: d.data(), v: v.exists ? v.data() : null, p: p.exists ? p.data() : null };
                 }));
                 adminRows.sort((a, b) => (a.m.verified === true) - (b.m.verified === true));
+                adminPending = adminRows.filter(r => r.m.verified !== true).length; updateMenuDot();
                 const lap = await db.collection('laporan').orderBy('createdAt', 'desc').limit(30).get();
                 adminLaporan = lap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderAdmin();
@@ -1740,7 +1743,6 @@
                 
             }
 
-            if (['kegiatan', 'sarpras-jamaah', 'konsultasi', 'takmir-wishlist', 'takmir-zis'].includes(tabKey)) document.querySelectorAll('.mnav-menu').forEach(b => { b.classList.add('text-gold-400', 'font-bold'); b.classList.remove('text-emerald-300'); });
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (tabKey === 'terdekat') setTimeout(initTerdekat, 50);
             if (tabKey === 'takmir-dashboard' && hasAuth()) refreshPermohonan();
@@ -1868,6 +1870,7 @@
             renderQAPublic();
             renderPermohonan();
             renderVerifBanner();
+            updateMenuDot();
             renderTerdekat();
 
             lucide.createIcons();
