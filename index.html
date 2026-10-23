@@ -2,11 +2,13 @@
 <html lang="id" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SatuMasjid - Ekosistem Masjid Digital Terpadu</title>
     <meta name="theme-color" content="#0d5c3a">
     <meta name="description" content="SatuMasjid: jadwal sholat, kajian, infaq, kas transparan, dan masjid terdekat dalam satu aplikasi.">
     <link rel="manifest" href="manifest.webmanifest">
+    <!-- Font Awesome untuk ikon medsos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22smG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2311714a%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23052a1b%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22smY%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f3e5ab%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23e0bd4c%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23aa8822%22%2F%3E%3C%2FlinearGradient%3E%3Cmask%20id%3D%22smM%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%2235.4%22%20cy%3D%2211.6%22%20r%3D%225.4%22%20fill%3D%22%23000%22%2F%3E%3C%2Fmask%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22url%28%23smG%29%22%2F%3E%3Cg%20transform%3D%22%22%3E%3Crect%20x%3D%222.5%22%20y%3D%222.5%22%20width%3D%2259%22%20height%3D%2259%22%20rx%3D%2212.5%22%20fill%3D%22none%22%20stroke%3D%22%23e6ca65%22%20stroke-opacity%3D%22.35%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2213%22%20r%3D%226.6%22%20fill%3D%22url%28%23smY%29%22%20mask%3D%22url%28%23smM%29%22%2F%3E%3Cpath%20d%3D%22M32%2019.5V23%22%20stroke%3D%22url%28%23smY%29%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M17%2045C17%2033%2024%2026.5%2032%2024C40%2026.5%2047%2033%2047%2045Z%22%20fill%3D%22url%28%23smY%29%22%2F%3E%3Crect%20x%3D%2212%22%20y%3D%2245%22%20width%3D%2240%22%20height%3D%224.5%22%20rx%3D%221.5%22%20fill%3D%22url%28%23smY%29%22%2F%3E%3Cpath%20d%3D%22M28%2049.5V43.5a4%204%200%200%201%208%200V49.5Z%22%20fill%3D%22%23073d27%22%2F%3E%3Cg%20fill%3D%22url%28%23smY%29%22%3E%3Crect%20x%3D%227.5%22%20y%3D%2233%22%20width%3D%224.2%22%20height%3D%2216.5%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7.5%2033L9.6%2028L11.7%2033Z%22%2F%3E%3Crect%20x%3D%2252.3%22%20y%3D%2233%22%20width%3D%224.2%22%20height%3D%2216.5%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M52.3%2033L54.4%2028L56.5%2033Z%22%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%22M12%2053.5H52%22%20stroke%3D%22%23e6ca65%22%20stroke-opacity%3D%22.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
     <link rel="apple-touch-icon" href="icons/icon-180.png">
     <!-- Tailwind CSS -->
@@ -61,6 +63,40 @@
         #splash { transition: opacity .6s ease, visibility .6s; } #splash.out { opacity: 0; visibility: hidden; }
         .sm-a1 { animation: smIn .8s cubic-bezier(.2,.8,.2,1) both } .sm-a2 { animation: smUp .8s .3s both } .sm-a3 { animation: smUp .8s .55s both }
         @media (prefers-reduced-motion: reduce) { .sm-a1, .sm-a2, .sm-a3 { animation: none } }
+
+        /* ===== Medsos & footer Kurniapedia ===== */
+        .glass-panel { background: rgba(15,23,42,.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 8px 32px 0 rgba(0,0,0,.37); }
+        .kurnia-icon { width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-size: .75rem; transition: all .3s ease; text-decoration: none; }
+        .kurnia-icon.ig:hover { color: #00f2fe; border-color: rgba(0,242,254,.6); }
+        .kurnia-icon.tt:hover { color: #bd00ff; border-color: rgba(189,0,255,.6); }
+        .kurnia-icon.web:hover { color: #ff007f; border-color: rgba(255,0,127,.6); }
+        .kurnia-icon.wa:hover { color: #00ff87; border-color: rgba(0,255,135,.6); }
+
+        /* ===== Optimasi HP: portrait & landscape ===== */
+        html { -webkit-text-size-adjust: 100%; }
+        html, body { overflow-x: hidden; }
+        button, a, select, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { scrollbar-width: none; }
+        header.sticky { padding-top: env(safe-area-inset-top); }
+        body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+        #mobile-nav-wrap { padding: .35rem calc(.5rem + env(safe-area-inset-right)) calc(.35rem + env(safe-area-inset-bottom)) calc(.5rem + env(safe-area-inset-left)); }
+        @media (max-width: 640px) {
+            input, select, textarea { font-size: 16px !important; }
+            #toast { left: .75rem; right: .75rem; max-width: none; top: calc(.75rem + env(safe-area-inset-top)); }
+            #modal-backdrop { align-items: flex-end; padding: 0; }
+            #modal-box { border-radius: 1.5rem 1.5rem 0 0; max-height: 88vh; max-height: 88dvh; padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); }
+        }
+        @media (pointer: coarse) {
+            main button, #modal-box button, #auth-screen button, #info-sheet button { min-height: 40px; }
+            .kurnia-icon { width: 2.5rem !important; height: 2.5rem !important; font-size: .95rem !important; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            header.sticky { position: static; }
+            #splash svg { width: 4.5rem; height: 4.5rem; margin-top: 1rem; } #splash h1 { font-size: 2.2rem; margin-top: .6rem; } #splash .mt-10 { margin-top: 1rem; }
+            #map-terdekat { height: 75vh; }
+            #modal-box { max-height: 94vh; max-height: 94dvh; }
+            #mobile-nav-wrap span { display: none; } #mobile-nav-wrap button { padding: .3rem 0; }
+        }
         .leaflet-container img { max-width: none !important; }
         .bg-islamic-pattern {
             background-color: #0d5c3a;
@@ -92,7 +128,7 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased selection:bg-gold-500 selection:text-white pb-20 lg:pb-0">
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased selection:bg-gold-500 selection:text-white pb-24 lg:pb-0">
 
     <!-- Toast Modal -->
     <div id="toast" class="fixed top-5 right-5 z-[400] transform transition-all duration-300 translate-x-full opacity-0 max-w-md bg-white rounded-xl shadow-2xl border-l-4 border-emerald-900 p-4 flex items-center space-x-3">
@@ -151,6 +187,7 @@
                         <div class="grid grid-cols-2 gap-2"><button onclick="doLogin(true)" class="py-2.5 bg-emerald-50 text-emerald-900 font-bold rounded-xl">Daftar Akun Baru</button><button onclick="doGoogle()" class="py-2.5 border border-slate-300 text-slate-700 font-bold rounded-xl">Google</button></div>
                     </div>
                     <p class="text-center text-xs text-slate-500 mt-6"><button onclick="openInfo('tentang')" class="font-semibold text-emerald-900">Tentang</button> · <button onclick="openInfo('jamaah')" class="font-semibold text-emerald-900">Panduan</button> · <button onclick="openInfo('faq')" class="font-semibold text-emerald-900">FAQ</button></p>
+                    <p class="text-center text-[11px] text-slate-400 mt-3">Crafted with <span style="color:#ff007f">♥</span> by <a href="https://kurniapedia.my.id" target="_blank" rel="noopener noreferrer" class="font-semibold text-emerald-900">Kurniapedia</a> 2026</p>
                 </div>
             </section>
         </div>
@@ -173,7 +210,7 @@
 
     <header class="bg-emerald-900 text-white sticky top-0 z-30 shadow-md">
         <!-- Top Bar: Logo, Search, Mode Switch, Location -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
             
             <!-- Brand Logo -->
             <div class="flex items-center space-x-3">
@@ -218,7 +255,7 @@
                     </button>
                     <button id="btn-mode-takmir" onclick="switchUserMode('takmir')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-emerald-200 hover:text-white flex items-center space-x-1">
                         <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                        <span>Takmir Admin</span>
+                        <span>Takmir<span class="hidden sm:inline"> Admin</span></span>
                     </button>
                 </div>
             </div>
@@ -920,64 +957,46 @@
 
     </main>
 
-    <footer class="border-t border-slate-200 bg-white mt-8">
-        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <div class="flex items-center gap-2"><svg class="w-7 h-7"><use href="#sm-logo"/></svg><span><b class="text-emerald-900">SatuMasjid</b> · Dekat Bersama Masjid</span></div>
-            <div class="flex gap-4 font-semibold text-emerald-900"><button onclick="openInfo('tentang')">Tentang</button><button onclick="openInfo('jamaah')">Panduan</button><button onclick="openInfo('faq')">FAQ</button></div>
-            <span>© 2026 SatuMasjid · v2.0</span>
+    <footer class="bg-emerald-950 border-t border-emerald-900 mt-8">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-4 text-center">
+            <div class="flex items-center gap-2 text-emerald-200 text-xs"><svg class="w-7 h-7"><use href="#sm-logo"/></svg><span><b class="text-white">SatuMasjid</b> · Dekat Bersama Masjid</span></div>
+            <div class="flex gap-5 text-xs font-semibold text-gold-300"><button onclick="openInfo('tentang')">Tentang</button><button onclick="openInfo('jamaah')">Panduan</button><button onclick="openInfo('faq')">FAQ</button></div>
+
+            <!-- Social Media Icon Bar -->
+            <div id="socialMediaRow" style="display:flex;align-items:center;justify-content:center;gap:10px;">
+                <a href="https://instagram.com/kurniapedia" target="_blank" rel="noopener noreferrer" aria-label="Instagram Kurniapedia" class="glass-panel kurnia-icon ig"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://tiktok.com/@kurniapedia" target="_blank" rel="noopener noreferrer" aria-label="TikTok Kurniapedia" class="glass-panel kurnia-icon tt"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://kurniapedia.my.id" target="_blank" rel="noopener noreferrer" aria-label="Website Kurniapedia" class="glass-panel kurnia-icon web"><i class="fa-solid fa-globe"></i></a>
+                <a href="https://wa.me/6285870906050" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Kurniapedia" class="glass-panel kurnia-icon wa"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+
+            <p style="font-size:11px;color:#94a3b8;font-family:sans-serif;">Crafted with <span style="color:#ff007f;">♥</span> by <span style="color:#00f2fe;font-weight:600;text-shadow:0 0 10px rgba(0,242,254,0.4);">Kurniapedia</span> 2026</p>
+            <p class="text-[10px] text-emerald-700">SatuMasjid v2.0</p>
         </div>
     </footer>
 
 
-    <!-- MOBILE BOTTOM NAVIGATION BAR -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-950 text-white border-t border-emerald-800 z-40 px-2 py-2">
-        <div id="mobile-nav-jamaah" class="grid grid-cols-6 text-center text-[10px]">
-            <button onclick="switchTab('home')" class="flex flex-col items-center py-1 text-gold-400 font-bold" id="mobnav-home">
-                <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
-                <span>Beranda</span>
-            </button>
-            <button onclick="switchTab('kajian')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-kajian">
-                <i data-lucide="book-open" class="w-5 h-5 mb-0.5"></i>
-                <span>Kajian</span>
-            </button>
-            <button onclick="switchTab('infaq')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-infaq">
-                <i data-lucide="heart" class="w-5 h-5 mb-0.5"></i>
-                <span>Infaq</span>
-            </button>
-            <button onclick="switchTab('sarpras-jamaah')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-sarpras-jamaah">
-                <i data-lucide="truck" class="w-5 h-5 mb-0.5"></i>
-                <span>Pinjam</span>
-            </button>
-            <button onclick="switchTab('terdekat')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-terdekat">
-                <i data-lucide="map-pin" class="w-5 h-5 mb-0.5"></i>
-                <span>Terdekat</span>
-            </button>
-            <button onclick="switchTab('konsultasi')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-konsultasi">
-                <i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i>
-                <span>Tanya</span>
-            </button>
+    <!-- MOBILE BOTTOM NAVIGATION BAR (scroll horizontal, semua menu) -->
+    <div id="mobile-nav-wrap" class="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-950 text-white border-t border-emerald-800 z-40">
+        <div id="mobile-nav-jamaah" class="flex overflow-x-auto no-scrollbar snap-x text-center text-[10px]">
+            <button onclick="switchTab('home')" id="mobnav-home" aria-label="Beranda" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-gold-400 font-bold"><i data-lucide="home" class="w-5 h-5 mb-0.5"></i><span>Beranda</span></button>
+            <button onclick="switchTab('kajian')" id="mobnav-kajian" aria-label="Kajian" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="book-open" class="w-5 h-5 mb-0.5"></i><span>Kajian</span></button>
+            <button onclick="switchTab('infaq')" id="mobnav-infaq" aria-label="Infaq" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="heart" class="w-5 h-5 mb-0.5"></i><span>Infaq</span></button>
+            <button onclick="switchTab('terdekat')" id="mobnav-terdekat" aria-label="Terdekat" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="map-pin" class="w-5 h-5 mb-0.5"></i><span>Terdekat</span></button>
+            <button onclick="switchTab('sarpras-jamaah')" id="mobnav-sarpras-jamaah" aria-label="Pinjam" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="package-check" class="w-5 h-5 mb-0.5"></i><span>Pinjam</span></button>
+            <button onclick="switchTab('kegiatan')" id="mobnav-kegiatan" aria-label="Relawan" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="hand-heart" class="w-5 h-5 mb-0.5"></i><span>Relawan</span></button>
+            <button onclick="switchTab('konsultasi')" id="mobnav-konsultasi" aria-label="Tanya" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="message-square" class="w-5 h-5 mb-0.5"></i><span>Tanya</span></button>
+            <button onclick="switchTab('fasilitas')" id="mobnav-fasilitas" aria-label="Fasilitas" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="info" class="w-5 h-5 mb-0.5"></i><span>Fasilitas</span></button>
         </div>
-
-        <div id="mobile-nav-takmir" class="grid grid-cols-4 text-center text-[10px] hidden">
-            <button onclick="switchTab('takmir-dashboard')" class="flex flex-col items-center py-1 text-gold-400 font-bold" id="mobnav-takmir-dashboard">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
-                <span>Dashboard</span>
-            </button>
-            <button onclick="switchTab('takmir-keuangan')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-keuangan">
-                <i data-lucide="wallet" class="w-5 h-5 mb-0.5"></i>
-                <span>Kas</span>
-            </button>
-            <button onclick="switchTab('takmir-agenda')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-agenda">
-                <i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i>
-                <span>Agenda</span>
-            </button>
-            <button onclick="switchTab('takmir-inventaris')" class="flex flex-col items-center py-1 text-emerald-300" id="mobnav-takmir-inventaris">
-                <i data-lucide="boxes" class="w-5 h-5 mb-0.5"></i>
-                <span>Inventaris</span>
-            </button>
+        <div id="mobile-nav-takmir" class="flex overflow-x-auto no-scrollbar snap-x text-center text-[10px] hidden">
+            <button onclick="switchTab('takmir-dashboard')" id="mobnav-takmir-dashboard" aria-label="Dashboard" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-gold-400 font-bold"><i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i><span>Dashboard</span></button>
+            <button onclick="switchTab('takmir-keuangan')" id="mobnav-takmir-keuangan" aria-label="Kas" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="wallet" class="w-5 h-5 mb-0.5"></i><span>Kas</span></button>
+            <button onclick="switchTab('takmir-agenda')" id="mobnav-takmir-agenda" aria-label="Agenda" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i><span>Agenda</span></button>
+            <button onclick="switchTab('takmir-inventaris')" id="mobnav-takmir-inventaris" aria-label="Aset" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="boxes" class="w-5 h-5 mb-0.5"></i><span>Aset</span></button>
+            <button onclick="switchTab('takmir-wishlist')" id="mobnav-takmir-wishlist" aria-label="Kebutuhan" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="target" class="w-5 h-5 mb-0.5"></i><span>Kebutuhan</span></button>
+            <button onclick="switchTab('takmir-zis')" id="mobnav-takmir-zis" aria-label="ZIS" class="flex-1 min-w-[66px] flex flex-col items-center py-1 snap-center text-emerald-300"><i data-lucide="heart-handshake" class="w-5 h-5 mb-0.5"></i><span>ZIS</span></button>
         </div>
     </div>
-
 
     <!-- GENERIC CONTAINER MODAL -->
     <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
@@ -1382,6 +1401,7 @@
             if (activeMobBtn) {
                 activeMobBtn.classList.add('text-gold-400', 'font-bold');
                 activeMobBtn.classList.remove('text-emerald-300');
+                activeMobBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
             }
 
             if (tabKey === 'terdekat') setTimeout(initTerdekat, 50);
