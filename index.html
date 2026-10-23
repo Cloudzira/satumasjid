@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SatuMasjid - Ekosistem Masjid Digital Terpadu</title>
+    <meta name="theme-color" content="#0d5c3a">
+    <meta name="description" content="SatuMasjid: jadwal sholat, kajian, infaq, kas transparan, dan masjid terdekat dalam satu aplikasi.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22smG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2311714a%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23052a1b%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22smY%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f3e5ab%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23e0bd4c%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23aa8822%22%2F%3E%3C%2FlinearGradient%3E%3Cmask%20id%3D%22smM%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%2235.4%22%20cy%3D%2211.6%22%20r%3D%225.4%22%20fill%3D%22%23000%22%2F%3E%3C%2Fmask%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2215%22%20fill%3D%22url%28%23smG%29%22%2F%3E%3Cg%20transform%3D%22%22%3E%3Crect%20x%3D%222.5%22%20y%3D%222.5%22%20width%3D%2259%22%20height%3D%2259%22%20rx%3D%2212.5%22%20fill%3D%22none%22%20stroke%3D%22%23e6ca65%22%20stroke-opacity%3D%22.35%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2213%22%20r%3D%226.6%22%20fill%3D%22url%28%23smY%29%22%20mask%3D%22url%28%23smM%29%22%2F%3E%3Cpath%20d%3D%22M32%2019.5V23%22%20stroke%3D%22url%28%23smY%29%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M17%2045C17%2033%2024%2026.5%2032%2024C40%2026.5%2047%2033%2047%2045Z%22%20fill%3D%22url%28%23smY%29%22%2F%3E%3Crect%20x%3D%2212%22%20y%3D%2245%22%20width%3D%2240%22%20height%3D%224.5%22%20rx%3D%221.5%22%20fill%3D%22url%28%23smY%29%22%2F%3E%3Cpath%20d%3D%22M28%2049.5V43.5a4%204%200%200%201%208%200V49.5Z%22%20fill%3D%22%23073d27%22%2F%3E%3Cg%20fill%3D%22url%28%23smY%29%22%3E%3Crect%20x%3D%227.5%22%20y%3D%2233%22%20width%3D%224.2%22%20height%3D%2216.5%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7.5%2033L9.6%2028L11.7%2033Z%22%2F%3E%3Crect%20x%3D%2252.3%22%20y%3D%2233%22%20width%3D%224.2%22%20height%3D%2216.5%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M52.3%2033L54.4%2028L56.5%2033Z%22%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%22M12%2053.5H52%22%20stroke%3D%22%23e6ca65%22%20stroke-opacity%3D%22.4%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -42,9 +47,20 @@
     <!-- Leaflet (peta OpenStreetMap, gratis tanpa API key) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase (Auth + Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <style>
         #map-terdekat { isolation: isolate; }
+        .sm-pattern { background-color: #06311f; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23e6ca65%27%20stroke-opacity%3D%27.13%27%3E%3Crect%20x%3D%2714%27%20y%3D%2714%27%20width%3D%2732%27%20height%3D%2732%27%2F%3E%3Crect%20x%3D%2714%27%20y%3D%2714%27%20width%3D%2732%27%20height%3D%2732%27%20transform%3D%27rotate%2845%2030%2030%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); }
+        @keyframes smIn { from { opacity: 0; transform: scale(.8) translateY(8px) } to { opacity: 1; transform: none } }
+        @keyframes smUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+        @keyframes smBar { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+        #splash { transition: opacity .6s ease, visibility .6s; } #splash.out { opacity: 0; visibility: hidden; }
+        .sm-a1 { animation: smIn .8s cubic-bezier(.2,.8,.2,1) both } .sm-a2 { animation: smUp .8s .3s both } .sm-a3 { animation: smUp .8s .55s both }
+        @media (prefers-reduced-motion: reduce) { .sm-a1, .sm-a2, .sm-a3 { animation: none } }
         .leaflet-container img { max-width: none !important; }
         .bg-islamic-pattern {
             background-color: #0d5c3a;
@@ -79,7 +95,7 @@
 <body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased selection:bg-gold-500 selection:text-white pb-20 lg:pb-0">
 
     <!-- Toast Modal -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-x-full opacity-0 max-w-md bg-white rounded-xl shadow-2xl border-l-4 border-emerald-900 p-4 flex items-center space-x-3">
+    <div id="toast" class="fixed top-5 right-5 z-[400] transform transition-all duration-300 translate-x-full opacity-0 max-w-md bg-white rounded-xl shadow-2xl border-l-4 border-emerald-900 p-4 flex items-center space-x-3">
         <div id="toast-icon" class="text-emerald-900 bg-emerald-50 p-2 rounded-lg">
             <i data-lucide="check-circle" class="w-6 h-6"></i>
         </div>
@@ -90,15 +106,78 @@
     </div>
 
     <!-- MAIN APP HEADER -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="sm-logo" viewBox="0 0 64 64"><defs><linearGradient id="smG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#11714a"/><stop offset="1" stop-color="#052a1b"/></linearGradient><linearGradient id="smY" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3e5ab"/><stop offset=".5" stop-color="#e0bd4c"/><stop offset="1" stop-color="#aa8822"/></linearGradient><mask id="smM"><rect width="64" height="64" fill="#fff"/><circle cx="35.4" cy="11.6" r="5.4" fill="#000"/></mask></defs><rect width="64" height="64" rx="15" fill="url(#smG)"/><g transform=""><rect x="2.5" y="2.5" width="59" height="59" rx="12.5" fill="none" stroke="#e6ca65" stroke-opacity=".35"/><circle cx="32" cy="13" r="6.6" fill="url(#smY)" mask="url(#smM)"/><path d="M32 19.5V23" stroke="url(#smY)" stroke-width="1.6" stroke-linecap="round"/><path d="M17 45C17 33 24 26.5 32 24C40 26.5 47 33 47 45Z" fill="url(#smY)"/><rect x="12" y="45" width="40" height="4.5" rx="1.5" fill="url(#smY)"/><path d="M28 49.5V43.5a4 4 0 0 1 8 0V49.5Z" fill="#073d27"/><g fill="url(#smY)"><rect x="7.5" y="33" width="4.2" height="16.5" rx="1"/><path d="M7.5 33L9.6 28L11.7 33Z"/><rect x="52.3" y="33" width="4.2" height="16.5" rx="1"/><path d="M52.3 33L54.4 28L56.5 33Z"/></g><path d="M12 53.5H52" stroke="#e6ca65" stroke-opacity=".4" stroke-linecap="round"/></g></symbol></svg>
+    <!-- SPLASH SCREEN -->
+    <div id="splash" class="fixed inset-0 z-[300] sm-pattern flex flex-col items-center justify-center text-center px-6">
+        <div class="absolute inset-0 bg-gradient-to-b from-emerald-900/40 via-transparent to-emerald-950/80"></div>
+        <p class="relative font-arabic text-gold-400 text-2xl sm-a3" dir="rtl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+        <svg class="relative w-28 h-28 mt-8 sm-a1 drop-shadow-2xl"><use href="#sm-logo"/></svg>
+        <h1 class="relative font-arabic text-5xl text-white mt-6 sm-a2 tracking-wide">Satu<span class="text-gold-400">Masjid</span></h1>
+        <p class="relative text-[11px] tracking-[.3em] uppercase text-gold-300 mt-2 sm-a3">Dekat Bersama Masjid</p>
+        <div class="relative w-40 h-0.5 bg-white/10 rounded mt-10 overflow-hidden"><div class="h-full bg-gold-400 origin-left" style="animation:smBar 1.6s .3s ease-out both"></div></div>
+    </div>
+
+    <!-- HALAMAN LOGIN / MASUK -->
+    <div id="auth-screen" class="fixed inset-0 z-[250] bg-slate-50 overflow-y-auto hidden">
+        <div class="min-h-full grid lg:grid-cols-2">
+            <aside class="sm-pattern relative hidden lg:flex flex-col justify-between p-12 text-white">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/50 to-emerald-950/90"></div>
+                <div class="relative flex items-center gap-3"><svg class="w-12 h-12"><use href="#sm-logo"/></svg><span class="font-arabic text-3xl">Satu<span class="text-gold-400">Masjid</span></span></div>
+                <div class="relative max-w-md">
+                    <p class="font-arabic text-gold-400 text-xl mb-4" dir="rtl">وَأَنَّ ٱلْمَسَـٰجِدَ لِلَّهِ</p>
+                    <h2 class="font-arabic text-4xl leading-tight">Satu langkah lebih dekat dengan masjid Anda.</h2>
+                    <ul class="mt-8 space-y-4 text-sm text-emerald-100">
+                        <li class="flex gap-3"><i data-lucide="clock" class="w-5 h-5 text-gold-400 flex-shrink-0"></i>Jadwal sholat, kiblat, dan kajian terkini</li>
+                        <li class="flex gap-3"><i data-lucide="eye" class="w-5 h-5 text-gold-400 flex-shrink-0"></i>Kas masjid terbuka dan transparan</li>
+                        <li class="flex gap-3"><i data-lucide="map-pin" class="w-5 h-5 text-gold-400 flex-shrink-0"></i>Temukan masjid terdekat dari lokasi Anda</li>
+                    </ul>
+                </div>
+                <p class="relative text-xs text-emerald-300">© 2026 SatuMasjid · Dekat Bersama Masjid</p>
+            </aside>
+            <section class="flex items-center justify-center p-6 sm:p-10">
+                <div class="w-full max-w-md">
+                    <div class="lg:hidden flex items-center gap-3 mb-8"><svg class="w-11 h-11"><use href="#sm-logo"/></svg><span class="font-arabic text-2xl text-emerald-900">Satu<span class="text-gold-600">Masjid</span></span></div>
+                    <h2 class="font-arabic text-3xl text-emerald-900">Assalamu'alaikum</h2>
+                    <p class="text-sm text-slate-500 mt-1">Selamat datang. Silakan pilih cara Anda masuk.</p>
+                    <button onclick="hideAuth()" class="w-full mt-6 py-3 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"><i data-lucide="users" class="w-4 h-4 text-gold-400"></i>Lanjut sebagai Jamaah</button>
+                    <p class="text-[11px] text-slate-400 text-center mt-2">Tanpa akun. Cukup untuk melihat jadwal, kajian, dan berinfaq.</p>
+                    <div class="flex items-center gap-3 my-6 text-[11px] text-slate-400 uppercase tracking-wider"><span class="flex-1 h-px bg-slate-200"></span>Pengurus / Takmir<span class="flex-1 h-px bg-slate-200"></span></div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3 text-xs">
+                        <div><label class="font-semibold text-slate-700">Masjid</label><select id="lg-masjid" onchange="changeMasjid(this.value)" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl bg-white"></select></div>
+                        <div><label class="font-semibold text-slate-700">Email</label><input id="lg-email" type="email" autocomplete="email" placeholder="nama@email.com" class="w-full mt-1 p-2.5 border border-slate-300 rounded-xl"></div>
+                        <div><div class="flex justify-between"><label class="font-semibold text-slate-700">Kata Sandi</label><button type="button" onclick="lupaSandi()" class="text-emerald-800 font-semibold">Lupa kata sandi?</button></div>
+                            <div class="relative"><input id="lg-pass" type="password" autocomplete="current-password" class="w-full mt-1 p-2.5 pr-10 border border-slate-300 rounded-xl"><button type="button" onclick="togglePass()" class="absolute right-3 top-3.5 text-slate-400"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div>
+                        <button onclick="doLogin(false)" class="w-full py-2.5 bg-gold-500 hover:bg-gold-600 text-emerald-950 font-bold rounded-xl">Masuk sebagai Takmir</button>
+                        <div class="grid grid-cols-2 gap-2"><button onclick="doLogin(true)" class="py-2.5 bg-emerald-50 text-emerald-900 font-bold rounded-xl">Daftar Akun Baru</button><button onclick="doGoogle()" class="py-2.5 border border-slate-300 text-slate-700 font-bold rounded-xl">Google</button></div>
+                    </div>
+                    <p class="text-center text-xs text-slate-500 mt-6"><button onclick="openInfo('tentang')" class="font-semibold text-emerald-900">Tentang</button> · <button onclick="openInfo('jamaah')" class="font-semibold text-emerald-900">Panduan</button> · <button onclick="openInfo('faq')" class="font-semibold text-emerald-900">FAQ</button></p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- TENTANG, PANDUAN & FAQ -->
+    <div id="info-sheet" class="fixed inset-0 z-[260] bg-slate-50 overflow-y-auto hidden">
+        <div class="sticky top-0 z-10 bg-emerald-900 text-white shadow-md">
+            <div class="max-w-3xl mx-auto px-4 pt-3 flex items-center justify-between"><div class="flex items-center gap-2"><svg class="w-8 h-8"><use href="#sm-logo"/></svg><span class="font-arabic text-xl">Satu<span class="text-gold-400">Masjid</span></span></div>
+                <button onclick="closeInfo()" class="p-2 rounded-lg hover:bg-white/10" aria-label="Tutup"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+            <div class="max-w-3xl mx-auto px-2 flex overflow-x-auto text-xs font-semibold">
+                <button id="info-t-tentang" onclick="openInfo('tentang')" class="px-4 py-3 border-b-2 whitespace-nowrap">Tentang</button>
+                <button id="info-t-jamaah" onclick="openInfo('jamaah')" class="px-4 py-3 border-b-2 whitespace-nowrap">Panduan Jamaah</button>
+                <button id="info-t-takmir" onclick="openInfo('takmir')" class="px-4 py-3 border-b-2 whitespace-nowrap">Panduan Takmir</button>
+                <button id="info-t-faq" onclick="openInfo('faq')" class="px-4 py-3 border-b-2 whitespace-nowrap">FAQ</button>
+            </div>
+        </div>
+        <div id="info-body" class="max-w-3xl mx-auto p-5 sm:p-8"></div>
+    </div>
+
     <header class="bg-emerald-900 text-white sticky top-0 z-30 shadow-md">
         <!-- Top Bar: Logo, Search, Mode Switch, Location -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
             
             <!-- Brand Logo -->
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-emerald-950 font-extrabold shadow-lg shadow-gold-500/20">
-                    <i data-lucide="landmark" class="w-6 h-6"></i>
-                </div>
+                <svg class="w-10 h-10 drop-shadow-lg flex-shrink-0" role="img" aria-label="Logo SatuMasjid"><use href="#sm-logo"/></svg>
                 <div>
                     <h1 class="font-black text-xl tracking-tight text-white leading-none">SatuMasjid</h1>
                     <p class="text-[10px] text-gold-300 font-medium tracking-wider uppercase mt-0.5">Dekat Bersama Masjid</p>
@@ -130,6 +209,7 @@
                     <p id="header-prayer-next" class="text-[10px] text-emerald-200">Dzuhur 12:05 WIB</p>
                 </div>
 
+                <button onclick="openInfo('tentang')" title="Tentang & Panduan" aria-label="Tentang dan Panduan" class="p-2 rounded-xl bg-emerald-950 border border-emerald-800/80 text-gold-300 hover:text-white"><i data-lucide="info" class="w-4 h-4"></i></button>
                 <!-- Dual Mode Toggle Button -->
                 <div class="bg-emerald-950 p-1 rounded-xl flex items-center border border-emerald-800/80 shadow-inner">
                     <button id="btn-mode-jamaah" onclick="switchUserMode('jamaah')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-gold-500 text-emerald-950 shadow-sm flex items-center space-x-1">
@@ -840,6 +920,14 @@
 
     </main>
 
+    <footer class="border-t border-slate-200 bg-white mt-8">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2"><svg class="w-7 h-7"><use href="#sm-logo"/></svg><span><b class="text-emerald-900">SatuMasjid</b> · Dekat Bersama Masjid</span></div>
+            <div class="flex gap-4 font-semibold text-emerald-900"><button onclick="openInfo('tentang')">Tentang</button><button onclick="openInfo('jamaah')">Panduan</button><button onclick="openInfo('faq')">FAQ</button></div>
+            <span>© 2026 SatuMasjid · v2.0</span>
+        </div>
+    </footer>
+
 
     <!-- MOBILE BOTTOM NAVIGATION BAR -->
     <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-950 text-white border-t border-emerald-800 z-40 px-2 py-2">
@@ -945,7 +1033,7 @@
         const COLS = ['keuangan','kajian','hajat','sarpras','mustahik','qaPublic'];
         COLS.forEach(k => D[k].forEach(x => x.masjidId = 1));
         D.ver = 2; D.permohonan = []; D.userBookmarks = [];
-        D.masjidList.forEach((m,i) => Object.assign(m, { bank: 'BSI', rekening: ['7123-4567-89','8800-1122-33','5566-7788-90'][i], pin: '1234', lat: [-6.9932, -7.0051, -6.9667][i], lng: [110.4203, 110.4381, 110.4167][i] }));
+        D.masjidList.forEach((m,i) => Object.assign(m, { bank: 'BSI', rekening: ['7123-4567-89','8800-1122-33','5566-7788-90'][i], lat: [-6.9932, -7.0051, -6.9667][i], lng: [110.4203, 110.4381, 110.4167][i] }));
         D.kajian.push({id:101,masjidId:2,tema:'Kajian Kitab Riyadhus Shalihin',ustaz:'Ust. Fauzan, Lc',waktu:"Jumat, Ba'da Maghrib",lokasi:'Teras Masjid',poster:P,live:false},{id:102,masjidId:3,tema:"Tahsin Al-Qur'an Dewasa",ustaz:'Ust. Hasan, S.Pd.I',waktu:"Selasa, Ba'da Isya",lokasi:'Aula Masjid',poster:P,live:false});
         D.hajat.push({id:101,masjidId:2,judul:'Pembangunan Tempat Wudhu Baru',target:20000000,terkumpul:4500000,batasWaktu:'31 Des 2026',ket:'Perluasan area wudhu jamaah.'});
         D.keuangan.push({id:101,masjidId:2,tanggal:'2026-10-20',tipe:'pemasukan',kategori:'Infaq Jumat',keterangan:'Kotak amal Jumat',nominal:3200000});
@@ -967,13 +1055,11 @@
         const curM = () => appState.masjidList.find(m => m.id === appState.activeMasjidId) || appState.masjidList[0];
         const byM = arr => arr.filter(x => x.masjidId === appState.activeMasjidId);
         const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        const hasAuth = id => sessionStorage.getItem('tk_' + id) === '1';
+        const hasAuth = (id = appState.activeMasjidId) => { const m = appState.masjidList.find(x => x.id === id); return !!(auth && auth.currentUser && m && m.ownerUid === auth.currentUser.uid); };
         function isTakmirAuth() {
-            const m = curM();
-            if (hasAuth(m.id)) return true;
-            const pin = prompt('PIN Takmir ' + m.name + ' (demo: 1234)');
-            if (pin !== null && pin === String(m.pin)) { sessionStorage.setItem('tk_' + m.id, '1'); return true; }
-            if (pin !== null) showToast('PIN salah', 'Akses Takmir ditolak.');
+            if (!auth) { showToast('Firebase belum siap', 'Periksa koneksi internet lalu muat ulang halaman.'); return false; }
+            if (hasAuth()) return true;
+            openModalLogin();
             return false;
         }
 
@@ -1075,26 +1161,175 @@
                 </div>`).join('');
         }
 
+        // FIREBASE: login Takmir + profil/QRIS masjid di Firestore
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv9tFEQJPQacYAZQyP_1sLF3B-wU7ORtY",
+            authDomain: "satumasjid-cfbad.firebaseapp.com",
+            projectId: "satumasjid-cfbad",
+            storageBucket: "satumasjid-cfbad.firebasestorage.app",
+            messagingSenderId: "469208684672",
+            appId: "1:469208684672:web:28950dbaa2b44afbd42e65"
+        };
+        let auth = null, db = null, qrisTmp = null;
+        try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); } catch (e) { console.warn('Firebase tidak tersedia', e); }
+        const fbErr = e => ({
+            'auth/invalid-credential': 'Email atau kata sandi salah.', 'auth/wrong-password': 'Email atau kata sandi salah.', 'auth/user-not-found': 'Akun tidak ditemukan.',
+            'auth/email-already-in-use': 'Email sudah terdaftar, silakan Masuk.', 'auth/weak-password': 'Kata sandi minimal 6 karakter.', 'auth/invalid-email': 'Format email tidak valid.',
+            'auth/operation-not-allowed': 'Aktifkan metode login di Firebase Console.', 'auth/unauthorized-domain': 'Domain belum diizinkan di Firebase Auth.',
+            'auth/popup-closed-by-user': 'Jendela login ditutup.', 'permission-denied': 'Tidak punya izin (cek Firestore Rules).'
+        }[e.code] || e.code || e.message);
+        async function syncMasjid() {
+            if (!db) return;
+            try {
+                const snap = await db.collection('masjid').get();
+                snap.forEach(d => { const m = appState.masjidList.find(x => String(x.id) === d.id); if (m) Object.assign(m, d.data()); });
+                saveState();
+            } catch (e) { console.warn('Sync gagal', e); }
+        }
+        function openModalLogin() { showAuth(); }
+        async function doLogin(reg) {
+            const email = document.getElementById('lg-email').value.trim(), pass = document.getElementById('lg-pass').value;
+            if (!email || !pass) return showToast('Data belum lengkap', 'Isi email dan kata sandi.');
+            try { await (reg ? auth.createUserWithEmailAndPassword(email, pass) : auth.signInWithEmailAndPassword(email, pass)); }
+            catch (e) { return showToast('Gagal masuk', fbErr(e)); }
+            afterLogin();
+        }
+        async function doGoogle() {
+            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+            catch (e) { return showToast('Gagal masuk', fbErr(e)); }
+            afterLogin();
+        }
+        async function afterLogin() {
+            closeModal(); hideAuth();
+            await syncMasjid();
+            const m = curM();
+            if (!m.ownerUid && confirm('Masjid ini belum punya pengurus terdaftar. Jadikan akun Anda pengurus ' + m.name + '?')) {
+                try {
+                    await db.collection('masjid').doc(String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, qris: m.qris || '', ownerUid: auth.currentUser.uid });
+                    m.ownerUid = auth.currentUser.uid; saveState();
+                } catch (e) { return showToast('Gagal klaim masjid', fbErr(e)); }
+            }
+            if (hasAuth()) { switchUserMode('takmir'); showToast('Selamat datang', 'Anda masuk sebagai pengurus ' + m.name + '.'); }
+            else showToast('Akses ditolak', 'Akun ini bukan pengurus masjid ini.');
+        }
+        function logoutTakmir() { if (auth) auth.signOut(); closeModal(); switchUserMode('jamaah'); showToast('Keluar', 'Anda telah keluar dari akun Takmir.'); }
+        function pilihQRIS(inp) {
+            const f = inp.files[0];
+            if (!f) return;
+            if (f.size > 8e6) return showToast('File terlalu besar', 'Maksimal 8 MB.');
+            const img = new Image();
+            img.onload = () => {
+                const sc = Math.min(1, 640 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+                c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+                const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+                qrisTmp = c.toDataURL('image/jpeg', 0.9);
+                const pv = document.getElementById('pf-qris-prev'); pv.src = qrisTmp; pv.classList.remove('hidden');
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = () => showToast('Gambar tidak valid', 'Pilih file JPG atau PNG.');
+            img.src = URL.createObjectURL(f);
+        }
+        async function simpanProfilAsync() {
+            const m = curM(), g = id => document.getElementById(id).value.trim();
+            m.name = g('pf-name') || m.name; m.address = g('pf-addr') || m.address; m.bank = g('pf-bank') || m.bank; m.rekening = g('pf-rek') || m.rekening;
+            const la = parseFloat(g('pf-lat')), ln = parseFloat(g('pf-lng'));
+            if (!isNaN(la) && !isNaN(ln)) { m.lat = la; m.lng = ln; }
+            if (qrisTmp) { m.qris = qrisTmp; qrisTmp = null; }
+            saveState(); closeModal();
+            if (db && hasAuth()) {
+                try {
+                    await db.collection('masjid').doc(String(m.id)).set({ name: m.name, address: m.address, bank: m.bank || '', rekening: m.rekening || '', lat: m.lat ?? null, lng: m.lng ?? null, qris: m.qris || '' }, { merge: true });
+                    showToast('Profil tersimpan', 'Tersinkron ke server, QRIS terlihat oleh semua jamaah.');
+                } catch (e) { showToast('Tersimpan di perangkat saja', 'Gagal sinkron: ' + fbErr(e)); }
+            } else showToast('Profil tersimpan', 'Hanya di perangkat ini.');
+        }
+
+        // HALAMAN MASUK, TENTANG & PANDUAN
+        function showAuth() {
+            const sel = document.getElementById('lg-masjid');
+            sel.innerHTML = appState.masjidList.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+            sel.value = appState.activeMasjidId;
+            document.getElementById('auth-screen').classList.remove('hidden');
+            lucide.createIcons();
+        }
+        function hideAuth() { sessionStorage.setItem('sm_entered', '1'); document.getElementById('auth-screen').classList.add('hidden'); }
+        function togglePass() { const i = document.getElementById('lg-pass'); i.type = i.type === 'password' ? 'text' : 'password'; }
+        function lupaSandi() {
+            const e = document.getElementById('lg-email').value.trim();
+            if (!auth || !e) return showToast('Isi email dahulu', 'Masukkan email, lalu tekan "Lupa kata sandi?".');
+            auth.sendPasswordResetEmail(e).then(() => showToast('Email terkirim', 'Periksa kotak masuk Anda untuk mengatur ulang kata sandi.')).catch(x => showToast('Gagal', fbErr(x)));
+        }
+        const hd = t => `<h3 class="font-arabic text-2xl text-emerald-900 mt-8 mb-3">${t}</h3>`;
+        const card = (t, d) => `<div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm"><h4 class="font-bold text-slate-900 text-sm">${t}</h4><p class="text-xs text-slate-600 mt-1 leading-relaxed">${d}</p></div>`;
+        const steps = a => `<ol class="space-y-3">${a.map((x, i) => `<li class="flex gap-3"><span class="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-900 text-gold-300 text-xs font-bold flex items-center justify-center">${i + 1}</span><p class="text-sm text-slate-600 pt-0.5"><b class="text-slate-900">${x[0]}</b> — ${x[1]}</p></li>`).join('')}</ol>`;
+        const faq = a => a.map(x => `<details class="bg-white border border-slate-200 rounded-xl p-4 mb-2 group"><summary class="cursor-pointer font-semibold text-sm text-slate-900">${x[0]}</summary><p class="text-xs text-slate-600 mt-2 leading-relaxed">${x[1]}</p></details>`).join('');
+        const INFO = {
+            tentang: () => `
+                <div class="text-center py-6"><svg class="w-24 h-24 mx-auto drop-shadow-xl"><use href="#sm-logo"/></svg>
+                <h2 class="font-arabic text-4xl text-emerald-900 mt-4">Satu<span class="text-gold-600">Masjid</span></h2>
+                <p class="text-[11px] tracking-[.25em] uppercase text-slate-500 mt-1">Dekat Bersama Masjid · Versi 2.0</p></div>
+                <p class="text-sm text-slate-600 leading-relaxed text-center max-w-xl mx-auto">SatuMasjid menghubungkan jamaah dan pengurus masjid dalam satu aplikasi: dari jadwal sholat dan kajian, hingga infaq dan laporan kas yang terbuka.</p>
+                ${hd('Nilai Kami')}
+                <div class="grid sm:grid-cols-2 gap-3">${card('Transparansi', 'Kas masuk dan keluar dapat dilihat jamaah sehingga tumbuh rasa percaya.')}${card('Kemudahan', 'Informasi ibadah dan layanan masjid ada dalam genggaman, tanpa perlu mencari-cari.')}${card('Kebersamaan', 'Memudahkan jamaah menemukan masjid, bergabung sebagai relawan, dan saling membantu.')}${card('Amanah', 'Data masjid dikelola oleh pengurus yang terverifikasi melalui akun resmi.')}</div>
+                ${hd('Fitur Utama')}
+                <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600 list-disc list-inside"><li>Jadwal sholat & kompas kiblat</li><li>Masjid terdekat dengan peta</li><li>Jadwal kajian & poster</li><li>Infaq QRIS / rekening</li><li>Kas masjid terbuka</li><li>Pinjam sarana & prasarana</li><li>Relawan & bantuan sosial</li><li>Tanya Ustadz & kotak saran</li></ul>
+                <div class="mt-8 p-4 rounded-2xl bg-gold-300/30 border border-gold-400/50 text-xs text-slate-700 leading-relaxed"><b>Catatan penting:</b> SatuMasjid tidak memproses atau menyimpan dana. Infaq ditransfer langsung ke rekening atau QRIS milik masjid, lalu dicatat setelah diverifikasi pengurus.</div>`,
+            jamaah: () => hd('Panduan Jamaah').replace('mt-8', 'mt-2') + steps([
+                ['Pilih masjid', 'gunakan pilihan masjid di bagian atas, atau cari lewat tab Masjid Terdekat.'],
+                ['Lihat jadwal & kiblat', 'jadwal sholat memakai waktu setempat. Buka Kompas Kiblat dan izinkan lokasi serta sensor gerak.'],
+                ['Ikuti kajian', 'buka tab Kajian untuk jadwal dan poster, lalu tandai kajian yang ingin Anda ikuti.'],
+                ['Berinfaq', 'buka tab Infaq, pindai QRIS atau transfer ke rekening masjid, kemudian isi nominal dan tekan "Konfirmasi Saya Sudah Transfer".'],
+                ['Pinjam sarana', 'pilih barang di tab Pinjam, isi penanggung jawab dan tanggal, lalu tunggu persetujuan takmir.'],
+                ['Tanya & beri masukan', 'kirim pertanyaan kepada ustadz atau saran kepada pengurus lewat tab Tanya.']
+            ]) + hd('Pasang di Layar Utama') + '<p class="text-sm text-slate-600 leading-relaxed">Android (Chrome): menu ⋮ lalu "Tambahkan ke layar utama". iPhone (Safari): tombol Bagikan lalu "Tambah ke Layar Utama".</p>',
+            takmir: () => hd('Panduan Takmir').replace('mt-8', 'mt-2') + steps([
+                ['Masuk atau daftar', 'pilih masjid Anda, lalu masuk dengan email atau Google pada halaman masuk.'],
+                ['Jadikan akun pengurus', 'jika masjid belum memiliki pengurus, Anda akan ditawari untuk mengklaimnya. Hanya satu akun pengurus per masjid.'],
+                ['Lengkapi profil', 'buka Profil & Rekening: isi alamat, rekening, koordinat peta, dan unggah gambar QRIS.'],
+                ['Catat kas', 'tambahkan pemasukan dan pengeluaran di menu Keuangan. Data tampil terbuka bagi jamaah.'],
+                ['Kelola kajian & inventaris', 'tambah, ubah, atau hapus jadwal kajian dan data sarana prasarana.'],
+                ['Proses permohonan', 'setujui atau tolak donasi, pinjaman, relawan, dan pengajuan bantuan dari dashboard. Donasi yang disetujui otomatis masuk kas.']
+            ]) + hd('Tips Unggah QRIS') + '<p class="text-sm text-slate-600 leading-relaxed">Gunakan gambar QRIS yang tajam dan tidak terpotong. Setelah diunggah, coba pindai dari layar lain untuk memastikan terbaca.</p>',
+            faq: () => hd('Pertanyaan Umum').replace('mt-8', 'mt-2') + faq([
+                ['Apakah infaq dibayar langsung lewat aplikasi?', 'Tidak. Anda mentransfer langsung ke rekening atau QRIS masjid. Aplikasi hanya mencatat konfirmasi, dan masuk ke kas setelah diverifikasi takmir.'],
+                ['Mengapa saya harus login sebagai jamaah?', 'Tidak perlu. Jamaah dapat memakai aplikasi tanpa akun. Login hanya untuk pengurus masjid.'],
+                ['Bagaimana data saya disimpan?', 'Profil masjid dan QRIS tersimpan di server Firebase. Data lain seperti kas dan permohonan saat ini tersimpan di perangkat dan belum tersinkron antar perangkat.'],
+                ['Jadwal sholat tampak berbeda dengan masjid saya?', 'Jadwal dihitung berdasarkan kota dan metode Kemenag. Selisih beberapa menit (ihtiyat) bisa terjadi; ikuti jadwal resmi masjid.'],
+                ['Kiblat tidak bergerak?', 'Izinkan akses lokasi dan sensor gerak, kalibrasi kompas dengan gerakan angka 8, dan jauhkan dari benda logam atau magnet.'],
+                ['Saya lupa kata sandi Takmir.', 'Isi email pada halaman masuk, lalu tekan "Lupa kata sandi?". Tautan atur ulang akan dikirim ke email Anda.']
+            ])
+        };
+        function openInfo(k) {
+            document.getElementById('info-body').innerHTML = INFO[k]();
+            ['tentang', 'jamaah', 'takmir', 'faq'].forEach(t => { const b = document.getElementById('info-t-' + t); b.className = 'px-4 py-3 border-b-2 whitespace-nowrap ' + (t === k ? 'border-gold-400 text-gold-300' : 'border-transparent text-emerald-200 hover:text-white'); });
+            const sh = document.getElementById('info-sheet'); sh.classList.remove('hidden'); sh.scrollTop = 0;
+            lucide.createIcons();
+        }
+        function closeInfo() { document.getElementById('info-sheet').classList.add('hidden'); }
+
         // PROFIL MASJID (takmir)
         function openModalProfil() {
             const m = curM();
+            qrisTmp = null;
+            const mb = document.getElementById('modal-box'); mb.style.maxHeight = '85vh'; mb.style.overflowY = 'auto';
             document.getElementById('modal-box').innerHTML = `
                 <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-slate-900 text-base">Profil & Rekening Masjid</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
                 <div class="space-y-3 text-xs">
-                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening],['pf-lat','Latitude (untuk peta)',m.lat],['pf-lng','Longitude (untuk peta)',m.lng],['pf-pin','PIN Takmir',m.pin]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
+                ${[['pf-name','Nama Masjid',m.name],['pf-addr','Alamat',m.address],['pf-bank','Bank',m.bank],['pf-rek','No. Rekening',m.rekening],['pf-lat','Latitude (untuk peta)',m.lat],['pf-lng','Longitude (untuk peta)',m.lng]].map(f => `<div><label class="font-semibold text-slate-700">${f[1]}</label><input id="${f[0]}" value="${esc(f[2])}" class="w-full mt-1 p-2 border rounded-xl"></div>`).join('')}
                 </div>
-                <button onclick="simpanProfil()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Simpan Profil</button>`;
+                <div class="text-xs mt-3">
+                    <label class="font-semibold text-slate-700">Gambar QRIS Masjid</label>
+                    <img id="pf-qris-prev" src="${m.qris && m.qris.startsWith('data:image/') ? m.qris : ''}" class="${m.qris ? '' : 'hidden'} w-32 h-32 object-contain border rounded-xl mt-1 bg-white">
+                    <input type="file" id="pf-qris" accept="image/*" onchange="pilihQRIS(this)" class="w-full mt-1 text-xs">
+                    <p class="text-[10px] text-slate-400 mt-1">Gambar diperkecil otomatis (maks. 640 px) agar ringan.</p>
+                </div>
+                <button onclick="simpanProfil()" class="w-full py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl shadow mt-3">Simpan Profil</button>
+                <button onclick="logoutTakmir()" class="w-full py-2 text-rose-600 font-bold text-xs mt-1">Keluar Akun${auth && auth.currentUser ? ' (' + esc(auth.currentUser.email || '') + ')' : ''}</button>`;
             document.getElementById('modal-backdrop').classList.remove('hidden');
             lucide.createIcons();
         }
-        function simpanProfil() {
-            const m = curM(), g = id => document.getElementById(id).value.trim();
-            m.name = g('pf-name') || m.name; m.address = g('pf-addr') || m.address; m.bank = g('pf-bank') || m.bank; m.rekening = g('pf-rek') || m.rekening; m.pin = g('pf-pin') || m.pin;
-            const la = parseFloat(g('pf-lat')), ln = parseFloat(g('pf-lng'));
-            if (!isNaN(la) && !isNaN(ln)) { m.lat = la; m.lng = ln; }
-            saveState(); closeModal(); showToast('Profil disimpan', 'Data masjid diperbarui.');
-        }
+        function simpanProfil() { simpanProfilAsync(); }
 
         // JADWAL SHOLAT (Aladhan, metode Kemenag RI; nilai awal = cadangan offline)
         const KOTA_JADWAL = { city: 'Semarang', country: 'Indonesia' };
@@ -1590,7 +1825,7 @@
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button></div>
                 <div class="text-center space-y-3 py-2">
                     <p class="text-xs text-slate-600">Program: <strong class="text-emerald-900">${esc(programName)}</strong></p>
-                    <div class="w-48 h-48 bg-slate-100 border-2 border-dashed border-emerald-900 rounded-2xl mx-auto p-2"><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('SatuMasjid|' + m.name)}" alt="QR" class="w-full h-full object-contain"></div>
+                    <div class="w-52 bg-slate-100 border-2 border-dashed border-emerald-900 rounded-2xl mx-auto p-2">${m.qris && m.qris.startsWith('data:image/') ? `<img src="${esc(m.qris)}" alt="QRIS ${esc(m.name)}" class="w-full object-contain rounded-lg">` : '<p class="text-[11px] text-slate-500 p-6">Takmir belum mengunggah QRIS. Gunakan transfer rekening di bawah.</p>'}</div>
                     <div class="bg-slate-50 p-3 rounded-xl text-xs text-left space-y-1 font-mono"><p class="text-slate-500">Rekening ${esc(m.bank)}:</p><p class="font-bold text-slate-900">${esc(m.rekening)} (a.n. ${esc(m.name)})</p></div>
                     <div class="text-left text-xs"><label class="font-semibold text-slate-700">Nominal yang Anda transfer (Rp)</label><input type="number" id="donasi-nominal" min="1000" placeholder="100000" class="w-full mt-1 p-2 border rounded-xl"></div>
                     <p class="text-[10px] text-slate-400">Infaq masuk ke kas setelah diverifikasi Takmir.</p>
@@ -2058,6 +2293,12 @@
         // INITIALIZE APP
         window.onload = function() {
             loadPrayerTimes();
+            syncMasjid();
+            const sp = document.getElementById('splash');
+            if (sessionStorage.getItem('sm_splash')) sp.remove();
+            else { sessionStorage.setItem('sm_splash', '1'); setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 700); }, 2000); }
+            if (!sessionStorage.getItem('sm_entered')) showAuth();
+            if (auth) auth.onAuthStateChanged(() => renderUI());
             renderUI();
         };
     </script>

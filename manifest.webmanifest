@@ -1,0 +1,30 @@
+{
+  "name": "SatuMasjid",
+  "short_name": "SatuMasjid",
+  "description": "Ekosistem masjid digital terpadu: jadwal sholat, kajian, infaq, dan kas transparan.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "id",
+  "background_color": "#06311f",
+  "theme_color": "#0d5c3a",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
