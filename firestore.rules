@@ -82,7 +82,15 @@ service cloud.firestore {
     // ---------- Identitas masjid ----------
     match /masjid/{id} {
       // Publik hanya melihat masjid TERVERIFIKASI. Pemilik & admin melihat miliknya.
-      allow read: if resource.data.verified == true
+      // get: akun boleh membaca dokumen berID = UID-nya sendiri, termasuk mengecek
+      // apakah dokumen itu sudah ada (tanpa ini, pendaftaran masjid pertama kali ditolak).
+      allow get: if (signedIn() && id == request.auth.uid)
+                 || resource.data.verified == true
+                 || (signedIn() && resource.data.ownerUid == request.auth.uid)
+                 || isAdmin();
+
+      // list (query): publik hanya yang terverifikasi
+      allow list: if resource.data.verified == true
                   || (signedIn() && resource.data.ownerUid == request.auth.uid)
                   || isAdmin();
 

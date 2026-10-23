@@ -1312,8 +1312,10 @@
                 snap.forEach(d => { if (Number.isFinite(d.data().id)) list.push(pickPub(d.data(), d.id)); });
                 const u = auth && auth.currentUser;
                 if (u && !u.isAnonymous && !list.some(x => x.ownerUid === u.uid)) {
-                    const own = await db.collection('masjid').doc(u.uid).get();
-                    if (own.exists && Number.isFinite(own.data().id)) list.push(pickPub(own.data(), own.id));
+                    try {
+                        const own = await db.collection('masjid').doc(u.uid).get();
+                        if (own.exists && Number.isFinite(own.data().id)) list.push(pickPub(own.data(), own.id));
+                    } catch (e) { console.warn('Dokumen masjid sendiri tidak terbaca', e.code); }
                 }
                 appState.masjidList = list;
                 if (!list.some(x => x.id === appState.activeMasjidId)) appState.activeMasjidId = list.length ? list[0].id : 0;
