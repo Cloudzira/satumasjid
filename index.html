@@ -60,6 +60,16 @@
 
     <style>
         #map-terdekat { isolation: isolate; }
+        .td-user-dot { width: 20px; height: 20px; margin: 4px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(37,99,235,.35), 0 2px 6px rgba(0,0,0,.35); position: relative; }
+        .td-user-arrow { position: absolute; left: 50%; top: -12px; margin-left: -6px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 12px solid #2563eb; transform-origin: 50% 19px; display: none; }
+        .td-user-arrow.on { display: block; }
+        .td-pin { width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: #0d5c3a; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; }
+        .td-pin span { transform: rotate(45deg); font-size: 16px; line-height: 1; }
+        .td-pin.reg { background: #c9a227; } .td-pin.sel { outline: 3px solid #f43f5e; }
+        #td-wrap.nav-full { position: fixed; inset: 0; height: 100vh !important; height: 100dvh !important; min-height: 0 !important; border-radius: 0; border: 0; z-index: 90; }
+        #td-wrap.nav-full .leaflet-control-zoom { display: none; }
+        #td-wrap.nav-full #td-ctl { top: calc(6rem + env(safe-area-inset-top)); }
+        #nav-banner { top: calc(.75rem + env(safe-area-inset-top)); } #nav-bar { bottom: calc(.75rem + env(safe-area-inset-bottom)); }
         .sm-pattern { background-color: #06311f; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2760%27%20height%3D%2760%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23e6ca65%27%20stroke-opacity%3D%27.13%27%3E%3Crect%20x%3D%2714%27%20y%3D%2714%27%20width%3D%2732%27%20height%3D%2732%27%2F%3E%3Crect%20x%3D%2714%27%20y%3D%2714%27%20width%3D%2732%27%20height%3D%2732%27%20transform%3D%27rotate%2845%2030%2030%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); }
         @keyframes smIn { from { opacity: 0; transform: scale(.8) translateY(8px) } to { opacity: 1; transform: none } }
         @keyframes smUp { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
@@ -104,7 +114,7 @@
         @media (max-height: 500px) and (orientation: landscape) {
             header.sticky { position: static; }
             #splash svg { width: 4.5rem; height: 4.5rem; margin-top: 1rem; } #splash h1 { font-size: 2.2rem; margin-top: .6rem; } #splash .mt-10 { margin-top: 1rem; }
-            #map-terdekat { height: 75vh; }
+            #td-wrap { height: 78vh !important; min-height: 0 !important; }
             #modal-box { max-height: 94vh; max-height: 94dvh; }
             #mobile-nav-wrap span { display: none; } #mobile-nav-wrap button { padding: .3rem 0; }
         }
@@ -691,24 +701,40 @@
         <!-- ========================================== -->
         <!-- TAB 7: DIREKTORI FASILITAS MASJID -->
         <!-- ========================================== -->
-        <section id="view-terdekat" class="view-content space-y-4 hidden">
-            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900">Masjid Terdekat</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Temukan masjid di sekitar Anda, lihat jaraknya di peta, dan buka rute perjalanan.</p>
+        <section id="view-terdekat" class="view-content space-y-3 hidden">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900">Masjid Terdekat</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Temukan masjid & musholla di sekitar Anda di mana pun berada, lengkap dengan petunjuk arah.</p>
+            </div>
+            <form onsubmit="return tdCari(event)" class="flex gap-2">
+                <input id="td-q" type="search" placeholder="Cari tempat lain: kota, alamat, nama jalan…" class="flex-1 min-w-0 px-3 py-2.5 border border-slate-300 rounded-xl text-sm bg-white">
+                <button class="px-4 py-2.5 bg-emerald-900 text-white rounded-xl text-xs font-bold">Cari</button>
+            </form>
+            <div id="td-status" class="hidden"></div>
+            <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-semibold pb-1">
+                <button data-f="all" onclick="tdFilter('all')" class="px-3 py-1.5 rounded-full border whitespace-nowrap">Semua</button>
+                <button data-f="masjid" onclick="tdFilter('masjid')" class="px-3 py-1.5 rounded-full border whitespace-nowrap">🕌 Masjid</button>
+                <button data-f="musholla" onclick="tdFilter('musholla')" class="px-3 py-1.5 rounded-full border whitespace-nowrap">🕋 Musholla / Surau</button>
+                <button data-f="verified" onclick="tdFilter('verified')" class="px-3 py-1.5 rounded-full border whitespace-nowrap">✓ Terverifikasi SatuMasjid</button>
+            </div>
+            <div id="td-wrap" class="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100" style="height:55vh;min-height:320px">
+                <div id="map-terdekat" class="absolute inset-0"></div>
+                <div id="td-ctl" class="absolute right-3 top-3 z-[500] flex flex-col gap-2">
+                    <button id="td-locate" onclick="tdLocate()" aria-label="Pusatkan ke lokasi saya" class="w-11 h-11 rounded-full shadow-lg border border-slate-200 flex items-center justify-center text-lg bg-white">🎯</button>
                 </div>
-                <div class="flex gap-2 flex-wrap">
-                    <select id="radius-terdekat" onchange="cariSekitar()" class="px-3 py-2 border border-slate-300 rounded-xl text-xs">
-                        <option value="1000">Radius 1 km</option><option value="3000" selected>Radius 3 km</option><option value="5000">Radius 5 km</option><option value="10000">Radius 10 km</option>
-                    </select>
-                    <button onclick="cariLokasi()" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-2">
-                        <i data-lucide="locate-fixed" class="w-4 h-4 text-gold-400"></i><span>Gunakan Lokasi Saya</span>
-                    </button>
+                <div id="nav-banner" class="hidden absolute left-3 right-3 z-[500] bg-emerald-900 text-white rounded-2xl shadow-xl p-3 flex items-center gap-3">
+                    <div id="nav-icon" class="text-3xl w-10 text-center">↑</div>
+                    <div class="min-w-0 flex-1"><p id="nav-dist" class="font-black text-xl leading-none"></p><p id="nav-text" class="text-xs text-emerald-100 mt-1"></p></div>
+                    <button id="nav-voice" onclick="navToggleVoice()" aria-label="Suara" class="w-10 h-10 rounded-full bg-white/10 text-lg">🔊</button>
+                </div>
+                <div id="nav-bar" class="hidden absolute left-3 right-3 z-[500] bg-white rounded-2xl shadow-xl p-3 flex items-center gap-3">
+                    <div class="flex-1 min-w-0"><p id="nav-rem" class="font-black text-emerald-900 text-lg leading-none"></p><p id="nav-eta" class="text-[11px] text-slate-500 mt-1"></p></div>
+                    <button onclick="tdNavStop()" class="px-4 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-bold">Selesai</button>
                 </div>
             </div>
-            <div id="map-terdekat" class="h-80 md:h-[28rem] rounded-2xl border border-slate-200 shadow-sm"></div>
-            <p id="terdekat-status" class="text-xs text-slate-500"></p>
+            <div id="td-route" class="hidden bg-white border border-slate-200 rounded-2xl p-4 shadow-sm"></div>
             <div id="terdekat-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            <p class="text-[10px] text-slate-400 leading-relaxed">Data tempat & peta © kontributor OpenStreetMap; cakupan bisa belum lengkap di beberapa daerah. Rute dihitung otomatis tanpa data lalu lintas langsung. Koordinat Anda dikirim ke layanan OpenStreetMap hanya untuk mencari tempat dan menghitung rute.</p>
         </section>
 
         <section id="view-fasilitas" class="view-content space-y-6 hidden">
@@ -1066,76 +1092,397 @@
 
         // PERMOHONAN JAMAAH (donasi, pinjam, relawan, bantuan, saran) -> diproses Takmir
 
-        // MASJID TERDEKAT (Leaflet + OpenStreetMap/Overpass)
-        let map = null, mapLayer = null, userPos = null, osmCache = [];
-        const hav = (a, b, c, d) => { const K = Math.PI / 180, x = (c - a) * K, y = (d - b) * K, q = Math.sin(x / 2) ** 2 + Math.cos(a * K) * Math.cos(c * K) * Math.sin(y / 2) ** 2; return 12742 * Math.asin(Math.sqrt(q)); };
-        const hasOrigin = () => !!userPos || curM().lat != null;
-        const origin = () => userPos || (curM().lat != null ? { lat: curM().lat, lng: curM().lng } : { lat: -2.5, lng: 118 });
-        const fmtKm = d => isNaN(d) ? '' : d.toFixed(1) + ' km';
-        const setStatus = t => { const el = document.getElementById('terdekat-status'); if (el) el.innerText = t; };
+        // MASJID TERDEKAT v2: lokasi live, pencarian di mana pun (OpenStreetMap), rute & navigasi
+        let userPos = null;
+        const TD = { map: null, layer: null, routeLayer: null, misc: null, userMarker: null, acc: null, watchId: null, follow: true, osm: [], filter: 'all', sel: null, manual: null, lastQ: null, radius: 1000, seq: 0, route: null, dest: null, mode: 'foot', nav: null, voice: true, wake: null, show: 20, sig: '', first: false, markers: {}, stale: false, lastRender: null, alert: false };
+        const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+        const PROFILE = { foot: ['routed-foot', 'foot', 'walking'], bike: ['routed-bike', 'bike', 'bicycling'], car: ['routed-car', 'driving', 'driving'] };
+        const distM = (a, b, c, d) => { const K = Math.PI / 180, x = (c - a) * K, y = (d - b) * K, q = Math.sin(x / 2) ** 2 + Math.cos(a * K) * Math.cos(c * K) * Math.sin(y / 2) ** 2; return 12742000 * Math.asin(Math.sqrt(q)); };
+        const fmtDist = m => m < 1000 ? Math.max(10, Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(m < 10000 ? 1 : 0) + ' km';
+        const fmtDur = s => { const m = Math.max(1, Math.round(s / 60)); return m < 60 ? m + ' mnt' : Math.floor(m / 60) + ' j ' + (m % 60) + ' mnt'; };
+        const walkMin = d => Math.max(1, Math.round(d * 1.3 / 83));
+
+        function tdStatus(msg, kind = 'info', act, alert = true) {
+            TD.alert = !!msg && alert;
+            const el = document.getElementById('td-status'); if (!el) return;
+            if (!msg) { el.className = 'hidden'; el.innerHTML = ''; return; }
+            const cls = { info: 'bg-slate-100 text-slate-700', warn: 'bg-amber-50 text-amber-800 border border-amber-200', err: 'bg-rose-50 text-rose-700 border border-rose-200' }[kind];
+            el.className = 'rounded-xl p-3 text-xs flex items-center justify-between gap-3 ' + cls;
+            el.innerHTML = `<span class="leading-relaxed">${msg}</span>${act ? `<button onclick="${act[1]}" class="flex-shrink-0 px-3 py-1.5 rounded-lg bg-emerald-900 text-white font-bold">${act[0]}</button>` : ''}`;
+        }
+        function tdSummary(n) {
+            if (TD.alert) return;
+            const o = tdOrigin();
+            if (!o) return tdStatus('Aktifkan lokasi atau cari tempat untuk melihat masjid di sekitar Anda.', 'info', null, false);
+            const where = TD.manual ? esc(TD.manual.label) : userPos ? `lokasi Anda${userPos.acc ? ' (±' + Math.round(userPos.acc) + ' m)' : ''}` : TD.stale ? 'lokasi terakhir Anda (menunggu GPS)' : 'masjid terpilih';
+            const weak = !TD.manual && userPos && userPos.acc > 150;
+            tdStatus(`${n} tempat dalam ${TD.radius >= 1000 ? TD.radius / 1000 + ' km' : TD.radius + ' m'} dari ${where}${weak ? ' · akurasi rendah: aktifkan GPS / lokasi presisi' : ''}`, weak ? 'warn' : 'info', TD.manual ? ['Lokasi Saya', 'tdResetManual()'] : null, false);
+        }
+        function tdLast() { try { const l = JSON.parse(localStorage.getItem('sm_lastpos')); return l && Date.now() - l.t < 6048e5 ? l : null; } catch (e) { return null; } }
+        function tdOrigin() {
+            if (TD.manual) return TD.manual;
+            if (userPos) return userPos;
+            const l = tdLast(); if (l) { TD.stale = true; return l; }
+            const m = curM(); return m.lat != null ? { lat: m.lat, lng: m.lng } : null;
+        }
+        function tdUpdateLocateBtn() { const b = document.getElementById('td-locate'); if (b) b.className = 'w-11 h-11 rounded-full shadow-lg border flex items-center justify-center text-lg ' + (TD.follow && userPos ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'); }
+
         function initTerdekat() {
-            if (!window.L) return showToast('Peta gagal dimuat', 'Periksa koneksi internet Anda.');
-            if (!map) {
-                const o = origin();
-                map = L.map('map-terdekat').setView([o.lat, o.lng], hasOrigin() ? 14 : 5);
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
-                mapLayer = L.layerGroup().addTo(map);
-                cariSekitar();
+            if (!window.L) return tdStatus('Peta gagal dimuat. Periksa koneksi internet lalu muat ulang.', 'err');
+            if (!TD.map) {
+                const o = tdOrigin();
+                TD.map = L.map('map-terdekat', { zoomControl: false }).setView(o ? [o.lat, o.lng] : [-2.5, 118], o ? 15 : 5);
+                L.control.zoom({ position: 'bottomright' }).addTo(TD.map);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(TD.map);
+                TD.layer = L.layerGroup().addTo(TD.map); TD.routeLayer = L.layerGroup().addTo(TD.map); TD.misc = L.layerGroup().addTo(TD.map);
+                TD.map.on('dragstart', () => { TD.follow = false; tdUpdateLocateBtn(); });
+                tdFilter(TD.filter);
             }
-            setTimeout(() => map.invalidateSize(), 100);
-            renderTerdekat();
+            setTimeout(() => TD.map.invalidateSize(), 150);
+            tdInitLocation();
+            if (o0()) tdSearch(); else renderTerdekat();
+            function o0() { return !TD.lastQ && tdOrigin(); }
         }
-        function cariLokasi() {
-            if (!navigator.geolocation) return showToast('Tidak didukung', 'Peramban tidak mendukung lokasi.');
-            setStatus('Mencari lokasi Anda…');
-            navigator.geolocation.getCurrentPosition(p => {
-                userPos = { lat: p.coords.latitude, lng: p.coords.longitude };
-                map.setView([userPos.lat, userPos.lng], 14);
-                loadPrayerTimes();
-                cariSekitar();
-            }, () => { setStatus('Izin lokasi ditolak. Jarak dihitung dari masjid yang sedang dipilih.'); showToast('Lokasi tidak aktif', 'Izinkan akses lokasi di peramban.'); }, { enableHighAccuracy: true, timeout: 10000 });
+        function tdInitLocation() {
+            if (TD.watchId !== null || TD.manual) return;
+            if (!navigator.geolocation) return tdStatus('Peramban tidak mendukung lokasi. Gunakan kolom pencarian tempat di atas.', 'warn');
+            if (navigator.permissions && navigator.permissions.query) {
+                navigator.permissions.query({ name: 'geolocation' }).then(p => {
+                    if (p.state === 'granted') tdStartWatch(); else if (p.state === 'denied') tdDenied(); else tdPrompt();
+                    p.onchange = () => { if (p.state === 'granted' && TD.watchId === null) tdStartWatch(); };
+                }).catch(tdPrompt);
+            } else tdPrompt();
         }
-        async function cariSekitar() {
-            const o = origin(), r = document.getElementById('radius-terdekat').value;
-            if (!hasOrigin()) { osmCache = []; setStatus('Tekan "Gunakan Lokasi Saya" untuk mencari masjid di sekitar Anda.'); renderTerdekat(); return; }
-            setStatus('Mencari masjid di sekitar…');
+        function tdPrompt() { tdStatus('Izinkan akses lokasi agar masjid terdekat dihitung dari posisi Anda saat ini. Koordinat dikirim ke layanan OpenStreetMap hanya untuk pencarian.', 'info', ['Aktifkan Lokasi', 'tdStartWatch()']); }
+        function tdDenied() { tdStatus('Izin lokasi ditolak. Buka pengaturan situs (ikon gembok di alamat) lalu izinkan Lokasi, atau cari tempat secara manual di atas.', 'warn', ['Coba Lagi', 'tdRetry()']); }
+        function tdStartWatch() {
+            if (TD.watchId !== null || !navigator.geolocation) return;
+            tdStatus('Mencari lokasi Anda…', 'info', null, false);
+            TD.watchId = navigator.geolocation.watchPosition(tdOnPos, tdOnPosErr, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+        }
+        function tdStopWatch() { if (TD.watchId !== null) { navigator.geolocation.clearWatch(TD.watchId); TD.watchId = null; } }
+        function tdRetry() { tdStopWatch(); tdStartWatch(); }
+        function tdPause() { if (!TD.nav) tdStopWatch(); }
+        function tdOnPosErr(e) {
+            if (TD.nav) return showToast('Sinyal GPS lemah', 'Navigasi menunggu sinyal lokasi…');
+            if (e.code === 1) { tdStopWatch(); tdDenied(); }
+            else if (e.code === 2) tdStatus('Sinyal lokasi belum tersedia. Pindah ke area terbuka dan pastikan GPS / Lokasi aktif.', 'warn', ['Coba Lagi', 'tdRetry()']);
+            else tdStatus('Mencari lokasi terlalu lama. Pastikan GPS aktif lalu coba lagi.', 'warn', ['Coba Lagi', 'tdRetry()']);
+        }
+        function tdOnPos(p) {
+            const c = p.coords;
+            if (userPos && c.accuracy > 1500) return;
+            userPos = { lat: c.latitude, lng: c.longitude, acc: c.accuracy || 0, heading: c.heading, speed: c.speed };
+            try { localStorage.setItem('sm_lastpos', JSON.stringify({ lat: userPos.lat, lng: userPos.lng, t: Date.now() })); } catch (e) {}
+            if (!TD.map) return;
+            tdDrawUser();
+            if (TD.nav) return tdNavUpdate();
+            TD.alert = false;
+            if (!TD.first) { TD.first = true; TD.stale = false; if (!TD.manual) TD.map.setView([userPos.lat, userPos.lng], 16); }
+            else if (TD.follow && !TD.manual && !TD.route) TD.map.panTo([userPos.lat, userPos.lng]);
+            tdUpdateLocateBtn();
+            if (!TD.manual) {
+                if (!TD.lastQ || distM(TD.lastQ.lat, TD.lastQ.lng, userPos.lat, userPos.lng) > 300) tdSearch();
+                else if (!TD.lastRender || distM(TD.lastRender.lat, TD.lastRender.lng, userPos.lat, userPos.lng) > 25) renderTerdekat();
+            }
+            loadPrayerTimes();
+        }
+        function tdDrawUser() {
+            const ll = [userPos.lat, userPos.lng];
+            if (!TD.userMarker) {
+                TD.userMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="td-user-dot"><div class="td-user-arrow"></div></div>', iconSize: [28, 28], iconAnchor: [14, 14] }), zIndexOffset: 1000, interactive: false }).addTo(TD.map);
+                TD.acc = L.circle(ll, { radius: userPos.acc || 30, color: '#2563eb', weight: 1, fillColor: '#3b82f6', fillOpacity: .12, interactive: false }).addTo(TD.map);
+            } else { TD.userMarker.setLatLng(ll); TD.acc.setLatLng(ll); TD.acc.setRadius(userPos.acc || 30); }
+            const el = TD.userMarker.getElement(), ar = el && el.querySelector('.td-user-arrow'), h = userPos.heading;
+            if (ar) { const ok = typeof h === 'number' && !isNaN(h); ar.classList.toggle('on', ok); if (ok) ar.style.transform = `rotate(${h}deg)`; }
+        }
+        function tdLocate() {
+            if (!TD.map) return;
+            if (TD.manual) tdResetManual();
+            else if (userPos) { TD.follow = true; TD.map.setView([userPos.lat, userPos.lng], Math.max(TD.map.getZoom(), 16)); tdUpdateLocateBtn(); if (!TD.lastQ || distM(TD.lastQ.lat, TD.lastQ.lng, userPos.lat, userPos.lng) > 300) tdSearch(); }
+            else { TD.alert = false; tdRetry(); }
+        }
+        function tdCari(e) { e.preventDefault(); tdCariAsync(); return false; }
+        async function tdCariAsync() {
+            const q = document.getElementById('td-q').value.trim();
+            if (q.length < 3) return showToast('Kata kunci terlalu pendek', 'Ketik minimal 3 huruf.');
+            if (!TD.map) initTerdekat();
+            tdStatus('Mencari tempat…', 'info', null, false);
             try {
-                const f = `["amenity"="place_of_worship"]["religion"="muslim"](around:${r},${o.lat},${o.lng})`;
-                const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(`[out:json][timeout:20];(node${f};way${f};);out center 60;`) });
-                const j = await res.json();
-                osmCache = j.elements.map(e => ({ id: 'osm' + e.id, name: e.tags?.name || 'Masjid/Musholla (tanpa nama)', lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon })).filter(x => x.lat != null);
-                setStatus(`${osmCache.length} tempat ibadah muslim ditemukan dalam radius ${r / 1000} km (data OpenStreetMap).`);
-            } catch (e) { osmCache = []; setStatus('Gagal memuat data sekitar (offline?). Masjid terdaftar SatuMasjid tetap ditampilkan.'); }
+                const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=id&q=' + encodeURIComponent(q));
+                const j = await r.json();
+                if (!j.length) return tdStatus('Tempat tidak ditemukan. Coba kata kunci lain.', 'warn', ['Lokasi Saya', 'tdResetManual()']);
+                TD.manual = { lat: +j[0].lat, lng: +j[0].lon, label: String(j[0].display_name).split(',').slice(0, 2).join(',').trim() };
+                TD.follow = false; TD.alert = false; TD.first = true; tdClearRoute(); tdUpdateLocateBtn();
+                TD.map.setView([TD.manual.lat, TD.manual.lng], 15);
+                TD.misc.clearLayers();
+                L.marker([TD.manual.lat, TD.manual.lng], { icon: L.divIcon({ className: '', html: '<div style="font-size:28px;line-height:28px">📍</div>', iconSize: [28, 28], iconAnchor: [14, 28] }), interactive: false }).addTo(TD.misc);
+                tdSearch();
+            } catch (e) { tdStatus('Pencarian tempat gagal. Periksa koneksi internet.', 'err'); }
+        }
+        function tdResetManual() {
+            TD.manual = null; TD.alert = false; if (TD.misc) TD.misc.clearLayers();
+            const q = document.getElementById('td-q'); if (q) q.value = '';
+            if (userPos) { TD.follow = true; TD.map.setView([userPos.lat, userPos.lng], 16); tdUpdateLocateBtn(); tdSearch(); } else { tdInitLocation(); tdSearch(); }
+        }
+
+        // PENCARIAN (Overpass API, beberapa server cadangan, radius otomatis melebar)
+        function tdDedupe(list) {
+            const out = [];
+            list.slice().sort((a, b) => (a.unnamed ? 1 : 0) - (b.unnamed ? 1 : 0)).forEach(x => {
+                if (!out.some(y => distM(x.lat, x.lng, y.lat, y.lng) < 50 && (x.unnamed || y.unnamed || x.name.toLowerCase() === y.name.toLowerCase()))) out.push(x);
+            });
+            return out;
+        }
+        async function tdOverpass(o, r) {
+            const key = `sm_op_${o.lat.toFixed(3)}_${o.lng.toFixed(3)}_${r}`;
+            try { const c = JSON.parse(sessionStorage.getItem(key)); if (c && Date.now() - c.t < 6e5) return c.d; } catch (e) {}
+            const f = `(around:${r},${o.lat},${o.lng})`;
+            const q = `[out:json][timeout:25];(nwr["amenity"="place_of_worship"]["religion"="muslim"]${f};nwr["building"="mosque"]${f};);out center 400;`;
+            for (const ep of OVERPASS) {
+                try {
+                    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+                    const res = await fetch(ep, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ctl.signal });
+                    clearTimeout(to);
+                    if (!res.ok) continue;
+                    const j = await res.json();
+                    const out = tdDedupe((j.elements || []).map(e => {
+                        const t = e.tags || {}, lat = e.lat ?? (e.center && e.center.lat), lng = e.lon ?? (e.center && e.center.lon);
+                        if (lat == null || lng == null) return null;
+                        const nm = t.name || t['name:id'] || t.alt_name || t['name:en'] || '';
+                        const small = /mushol+a|mushalla|musala|surau|langgar|prayer\s*room/i.test(nm);
+                        return { id: 'osm' + e.type[0] + e.id, osmUrl: `https://www.openstreetmap.org/${e.type}/${e.id}`, name: nm || (small ? 'Musholla' : 'Masjid') + ' (tanpa nama)', unnamed: !nm, kind: small ? 'musholla' : 'masjid', lat, lng, addr: [t['addr:street'], t['addr:housenumber'], t['addr:suburb'] || t['addr:city']].filter(Boolean).join(' '), reg: false };
+                    }).filter(Boolean));
+                    try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), d: out })); } catch (e) {}
+                    return out;
+                } catch (e) { /* coba server berikutnya */ }
+            }
+            return null;
+        }
+        async function tdSearch() {
+            const o = tdOrigin();
+            if (!o) return renderTerdekat();
+            TD.lastQ = { lat: o.lat, lng: o.lng };
+            const seq = ++TD.seq;
+            tdStatus('Mencari masjid di sekitar…', 'info', null, false);
+            let best = null;
+            for (const r of [1000, 2500, 5000, 10000, 25000]) {
+                const res = await tdOverpass(o, r);
+                if (seq !== TD.seq) return;
+                if (res === null) break;
+                best = res; TD.radius = r;
+                if (res.length >= 8) break;
+            }
+            if (best === null) { tdStatus('Gagal memuat data masjid dari OpenStreetMap. Periksa koneksi internet.', 'err', ['Coba Lagi', 'tdSearch()']); return renderTerdekat(); }
+            TD.osm = best; TD.alert = false; TD.sig = ''; TD.show = 20;
             renderTerdekat();
+        }
+        function tdItems() {
+            const o = tdOrigin();
+            if (!o) return [];
+            const reg = appState.masjidList.filter(m => m.lat != null && m.lng != null).map(m => ({ id: 'sm' + m.id, mid: m.id, name: m.name, addr: m.address, kind: 'masjid', reg: true, verified: m.verified, maps: m.maps, lat: m.lat, lng: m.lng }));
+            let all = [...reg, ...TD.osm.filter(x => !reg.some(r => distM(r.lat, r.lng, x.lat, x.lng) < 60))].map(x => ({ ...x, d: distM(o.lat, o.lng, x.lat, x.lng) }));
+            all = all.filter(x => !x.reg || x.d <= Math.max(TD.radius, 3000));
+            if (TD.filter === 'masjid') all = all.filter(x => x.kind === 'masjid');
+            else if (TD.filter === 'musholla') all = all.filter(x => x.kind === 'musholla');
+            else if (TD.filter === 'verified') all = all.filter(x => x.reg && x.verified);
+            return all.sort((a, b) => a.d - b.d);
+        }
+        function tdFilter(f) {
+            TD.filter = f; TD.show = 20; TD.sig = '';
+            document.querySelectorAll('#view-terdekat [data-f]').forEach(b => { const on = b.dataset.f === f; b.className = 'px-3 py-1.5 rounded-full border whitespace-nowrap ' + (on ? 'bg-emerald-900 text-white border-emerald-900' : 'bg-white text-slate-700 border-slate-300'); });
+            renderTerdekat();
+        }
+        function renderTerdekat() {
+            if (!TD.map) return;
+            const o = tdOrigin(), items = tdItems();
+            TD.lastRender = o ? { lat: o.lat, lng: o.lng } : null;
+            tdSummary(items.length);
+            const sig = [o ? o.lat.toFixed(4) + o.lng.toFixed(4) : '-', items.map(x => x.id).join(','), TD.filter, TD.show].join('|');
+            if (sig === TD.sig) return;
+            TD.sig = sig;
+            TD.layer.clearLayers(); TD.markers = {};
+            items.slice(0, 80).forEach(x => {
+                const icon = L.divIcon({ className: '', html: `<div class="td-pin ${x.reg ? 'reg' : ''} ${TD.sel === x.id ? 'sel' : ''}"><span>${x.kind === 'musholla' ? '🕋' : '🕌'}</span></div>`, iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -30] });
+                const mk = L.marker([x.lat, x.lng], { icon, title: x.name }).addTo(TD.layer);
+                mk.on('click', () => tdSelect(x.id, true));
+                TD.markers[x.id] = mk;
+            });
+            const list = document.getElementById('terdekat-list');
+            if (!items.length) { list.innerHTML = `<div class="md:col-span-2 text-center text-xs text-slate-500 bg-white border border-slate-200 rounded-2xl p-6">${o ? 'Belum ada masjid yang ditemukan di area ini. Data OpenStreetMap mungkin belum lengkap — coba cari tempat lain atau ubah filter.' : 'Aktifkan lokasi atau cari tempat untuk melihat masjid di sekitar Anda.'}</div>`; return; }
+            list.innerHTML = items.slice(0, TD.show).map(x => `
+                <div id="tdc-${esc(x.id)}" class="bg-white p-4 rounded-2xl border ${TD.sel === x.id ? 'border-rose-400' : 'border-slate-200'} shadow-sm">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${x.reg ? 'bg-gold-300 text-emerald-950' : 'bg-slate-100 text-slate-600'}">${x.reg ? (x.verified ? 'Terverifikasi SatuMasjid ✓' : 'SatuMasjid') : x.kind === 'musholla' ? 'Musholla / Surau' : 'Masjid'}</span>
+                            <h4 class="font-bold text-slate-900 text-sm mt-1 break-words">${esc(x.name)}</h4>
+                            ${x.addr ? `<p class="text-[11px] text-slate-500 break-words">${esc(x.addr)}</p>` : ''}
+                        </div>
+                        <div class="text-right flex-shrink-0"><p class="text-sm font-black text-emerald-900">${fmtDist(x.d)}</p><p class="text-[10px] text-slate-400">±${walkMin(x.d)} mnt jalan</p></div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-3 text-[11px] font-bold">
+                        <button onclick="tdRoute(this.dataset.i)" data-i="${esc(x.id)}" class="px-3 py-1.5 bg-emerald-900 text-white rounded-lg">➤ Rute</button>
+                        <button onclick="tdSelect(this.dataset.i)" data-i="${esc(x.id)}" class="px-3 py-1.5 bg-emerald-100 text-emerald-900 rounded-lg">Lihat Peta</button>
+                        ${x.reg ? `<button onclick="pilihMasjid(${x.mid})" class="px-3 py-1.5 bg-slate-100 text-slate-800 rounded-lg">Portal</button>` : `<a href="${esc(x.osmUrl)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg">Info</a>`}
+                    </div>
+                </div>`).join('') + (items.length > TD.show ? `<button onclick="TD.show+=20;TD.sig='';renderTerdekat()" class="md:col-span-2 py-2.5 text-xs font-bold text-emerald-900 bg-white border border-slate-200 rounded-xl">Tampilkan lebih banyak (${items.length - TD.show})</button>` : '');
+        }
+        function tdSelect(id, fromMap) {
+            const it = tdItems().find(x => x.id === id); if (!it) return;
+            TD.sel = id;
+            Object.entries(TD.markers).forEach(([k, m]) => { const el = m.getElement(), pin = el && el.querySelector('.td-pin'); if (pin) pin.classList.toggle('sel', k === id); });
+            document.querySelectorAll('#terdekat-list > div[id^="tdc-"]').forEach(c => { const on = c.id === 'tdc-' + id; c.classList.toggle('border-rose-400', on); c.classList.toggle('border-slate-200', !on); });
+            const mk = TD.markers[id];
+            if (mk) mk.bindPopup(`<b>${esc(it.name)}</b><br>${fmtDist(it.d)} · ±${walkMin(it.d)} mnt jalan<br><a href="#" onclick="tdRoute(this.dataset.i);return false" data-i="${esc(id)}">➤ Rute ke sini</a>${it.reg ? ` · <a href="#" onclick="pilihMasjid(${it.mid});return false">Portal</a>` : ''}`).openPopup();
+            if (!fromMap) { TD.follow = false; tdUpdateLocateBtn(); TD.map.setView([it.lat, it.lng], 17); document.getElementById('td-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            else { const c = document.getElementById('tdc-' + id); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
         }
         function pilihMasjid(id) { changeMasjid(id); switchTab('home'); }
-        function renderTerdekat() {
-            if (!map) return;
-            const o = origin();
-            mapLayer.clearLayers();
-            const all = [
-                ...appState.masjidList.filter(m => m.lat != null).map(m => ({ id: m.id, name: m.name, sub: m.address, lat: m.lat, lng: m.lng, maps: m.maps, reg: true })),
-                ...osmCache.map(x => ({ ...x, sub: 'Data OpenStreetMap', reg: false }))
-            ].map(x => ({ ...x, d: hasOrigin() ? hav(o.lat, o.lng, x.lat, x.lng) : NaN })).sort((a, b) => hasOrigin() ? a.d - b.d : a.name.localeCompare(b.name));
-            if (userPos) L.circleMarker([o.lat, o.lng], { radius: 8, color: '#2563eb', fillColor: '#3b82f6', fillOpacity: .9 }).addTo(mapLayer).bindPopup('Lokasi Anda');
-            all.forEach(x => {
-                const pop = `<b>${esc(x.name)}</b><br>${esc(x.sub)}<br>${fmtKm(x.d)}${x.maps && /^https?:\/\//.test(x.maps) ? `<br><a href="${esc(x.maps)}" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>` : ''}${x.reg ? `<br><a href="#" onclick="pilihMasjid(${x.id});return false">Buka portal masjid</a>` : ''}`;
-                (x.reg ? L.marker([x.lat, x.lng]) : L.circleMarker([x.lat, x.lng], { radius: 6, color: '#0d5c3a', fillColor: '#34d399', fillOpacity: .9 })).addTo(mapLayer).bindPopup(pop);
-            });
-            document.getElementById('terdekat-list').innerHTML = all.slice(0, 20).map(x => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${x.reg ? 'bg-gold-300 text-emerald-950' : 'bg-slate-100 text-slate-600'}">${x.reg ? 'Terdaftar SatuMasjid' : 'OpenStreetMap'}</span>
-                        <h4 class="font-bold text-slate-900 text-sm mt-1 truncate">${esc(x.name)}</h4>
-                        <p class="text-[11px] text-slate-500 truncate">${esc(x.sub)}</p>
-                        <p class="text-xs font-bold text-emerald-900 mt-1">${fmtKm(x.d)}</p>
-                    </div>
-                    <div class="flex flex-col gap-1.5 flex-shrink-0 text-[11px] font-bold">
-                        <button onclick="map.flyTo([${x.lat},${x.lng}],17)" class="px-2.5 py-1 bg-emerald-100 text-emerald-900 rounded-lg">Lihat Peta</button>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}" target="_blank" rel="noopener" class="px-2.5 py-1 bg-emerald-900 text-white rounded-lg text-center">Rute</a>
-                        ${x.reg ? `<button onclick="pilihMasjid(${x.id})" class="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-lg">Portal</button>` : ''}
-                    </div>
-                </div>`).join('');
+
+        // RUTE & NAVIGASI (OSRM milik FOSSGIS / OpenStreetMap Jerman)
+        function stepText(s) {
+            const m = s.maneuver, to = s.name ? ` ke ${s.name}` : '';
+            const MOD = { uturn: 'Putar balik', 'sharp right': 'Belok tajam ke kanan', right: 'Belok kanan', 'slight right': 'Serong ke kanan', straight: 'Lurus', 'slight left': 'Serong ke kiri', left: 'Belok kiri', 'sharp left': 'Belok tajam ke kiri' };
+            switch (m.type) {
+                case 'depart': return 'Mulai perjalanan' + (s.name ? ` di ${s.name}` : '');
+                case 'arrive': return 'Anda tiba di tujuan' + (m.modifier === 'left' ? ' (di sisi kiri)' : m.modifier === 'right' ? ' (di sisi kanan)' : '');
+                case 'roundabout': case 'rotary': case 'roundabout turn': return `Masuk bundaran, ambil jalan keluar ke-${m.exit || 1}${to}`;
+                case 'exit roundabout': case 'exit rotary': return 'Keluar dari bundaran' + to;
+                case 'fork': return (/left/.test(m.modifier || '') ? 'Di percabangan, ambil kiri' : 'Di percabangan, ambil kanan') + to;
+                case 'merge': return 'Gabung ke jalur' + to;
+                case 'on ramp': return 'Masuk jalur penghubung' + to;
+                case 'off ramp': return 'Keluar lewat jalur samping' + to;
+                case 'end of road': return (MOD[m.modifier] || 'Belok') + ' di ujung jalan' + to;
+                case 'continue': case 'new name': return (m.modifier && m.modifier !== 'straight' ? MOD[m.modifier] : 'Lurus') + (s.name ? ` di ${s.name}` : '');
+                default: return (MOD[m.modifier] || 'Lanjutkan') + to;
+            }
+        }
+        function stepIcon(s) {
+            if (s.type === 'arrive') return '🏁';
+            if (/roundabout|rotary/.test(s.type)) return '⟳';
+            return { uturn: '↶', 'sharp right': '↱', right: '↱', 'slight right': '↗', straight: '↑', 'slight left': '↖', left: '↰', 'sharp left': '↰' }[s.mod] || '↑';
+        }
+        async function tdRoute(id, mode, opts = {}) {
+            const it = tdItems().find(x => x.id === id) || (TD.dest && TD.dest.id === id ? TD.dest : null);
+            if (!it) return;
+            const o = opts.fromLive && userPos ? userPos : tdOrigin();
+            if (!o) return showToast('Lokasi belum diketahui', 'Aktifkan lokasi atau cari tempat asal terlebih dahulu.');
+            TD.dest = it; TD.mode = mode || TD.mode || 'foot';
+            const panel = document.getElementById('td-route');
+            if (!opts.quiet) { panel.classList.remove('hidden'); panel.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Menghitung rute…</p>'; panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            const [d, pf, gm] = PROFILE[TD.mode];
+            try {
+                const res = await fetch(`https://routing.openstreetmap.de/${d}/route/v1/${pf}/${o.lng},${o.lat};${it.lng},${it.lat}?overview=full&geometries=geojson&steps=true&alternatives=false`);
+                const j = await res.json();
+                if (j.code !== 'Ok' || !j.routes || !j.routes[0]) throw new Error(j.code || 'gagal');
+                const rt = j.routes[0];
+                TD.route = { o: { lat: o.lat, lng: o.lng }, dist: rt.distance, dur: rt.duration, coords: rt.geometry.coordinates.map(c => [c[1], c[0]]), steps: rt.legs.flatMap(l => l.steps).map(s => ({ text: stepText(s), dist: s.distance, dur: s.duration, loc: [s.maneuver.location[1], s.maneuver.location[0]], type: s.maneuver.type, mod: s.maneuver.modifier })) };
+                let from = 0;
+                TD.route.steps.forEach(st => { let bi = from, bd = Infinity; for (let i = from; i < TD.route.coords.length; i++) { const dd = (TD.route.coords[i][0] - st.loc[0]) ** 2 + (TD.route.coords[i][1] - st.loc[1]) ** 2; if (dd < bd) { bd = dd; bi = i; } } st.vi = bi; from = bi; });
+                TD.routeLayer.clearLayers();
+                L.polyline(TD.route.coords, { color: '#ffffff', weight: 10, opacity: .9 }).addTo(TD.routeLayer);
+                L.polyline(TD.route.coords, { color: '#2563eb', weight: 6, opacity: .95 }).addTo(TD.routeLayer);
+                if (!opts.quiet) TD.map.fitBounds(L.latLngBounds(TD.route.coords), { padding: [50, 50] });
+                tdRenderRoute();
+                return true;
+            } catch (e) {
+                if (opts.quiet) return false;
+                TD.route = null;
+                panel.innerHTML = `<p class="text-xs text-rose-700 font-bold">Rute tidak dapat dihitung${TD.mode === 'foot' ? '' : ' untuk moda ini'}.</p><p class="text-[11px] text-slate-500 mt-1">Kemungkinan tidak ada jalan yang terhubung, atau layanan rute sedang sibuk. Coba moda lain atau buka di Google Maps.</p>
+                    <div class="flex gap-2 mt-3"><a href="https://www.google.com/maps/dir/?api=1&destination=${it.lat},${it.lng}&travelmode=${gm}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 border border-slate-300 text-slate-700 font-bold text-xs rounded-xl text-center">Buka di Google Maps</a><button onclick="tdClearRoute()" class="px-4 py-2.5 text-slate-500 text-xs font-bold">Tutup</button></div>`;
+                return false;
+            }
+        }
+        function tdRenderRoute() {
+            const el = document.getElementById('td-route'), r = TD.route, d = TD.dest;
+            if (!r || !d) return el.classList.add('hidden');
+            const modes = [['foot', '🚶', 'Jalan kaki'], ['bike', '🚲', 'Sepeda'], ['car', '🚗', 'Mobil/Motor']];
+            el.classList.remove('hidden');
+            el.innerHTML = `
+                <div class="flex justify-between items-start gap-2"><div class="min-w-0"><p class="text-[11px] text-slate-500">Menuju</p><p class="font-bold text-slate-900 break-words">${esc(d.name)}</p></div><button onclick="tdClearRoute()" aria-label="Tutup rute" class="p-2 text-slate-400">✕</button></div>
+                <div class="flex gap-2 mt-3">${modes.map(m => `<button onclick="tdRoute(TD.dest.id,'${m[0]}')" class="flex-1 py-2 rounded-xl text-[11px] font-bold border ${TD.mode === m[0] ? 'bg-emerald-900 text-white border-emerald-900' : 'bg-white text-slate-700 border-slate-300'}">${m[1]} ${m[2]}</button>`).join('')}</div>
+                <div class="flex items-end gap-3 mt-3"><p class="text-3xl font-black text-emerald-900 leading-none">${fmtDur(r.dur)}</p><p class="text-sm text-slate-500 pb-0.5">${fmtDist(r.dist)}</p></div>
+                <div class="flex gap-2 mt-3"><button onclick="tdNavStart()" class="flex-1 py-2.5 bg-emerald-900 text-white font-bold text-xs rounded-xl">▶ Mulai Navigasi</button>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${d.lat},${d.lng}&travelmode=${PROFILE[TD.mode][2]}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 border border-slate-300 text-slate-700 font-bold text-xs rounded-xl text-center">Buka di Google Maps</a></div>
+                <details class="mt-3"><summary class="text-xs font-bold text-emerald-900 cursor-pointer">Langkah-langkah (${r.steps.length})</summary><ol class="mt-2 space-y-2">${r.steps.map(s => `<li class="flex gap-2 text-xs"><span class="w-6 text-center text-base">${stepIcon(s)}</span><span class="flex-1 text-slate-700">${esc(s.text)}</span><span class="text-slate-400 whitespace-nowrap">${fmtDist(s.dist)}</span></li>`).join('')}</ol></details>`;
+        }
+        function tdClearRoute() {
+            if (TD.nav) tdNavStop();
+            TD.route = null; TD.dest = null;
+            if (TD.routeLayer) TD.routeLayer.clearLayers();
+            const el = document.getElementById('td-route'); if (el) el.classList.add('hidden');
+        }
+        function routeProgress(p, coords, from) {
+            const k = Math.cos(p.lat * Math.PI / 180), mx = 111320 * k, my = 110540;
+            const scan = (lo, hi) => {
+                let best = { d: Infinity, pos: 0 };
+                for (let i = lo; i < hi; i++) {
+                    const ax = (coords[i][1] - p.lng) * mx, ay = (coords[i][0] - p.lat) * my, bx = (coords[i + 1][1] - p.lng) * mx, by = (coords[i + 1][0] - p.lat) * my;
+                    const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / L2)) : 0, d = Math.hypot(ax + t * dx, ay + t * dy);
+                    if (d < best.d) best = { d, pos: i + t };
+                }
+                return best;
+            };
+            const n = coords.length - 1;
+            const w = scan(Math.max(0, from - 3), Math.min(n, from + 400));
+            return w.d <= 150 ? w : scan(0, n);
+        }
+        function say(t) {
+            if (!TD.voice || !window.speechSynthesis) return;
+            try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'id-ID'; speechSynthesis.speak(u); } catch (e) {}
+        }
+        function navToggleVoice() { TD.voice = !TD.voice; document.getElementById('nav-voice').innerText = TD.voice ? '🔊' : '🔇'; if (!TD.voice && window.speechSynthesis) speechSynthesis.cancel(); }
+        async function tdWake() { try { if ('wakeLock' in navigator && TD.nav) TD.wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && TD.nav) tdWake(); });
+        async function tdNavStart() {
+            if (!TD.route || !TD.dest) return;
+            if (!navigator.geolocation) return showToast('Lokasi tidak didukung', 'Gunakan tombol Buka di Google Maps.');
+            if (!userPos) { tdStartWatch(); return showToast('Menunggu lokasi', 'Aktifkan lokasi, lalu tekan Mulai Navigasi lagi.'); }
+            if (distM(TD.route.o.lat, TD.route.o.lng, userPos.lat, userPos.lng) > 100) {
+                if (!(await tdRoute(TD.dest.id, TD.mode, { fromLive: true, quiet: true }))) return showToast('Rute gagal dihitung', 'Coba lagi beberapa saat.');
+            }
+            TD.nav = { idx: Math.min(1, TD.route.steps.length - 1), spoken: -1, off: 0, lastReroute: 0, pos: 0 };
+            TD.follow = true; tdUpdateLocateBtn();
+            document.getElementById('td-wrap').classList.add('nav-full');
+            document.getElementById('nav-banner').classList.remove('hidden'); document.getElementById('nav-bar').classList.remove('hidden');
+            TD.map.invalidateSize(); TD.map.setView([userPos.lat, userPos.lng], TD.mode === 'car' ? 17 : 18);
+            tdWake(); say('Navigasi dimulai. ' + TD.route.steps[TD.nav.idx].text);
+            tdNavUpdate();
+        }
+        function tdNavUpdate() {
+            const n = TD.nav, r = TD.route;
+            if (!n || !r || !userPos) return;
+            if (distM(userPos.lat, userPos.lng, TD.dest.lat, TD.dest.lng) < 30) return tdNavStop('Anda telah tiba di ' + TD.dest.name, true);
+            const pr = routeProgress(userPos, r.coords, Math.floor(n.pos || 0));
+            if (pr.d < 150) n.pos = Math.max(n.pos || 0, pr.pos);
+            const rad = TD.mode === 'car' ? 35 : 20;
+            while (n.idx < r.steps.length - 1 && ((n.pos || 0) > r.steps[n.idx].vi || distM(userPos.lat, userPos.lng, r.steps[n.idx].loc[0], r.steps[n.idx].loc[1]) < rad)) n.idx++;
+            const st = r.steps[n.idx], dNext = distM(userPos.lat, userPos.lng, st.loc[0], st.loc[1]);
+            let rem = dNext; for (let k = n.idx; k < r.steps.length; k++) rem += r.steps[k].dist;
+            const eta = rem / (r.dist / Math.max(1, r.dur));
+            n.off = pr.d > Math.max(40, Math.min(120, (userPos.acc || 0) * 1.5)) ? n.off + 1 : 0;
+            if (n.off >= 3 && Date.now() - n.lastReroute > 10000) {
+                n.lastReroute = Date.now(); n.off = 0; say('Menghitung ulang rute');
+                tdRoute(TD.dest.id, TD.mode, { fromLive: true, quiet: true }).then(ok => { if (ok && TD.nav) { TD.nav.idx = Math.min(1, TD.route.steps.length - 1); TD.nav.spoken = -1; TD.nav.pos = 0; } });
+            }
+            document.getElementById('nav-icon').innerText = stepIcon(st);
+            document.getElementById('nav-dist').innerText = fmtDist(dNext);
+            document.getElementById('nav-text').innerText = st.text;
+            document.getElementById('nav-rem').innerText = fmtDist(rem) + ' · ' + fmtDur(eta);
+            document.getElementById('nav-eta').innerText = 'Tiba ± ' + new Date(Date.now() + eta * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' · menuju ' + TD.dest.name;
+            const thr = TD.mode === 'car' ? 200 : TD.mode === 'bike' ? 100 : 50;
+            if (dNext < thr && n.spoken !== n.idx) { n.spoken = n.idx; say((dNext > thr / 2 ? `Dalam ${Math.round(dNext / 10) * 10} meter, ` : '') + st.text); }
+            if (TD.follow) TD.map.panTo([userPos.lat, userPos.lng]);
+        }
+        function tdNavStop(msg, arrived) {
+            TD.nav = null;
+            document.getElementById('td-wrap').classList.remove('nav-full');
+            document.getElementById('nav-banner').classList.add('hidden'); document.getElementById('nav-bar').classList.add('hidden');
+            if (TD.wake) { TD.wake.release().catch(() => {}); TD.wake = null; }
+            if (window.speechSynthesis) speechSynthesis.cancel();
+            if (arrived) say('Anda telah tiba di tujuan');
+            if (TD.map) setTimeout(() => TD.map.invalidateSize(), 100);
+            if (msg) showToast(arrived ? 'Sudah sampai 🕌' : 'Navigasi selesai', msg);
         }
 
         // FIREBASE: login Takmir + profil/QRIS masjid di Firestore
@@ -1636,7 +1983,7 @@
                 ${hd('Nilai Kami')}
                 <div class="grid sm:grid-cols-2 gap-3">${card('Transparansi', 'Kas masuk dan keluar dapat dilihat jamaah sehingga tumbuh rasa percaya.')}${card('Kemudahan', 'Informasi ibadah dan layanan masjid ada dalam genggaman, tanpa perlu mencari-cari.')}${card('Kebersamaan', 'Memudahkan jamaah menemukan masjid, bergabung sebagai relawan, dan saling membantu.')}${card('Amanah', 'Data masjid dikelola oleh pengurus yang terverifikasi melalui akun resmi.')}</div>
                 ${hd('Fitur Utama')}
-                <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600 list-disc list-inside"><li>Jadwal sholat & kompas kiblat</li><li>Masjid terdekat dengan peta</li><li>Jadwal kajian & poster</li><li>Infaq QRIS / rekening</li><li>Kas masjid terbuka</li><li>Pinjam sarana & prasarana</li><li>Relawan & bantuan sosial</li><li>Tanya Ustadz & kotak saran</li></ul>
+                <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600 list-disc list-inside"><li>Jadwal sholat & kompas kiblat</li><li>Masjid terdekat, peta & navigasi</li><li>Jadwal kajian & poster</li><li>Infaq QRIS / rekening</li><li>Kas masjid terbuka</li><li>Pinjam sarana & prasarana</li><li>Relawan & bantuan sosial</li><li>Tanya Ustadz & kotak saran</li></ul>
                 <div class="mt-8 p-4 rounded-2xl bg-gold-300/30 border border-gold-400/50 text-xs text-slate-700 leading-relaxed"><b>Catatan penting:</b> SatuMasjid tidak memproses atau menyimpan dana. Infaq ditransfer langsung ke rekening atau QRIS milik masjid, lalu dicatat setelah diverifikasi pengurus. Rekening dan QRIS hanya tampil setelah ditinjau admin SatuMasjid.</div>`,
             jamaah: () => hd('Panduan Jamaah').replace('mt-8', 'mt-2') + steps([
                 ['Pilih masjid', 'gunakan pilihan masjid di bagian atas, atau cari lewat tab Masjid Terdekat.'],
@@ -1660,6 +2007,7 @@
                 ['Mengapa saya harus login sebagai jamaah?', 'Tidak perlu. Jamaah dapat memakai aplikasi tanpa akun. Login hanya untuk pengurus masjid.'],
                 ['Bagaimana data saya disimpan?', 'Profil masjid dan QRIS tersimpan di server Firebase. Data lain seperti kas dan permohonan saat ini tersimpan di perangkat dan belum tersinkron antar perangkat.'],
                 ['Jadwal sholat tampak berbeda dengan masjid saya?', 'Jadwal dihitung berdasarkan kota dan metode Kemenag. Selisih beberapa menit (ihtiyat) bisa terjadi; ikuti jadwal resmi masjid.'],
+                ['Bagaimana navigasi di Masjid Terdekat bekerja?', 'Izinkan lokasi, pilih masjid, tekan Rute lalu Mulai Navigasi. Posisi Anda diperbarui langsung dan rute dihitung ulang bila Anda menyimpang. Rute memakai data OpenStreetMap tanpa lalu lintas langsung; untuk perjalanan jauh dengan mobil, tombol Buka di Google Maps lebih akurat soal kemacetan. Layar sebaiknya tetap menyala selama navigasi.'],
                 ['Kiblat tidak bergerak?', 'Izinkan akses lokasi dan sensor gerak, kalibrasi kompas dengan gerakan angka 8, dan jauhkan dari benda logam atau magnet.'],
                 ['Bagaimana saya tahu rekening masjid itu asli?', 'Hanya masjid bertanda ✓ dengan rekening/QRIS yang sudah ditinjau admin yang dapat dipakai berinfaq. Pastikan nama penerima sesuai nama masjid. Jika ada yang janggal, tekan "Laporkan masjid ini" di jendela infaq.'],
                 ['Saya lupa kata sandi Takmir.', 'Isi email pada halaman masuk, lalu tekan "Lupa kata sandi?". Tautan atur ulang akan dikirim ke email Anda.']
@@ -1751,7 +2099,7 @@
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (tabKey === 'terdekat') setTimeout(initTerdekat, 50);
+            if (tabKey === 'terdekat') setTimeout(initTerdekat, 50); else tdPause();
             if (tabKey === 'takmir-dashboard' && hasAuth()) refreshPermohonan();
             if (tabKey === 'takmir-dashboard' || tabKey === 'takmir-keuangan') {
                 setTimeout(renderKasChart, 100);
